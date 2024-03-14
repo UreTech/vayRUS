@@ -221,7 +221,7 @@
     <ClInclude Include="content\sourceContent\vayrusCube.h">
       <Filter>content\sourceContent</Filter>
     </ClInclude>
-    <ClInclude Include="defaultNetworkStructs.h">
+    <ClInclude Include="content\sourceContent\networkStructs\defaultNetworkStructs.h">
       <Filter>content\sourceContent\networkStructs</Filter>
     </ClInclude>
   </ItemGroup>

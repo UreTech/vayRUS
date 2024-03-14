@@ -175,7 +175,7 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;D:\vayRUS\vayRUS3D\content\sourceContent;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -236,8 +236,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="content\sourceContent\MyPlayerPawn.h" />
+    <ClInclude Include="content\sourceContent\networkStructs\defaultNetworkStructs.h" />
     <ClInclude Include="content\sourceContent\vayrusCube.h" />
-    <ClInclude Include="defaultNetworkStructs.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />

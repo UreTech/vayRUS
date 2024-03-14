@@ -33,7 +33,9 @@ namespace UreTechEngine {
 		static networkSystem* c_NetInst;
 		static networkSystem* getNetworkSystem();
 
-		networkReplicationStruct replicating_func_dat;
+		void* replicating_func_dat_o; 
+		void* replicating_func_dat_i;
+		size_t replicating_func_dat_size;
 
 		bool invalidIP = true;
 

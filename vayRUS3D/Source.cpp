@@ -211,7 +211,11 @@ int main(int argc, char** argv) {
 	spawnables["vayrusCube"] = []() { return new vayrusCube(); };
 
 	networkReplicationStruct* netTest = new networkReplicationStruct();
+	networkReplicationStruct* netTest2 = new networkReplicationStruct();
 	memcpy(&netTest->func_notify[0],"func_rep_Test",13);
+	netSys->replicating_func_dat_o = netTest;
+	netSys->replicating_func_dat_i = netTest2;
+	netSys->replicating_func_dat_size = sizeof(networkReplicationStruct);
 
 	//while (1) {}
 
@@ -361,12 +365,13 @@ int main(int argc, char** argv) {
 		ImGui::End();
 		//NET WINDOW END
 		if (engine->isServer && engine->isInServer) {
+			netTest->func_test_input.test = "im tstsr!";
 			netSys->connectionRequest();
 			netSys->sendRecvToClient();
 		}
 		if (!engine->isServer && engine->isInServer) {
 			netSys->sendRecvToServer();
-			netTest->run_noticed_funcs();
+			netTest2->run_noticed_funcs();
 		}
 
 

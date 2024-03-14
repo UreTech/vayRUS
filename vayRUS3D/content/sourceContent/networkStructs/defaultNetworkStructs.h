@@ -15,8 +15,9 @@ typedef char ent_name[30];
 // func_rep_Test definiton
 struct func_rep_Test_input_struct {
 	int test_val0 = 2;
-	char test[20] = "im test";
+	std::string test = "im test";
 };
+
 
 struct networkReplicationStruct
 {

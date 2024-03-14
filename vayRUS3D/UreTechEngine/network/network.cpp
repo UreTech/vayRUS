@@ -144,22 +144,22 @@ void UreTechEngine::networkSystem::connectionRequest()
 
 void UreTechEngine::networkSystem::sendRecvToServer()
 {
-    char buffer[sizeof(networkReplicationStruct)];
+    char buffer[sizeof(replicating_func_dat_size)];
     int n;
 
-    n = recv(sock, buffer, 255, 0);
+    n = recv(sock, buffer, sizeof(replicating_func_dat_size), 0);
     EngineERROR::consoleError(std::string("(DEBUG): return:")+std::to_string(n), EngineERROR::INFO_NORMAL);
     if (n >= 0) {
-        printf("%s\n", buffer);
+        memcpy(replicating_func_dat_i, buffer, sizeof(replicating_func_dat_size));
         if (n != sizeof(networkReplicationStruct)) {
             EngineERROR::consoleError(std::string("(Network Socket): Package is not valid! !="+ std::to_string(sizeof(networkReplicationStruct)) +" bytes"), EngineERROR::ERROR_NORMAL);
         }
     }
    // EngineERROR::consoleError("(DEBUG): enter message", EngineERROR::INFO_NORMAL);
     //fgets(buffer, 255, stdin);
-    //memcpy(buffer, &replicating_func_dat, sizeof(networkReplicationStruct));
+    memcpy(buffer, &replicating_func_dat_o, sizeof(replicating_func_dat_size));
 
-    n = send(sock, buffer, sizeof(buffer), 0);
+    n = send(sock, buffer, sizeof(replicating_func_dat_size), 0);
     EngineERROR::consoleError(std::string(buffer), EngineERROR::ERROR_ERROR);
     if (n < 0) {
         EngineERROR::consoleError(std::string("(Network Socket): Can not write to server!"), EngineERROR::ERROR_NORMAL);
@@ -168,15 +168,15 @@ void UreTechEngine::networkSystem::sendRecvToServer()
 
 void UreTechEngine::networkSystem::sendRecvToClient()
 {
-    char buffer[256];
+    char buffer[sizeof(replicating_func_dat_size)];
     for (int i = 0; i < clientSocks.size(); i++) {
 
         // This send() function sends the 13 bytes of the string to the new socket
         clientData* toSendSock = (clientData*)clientSocks.getIndex(i);
-        send(toSendSock->sock, "OK! BROO", 9, 0);
+        send(toSendSock->sock, (char*)replicating_func_dat_o, sizeof(replicating_func_dat_size), 0);
 
         int n;
-        n = recv(toSendSock->sock, buffer, 255, 0);
+        n = recv(toSendSock->sock, (char*)replicating_func_dat_i, sizeof(replicating_func_dat_size), 0);
 
         if (n >= 0) {
             EngineERROR::consoleError(std::string("(DEBUG): return:") + std::to_string(n), EngineERROR::INFO_NORMAL);
