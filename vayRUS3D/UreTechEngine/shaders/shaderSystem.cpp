@@ -34,7 +34,12 @@ void ShaderProgram::use()
 void ShaderProgram::addUniform(const std::string& varName)
 {
 	m_UniformVars[varName] = glGetUniformLocation(programID, varName.c_str());
-	UreTechEngine::EngineERROR::consoleError(varName + std::to_string(m_UniformVars[varName]), UreTechEngine::EngineERROR::INFO_NORMAL);
+	if ((int)m_UniformVars[varName] == -1) {
+		UreTechEngine::EngineERROR::consoleError(varName + " " + std::to_string(m_UniformVars[varName]) + " is missing!", UreTechEngine::EngineERROR::WARN_CAN_CAUSE_ERROR);
+	}
+	else {
+		UreTechEngine::EngineERROR::consoleError(varName + " " + std::to_string(m_UniformVars[varName]), UreTechEngine::EngineERROR::INFO_NORMAL);
+	}
 }
 
 void ShaderProgram::setFloat(const std::string& varName, float val)

@@ -22,12 +22,14 @@ void mesh::draw(UreTechEngine::Transform3D _addTrnsfm)
 	shaderProg->setTexture("texture4", 4);
 	shaderProg->setTexture("texture5", 5);
 
-	if (useMultipleTexture) {
+	if (useMultipleMaterials) {
+		for (int i = 0; i < Materials.size();i++) {
+			textures.push_back(Materials[i].colorText);
+		}
 		textManager->applyMultipleTexture(textures);
 	}
 	else {
-		textManager->applyTexture(GL_TEXTURE0, TextureID);
-		//shaderProg->setTexture(std::string("texture") + std::to_string(0), 0);
+		textManager->applyTexture(GL_TEXTURE0, Materials[0].colorText);
 	}
 	glm::vec3 TransformTransliton = glm::vec3(transform.Location.fx() + _addTrnsfm.Location.fx(), transform.Location.fy() + _addTrnsfm.Location.fy(), transform.Location.fz() + _addTrnsfm.Location.fz());
 	UreTechEngine::Rotation _rot;
@@ -40,9 +42,11 @@ void mesh::draw(UreTechEngine::Transform3D _addTrnsfm)
 	shaderProg->setVec3("uTranslation", TransformTransliton);
 	shaderProg->setVec3("uRotation", TransformRotation);
 	shaderProg->setMat4("uScale", &TransformScale);
-	shaderProg->setBool("litRender", litRender);
 
-
+	for (int i = 0; i < Materials.size(); i++) {
+		shaderProg->setBool("litRender"+std::to_string(i), Materials[i].litRender);
+		shaderProg->setFloat("specularStrength" + std::to_string(i), Materials[i].specularStrength);
+	}
 
 	p_Vao->activateBuffer();
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
@@ -61,11 +65,12 @@ void mesh::changeLitRender(bool val)
 	shaderProg->setBool("litRender", litRender);
 }
 
-mesh::mesh(vertexArrayObject* _p_Vao, texture _text)
+mesh::mesh(vertexArrayObject* _p_Vao, Material _mat)
 {
 	p_Vao = _p_Vao;
 	indexCount = p_Vao->getIndexCount();
-	TextureID = _text;
+	this->Materials.push_back(_mat);
+	TextureID = 0;
 	PlayerRef= UreTechEngine::UreTechEngineClass::getEngine()->getPlayer();
 	textManager = TextureManager::getInstance();
 	if (textManager == nullptr) {

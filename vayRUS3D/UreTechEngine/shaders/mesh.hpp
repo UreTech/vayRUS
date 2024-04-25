@@ -6,6 +6,7 @@
 #include"../UreTechEngine/shaders/textureSystem.hpp"
 #include"../UreTechEngine/utils/baseVector.h"
 #include"../UreTechEngine/player/player.h"
+#include"../shaders/Material.h"
 #include"../utils/Array.hpp"
 
 #include<vector>
@@ -22,13 +23,16 @@ class TextureManager;
 typedef unsigned int texture;
 class mesh {
 public:
+	std::vector<Material> Materials;
+	bool useMultipleMaterials = false;
+
 	std::vector<texture> textures;
-	bool useMultipleTexture = false;
+
 	UreTechEngine::Transform3D transform;
 	void draw(UreTechEngine::Transform3D _addTrnsfm);
 	void applyTexture(texture _text);
 	void changeLitRender(bool val);
-	mesh(vertexArrayObject* _p_Vao, texture _text);
+	mesh(vertexArrayObject* _p_Vao, Material _mat);
 private:
 	bool litRender = true;
 	vertexArrayObject* p_Vao;

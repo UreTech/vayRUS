@@ -78,7 +78,7 @@
     <ClCompile Include="imgui\imgui_widgets.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Source.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Source Files\UreTechEngine</Filter>
     </ClCompile>
     <ClCompile Include="UreTechEngine\entity\entity.cpp">
@@ -128,6 +128,9 @@
     </ClCompile>
     <ClCompile Include="content\sourceContent\networkStructs\defaultNetworkStructs.cpp">
       <Filter>content\sourceContent\networkStructs</Filter>
+    </ClCompile>
+    <ClCompile Include="UreTechEngine\shaders\Material.cpp">
+      <Filter>Source Files\UreTechEngine\shaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -223,6 +226,12 @@
     </ClInclude>
     <ClInclude Include="content\sourceContent\networkStructs\defaultNetworkStructs.h">
       <Filter>content\sourceContent\networkStructs</Filter>
+    </ClInclude>
+    <ClInclude Include="UreTechEngine\shaders\Material.h">
+      <Filter>Source Files\UreTechEngine\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="UreTechEngine\utils\util.hpp">
+      <Filter>Source Files\UreTechEngine\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

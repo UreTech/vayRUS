@@ -18,6 +18,7 @@
  out vec3 FragPos; 
  out vec3 Normal;
  out int vertTextureLevel;
+ out vec3 viewPos;
 
  mat4 rotationX( in float angle ) {
 	return mat4(	1.0,		0,			0,			0,
@@ -63,4 +64,5 @@ void main()
 	Normal =mat3(transpose(inverse(model))) * inNormDat;
 	vertTextureLevel = inTexLvl;
 	FragPos = vec3(model*vec4(inPosition, 1.0));
+	viewPos = inPosition;
 }

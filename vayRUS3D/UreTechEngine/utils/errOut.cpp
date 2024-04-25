@@ -2,12 +2,16 @@
 #include <string>
 #include <iostream>
 #include<conio.h>
+#include <Windows.h>
+
 using namespace std;
 namespace UreTechEngine {
 	class EngineERROR;
 }
+
 void UreTechEngine::EngineERROR::consoleError(std::string _errMsg, t_error errTyp)
 {
+	std::wstring a = L"(!)FATAL ERROR:" + std::wstring(_errMsg.begin(), _errMsg.end());
 	switch (errTyp)
 	{
 	case UreTechEngine::EngineERROR::ERROR_ERROR:
@@ -15,6 +19,8 @@ void UreTechEngine::EngineERROR::consoleError(std::string _errMsg, t_error errTy
 		break;
 	case UreTechEngine::EngineERROR::ERROR_FATAL:
 		cout << "(!)FATAL ERROR:" << _errMsg << endl;
+		
+		MessageBox(NULL, a.c_str(), L"Internal Engine ERROR!", MB_ICONERROR);
 		forceToExit();
 		break;
 	case UreTechEngine::EngineERROR::ERROR_NORMAL:

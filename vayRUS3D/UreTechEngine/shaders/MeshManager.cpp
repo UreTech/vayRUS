@@ -2,6 +2,7 @@
 #include"vertexStructs.hpp"
 #include<vector>
 #include "../utils/errOut.h"
+#include "Material.h"
 
 MeshManager* MeshManager::c_Instance = nullptr;
 	
@@ -19,7 +20,7 @@ MeshManager* MeshManager::getInstance()
 	}
 }
 
-mesh* MeshManager::importMeshFbx(std::string filePath,texture _text)
+mesh* MeshManager::importMeshFbx(std::string filePath,Material _mat)
 {
 	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices,finalIndices;
 	std::vector< glm::vec3 > temp_vertices;
@@ -116,7 +117,7 @@ mesh* MeshManager::importMeshFbx(std::string filePath,texture _text)
 
 	unsigned int vertCount = temp_vertices.size();
 	_vao->createObject(tmpVert[0], tmpVert.size(), finalIndices[0], finalIndices.size());
-	mesh* result = new mesh(_vao,_text);
+	mesh* result = new mesh(_vao, _mat);
 
 	return result;
 }

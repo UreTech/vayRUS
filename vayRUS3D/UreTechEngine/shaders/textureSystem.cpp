@@ -35,13 +35,13 @@ unsigned int TextureManager::loadTextureFromFile(std::string fileName, bool texA
 
 		stbi_set_flip_vertically_on_load(1);
 
-		unsigned char* textureAddr = stbi_load(fileName.c_str(), &t_width, &t_height, &nrChannels, 0);
+		unsigned char* textureAddr = stbi_load(fileName.c_str(), &t_width, &t_height, &nrChannels, 4);
 
 		unsigned int texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureAddr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t_width, t_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureAddr);
 
 		glGenerateMipmap(GL_TEXTURE_2D);
 		if (texAntiAlising) {

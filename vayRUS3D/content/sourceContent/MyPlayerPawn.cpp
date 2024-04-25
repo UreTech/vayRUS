@@ -17,6 +17,8 @@ MyPlayerPawn::MyPlayerPawn(mesh* _mesh, std::string _entName, UreTechEngine::Tra
 void MyPlayerPawn::begin()
 {
 	texture text = TextureManager::getInstance()->loadTextureFromFile("content/Textures/susTM.png");
-	this->entityMesh = MeshManager::getInstance()->importMeshFbx("content/Meshs/defaultCapsule.obj",text);
+	Material myMat;
+	myMat.colorText = text;
+	this->entityMesh = MeshManager::getInstance()->importMeshFbx("content/Meshs/defaultCapsule.obj", myMat);
 	UreTechEngine::EngineERROR::consoleError("oldu brom!", UreTechEngine::EngineERROR::INFO_NORMAL);
 }

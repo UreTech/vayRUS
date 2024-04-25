@@ -10,7 +10,9 @@ vayrusCube::vayrusCube(void) {
 void vayrusCube::begin() {
 	//add your begin commands here
 	texture tex = TextureManager::getInstance()->loadTextureFromFile("textures/text2.png");
-	entityMesh = MeshManager::getInstance()->importMeshFbx("a.obj",tex);
+	Material mymat;
+	mymat.colorText = tex;
+	entityMesh = MeshManager::getInstance()->importMeshFbx("a.obj",mymat);
 	entName = "vayrusCube";
 }
 

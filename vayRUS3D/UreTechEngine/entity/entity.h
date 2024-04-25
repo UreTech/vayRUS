@@ -13,6 +13,8 @@ namespace UreTechEngine {
 	class entity {
 	public:
 		std::string entName = "NONE";
+		std::string entClassName = "entity";
+		std::string entCustomSets = "null";
 		UreTechEngine::Transform3D transform;
 		mesh* entityMesh;
 		UreTechEngineClass* engineRef=nullptr;

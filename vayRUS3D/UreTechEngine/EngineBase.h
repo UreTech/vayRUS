@@ -15,15 +15,21 @@
 #include"nlohmann/json.hpp"
 
 class mesh;
+class Material;
+
 namespace UreTechEngine {
 	class entity;
 	class Player;
 	class UreTechEngineClass {
+	typedef unsigned char texture;
 	public:
 		static unsigned int displayWidth;
 		static unsigned int displayHeight;
 		bool isInServer = false;
 		bool isServer = true;
+
+		std::map<std::string, Material> loadedMaterials;
+		std::map<std::string, texture> loadedTextures;
 
 		ShaderProgram* mainShaderProgram = nullptr;
 		static UreTechEngineClass* c_Instance;
@@ -42,6 +48,12 @@ namespace UreTechEngine {
 
 		bool killEntity(entity* _ent);
 		bool killEntity(std::string entName);
+
+		void loadMap(std::string mapPath);
+		void saveCurrentMap(std::string mapPath);
+		void saveGame(std::string gamePath);
+		void loadGame(std::string gamePath);
+
 	private:
 		nlohmann::json mapJson;
 		Player* defPlayer = nullptr;

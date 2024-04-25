@@ -10,6 +10,7 @@
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::c_Instance = nullptr;
 unsigned int UreTechEngine::UreTechEngineClass::displayWidth = 1000;
 unsigned int UreTechEngine::UreTechEngineClass::displayHeight = 1000;
+
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine()
 {
     if (c_Instance != nullptr) {
@@ -24,7 +25,7 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
 			while(1){}
 		}
 
-		c_Instance->window = glfwCreateWindow(displayWidth, displayHeight, "vayRUS3D BETA1.0.8-Pre_EDITOR-NETWORK (TEST) OpenGL3.3", NULL, NULL);
+		c_Instance->window = glfwCreateWindow(displayWidth, displayHeight, "vayRUS3D-EDITOR BETA1.1.0 OpenGL3.3", NULL, NULL);
 		if (c_Instance->window == NULL) {
 			std::cout << "WINDOW ERROR!";
 			glfwTerminate();
@@ -41,7 +42,7 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
 		c_Instance->mainShaderProgram->attachShader("content/shaders/baseVS.glsl", GL_VERTEX_SHADER);
 		c_Instance->mainShaderProgram->attachShader("content/shaders/baseFS.glsl", GL_FRAGMENT_SHADER);
 		c_Instance->mainShaderProgram->link();
-		c_Instance->mainShaderProgram->addUniform("uColor");
+
 		c_Instance->mainShaderProgram->addUniform("uTranslation");
 		c_Instance->mainShaderProgram->addUniform("uRotation");
 		c_Instance->mainShaderProgram->addUniform("uScale");
@@ -49,10 +50,9 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
 		c_Instance->mainShaderProgram->addUniform("uMtxCamPos");
 		c_Instance->mainShaderProgram->addUniform("uCamRot");
 		c_Instance->mainShaderProgram->addUniform("uMtxCam");
-		c_Instance->mainShaderProgram->addUniform("litRender");
 		c_Instance->mainShaderProgram->addUniform("lightPos");
+		c_Instance->mainShaderProgram->addUniform("uLightColor");
 
-		//c_Instance->mainShaderProgram->addUniform("inTexLvl");
 		c_Instance->mainShaderProgram->addUniform("texture0");
 		c_Instance->mainShaderProgram->addUniform("texture1");
 		c_Instance->mainShaderProgram->addUniform("texture2");
@@ -60,13 +60,27 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
 		c_Instance->mainShaderProgram->addUniform("texture4");
 		c_Instance->mainShaderProgram->addUniform("texture5");
 
+		c_Instance->mainShaderProgram->addUniform("specularStrength0");
+		c_Instance->mainShaderProgram->addUniform("specularStrength1");
+		c_Instance->mainShaderProgram->addUniform("specularStrength2");
+		c_Instance->mainShaderProgram->addUniform("specularStrength3");
+		c_Instance->mainShaderProgram->addUniform("specularStrength4");
+		c_Instance->mainShaderProgram->addUniform("specularStrength5");
+
+		c_Instance->mainShaderProgram->addUniform("litRender0");
+		c_Instance->mainShaderProgram->addUniform("litRender1");
+		c_Instance->mainShaderProgram->addUniform("litRender2");
+		c_Instance->mainShaderProgram->addUniform("litRender3");
+		c_Instance->mainShaderProgram->addUniform("litRender4");
+		c_Instance->mainShaderProgram->addUniform("litRender5");
+
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_FRONT);
 		glFrontFace(GL_CW);
 		
-		glfwWindowHint(GLFW_SAMPLES, 4);
-		glEnable(GL_MULTISAMPLE);
+		//glfwWindowHint(GLFW_SAMPLES, 4);
+		//glEnable(GL_MULTISAMPLE);
 		//******
 
         c_Instance->defPlayer = new Player;
@@ -138,6 +152,8 @@ unsigned int UreTechEngine::UreTechEngineClass::getCountOfEntity()
 void UreTechEngine::UreTechEngineClass::engineTick()
 {
 	for (int i = 0; i < countOfEntity; i++) {
+		glm::vec4 a(1.0f, 1.0f, 1.0f, 1.0f);
+		mainShaderProgram->setVec4("uLightColor", a);
 		sceneEntities[i]->updateVisual();
 	}
 }
@@ -172,12 +188,115 @@ bool UreTechEngine::UreTechEngineClass::killEntity(std::string _entName)
 	return false;
 }
 
+void UreTechEngine::UreTechEngineClass::saveCurrentMap(std::string mapPath)
+{
+	nlohmann::json map;
+
+	for (int i = 0; i < this->countOfEntity; i++) {
+		map["OBJECT" + std::to_string(i)]["CLASS"] = sceneEntities[i]->entClassName;
+		map["OBJECT" + std::to_string(i)]["NAME"] = sceneEntities[i]->entName;
+		map["OBJECT" + std::to_string(i)]["CUSTOM"] = sceneEntities[i]->entCustomSets;
+
+		map["OBJECT" + std::to_string(i)]["TRANSFORM"]["LOCX"] = sceneEntities[i]->transform.Location.x;
+		map["OBJECT" + std::to_string(i)]["TRANSFORM"]["LOCY"] = sceneEntities[i]->transform.Location.y;
+		map["OBJECT" + std::to_string(i)]["TRANSFORM"]["LOCZ"] = sceneEntities[i]->transform.Location.z;
+					 
+ 		map["OBJECT" + std::to_string(i)]["TRANSFORM"]["ROTR"] = sceneEntities[i]->transform.Rotation.roll;
+		map["OBJECT" + std::to_string(i)]["TRANSFORM"]["ROTP"] = sceneEntities[i]->transform.Rotation.pitch;
+		map["OBJECT" + std::to_string(i)]["TRANSFORM"]["ROTY"] = sceneEntities[i]->transform.Rotation.yaw;
+					 
+ 		map["OBJECT" + std::to_string(i)]["TRANSFORM"]["SCLX"] = sceneEntities[i]->transform.Scale.x;
+		map["OBJECT" + std::to_string(i)]["TRANSFORM"]["SCLY"] = sceneEntities[i]->transform.Scale.y;
+		map["OBJECT" + std::to_string(i)]["TRANSFORM"]["SCLZ"] = sceneEntities[i]->transform.Scale.z;
+	}
+
+	std::ofstream file(mapPath + ".UMAP");
+	if (file.is_open()) {
+		file << std::setw(4) << map << std::endl;
+		file.close();
+		EngineERROR::consoleError("map saved as " + mapPath + ".UMAP", EngineERROR::INFO_NORMAL);
+	}
+	else {
+		EngineERROR::consoleError("can not save the map!", EngineERROR::WARN_NORMAL);
+	}
+
+}
+
+void UreTechEngine::UreTechEngineClass::saveGame(std::string gamePath)
+{
+	nlohmann::json game;
+	int mi = 0;
+	for (auto it = loadedMaterials.begin(); it != loadedMaterials.end(); ++it) {
+		// Ýteratörün first ve second üyeleri, anahtar-deðer çiftini temsil eder
+		Material mat = it->second;
+		game["GAME"]["MATERIAL" + std::to_string(mi)]["path"] = it->first+".UMAT";
+		mi++;
+	}
+
+	std::ofstream file(gamePath + ".UGAME");
+	if (file.is_open()) {
+		file << std::setw(4) << game << std::endl;
+		file.close();
+		EngineERROR::consoleError("map saved as " + gamePath + ".UGAME", EngineERROR::INFO_NORMAL);
+	}
+	else {
+		EngineERROR::consoleError("can not save the GAME!", EngineERROR::WARN_NORMAL);
+	}
+}
+
+void UreTechEngine::UreTechEngineClass::loadGame(std::string gamePath)
+{
+	std::ifstream file(gamePath+".UGAME");
+
+
+	if (!file.is_open()) {
+		EngineERROR::consoleError("game loading error: " + gamePath + ".UGAME", EngineERROR::ERROR_ERROR);
+		return;
+	}
+
+	if (!file.good()) {
+		EngineERROR::consoleError("game loading error(buffer error): " + gamePath + ".UGAME", EngineERROR::ERROR_ERROR);
+		return;
+	}
+
+	nlohmann::json jsonData;
+	file.seekg(0);
+	file >> jsonData;
+	file.close();
+	unsigned int i = 0;
+
+	while (1) {
+		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		std::string finding = "MATERIAL" + std::to_string(i);
+		std::string asd = jsonData.dump();
+
+		if (jsonData.find("GAME") != jsonData.end()) {
+			auto& inner_json = jsonData["GAME"];
+			if (inner_json.find(finding) != inner_json.end()) {
+				std::string laodingMat = jsonData["GAME"][finding]["path"];
+				Material lodMat;
+				lodMat.loadMaterial(laodingMat);
+				loadedMaterials[laodingMat] = lodMat;
+				i++;
+			}
+			else {
+				break;
+			}
+		}
+		else {
+			EngineERROR::consoleError("game loading error(file is not valid): " + gamePath + ".UGAME", EngineERROR::ERROR_ERROR);
+			break;
+		}
+	}
+	EngineERROR::consoleError("game loaded: " + gamePath + ".UGAME"+std::to_string(i), EngineERROR::INFO_NORMAL);
+}
+
 UreTechEngine::UreTechEngineClass::UreTechEngineClass()
 {
 }
 
-
 UreTechEngine::UreTechEngineClass::~UreTechEngineClass()
 {
 }
+
 

@@ -27,6 +27,8 @@
 #include"UreTechEngine/shaders/mesh.hpp"
 #include"UreTechEngine/utils/3DMath.hpp"
 #include"UreTechEngine/utils/Array.hpp"
+#include"UreTechEngine/utils/util.hpp"
+#include"UreTechEngine/shaders/Material.h"
 
 #include"UreTechEngine/network/network.h"
 
@@ -121,6 +123,9 @@ texture Texture1;
 int main(int argc, char** argv) {
 	//init engine
 	UreTechEngine::UreTechEngineClass* engine = UreTechEngine::UreTechEngineClass::getEngine();//init engine
+	if (engine == nullptr) {
+		EngineERROR::consoleError("ENGINE ERROR (0x01)", EngineERROR::ERROR_FATAL);
+	}
 	GLFWwindow* window = engine->getWindow();
 	engine->setKeyCallBackFunc(key_callback, mouse_button_callback);
 	//init net system
@@ -146,20 +151,29 @@ int main(int argc, char** argv) {
 	UreTechEngine::EngineERROR::consoleError(std::to_string(Texture0), UreTechEngine::EngineERROR::INFO_NORMAL);
 	UreTechEngine::EngineERROR::consoleError(std::to_string(Texture1), UreTechEngine::EngineERROR::INFO_NORMAL);
 
+	Material susTMMaterial;
+	susTMMaterial.colorText = Texture0;
 
+	Material susMaterial;
+	susMaterial.colorText = Texture1;
 
-	mesh* mesh0 = meshManager->importMeshFbx("content/Meshs/flaty.obj", grass01Texture);
-	mesh* mesh1 = meshManager->importMeshFbx("content/Meshs/cube2TexTest.obj", Texture0);
-	mesh1->useMultipleTexture = true;
-	mesh1->textures.push_back(Texture0); 
-	mesh1->textures.push_back(Texture1);
+	Material grasMat;
+	grasMat.colorText = grass01Texture;
+
+	Material skyspMat;
+	skyspMat.colorText = Texture2;
+
+	mesh* mesh0 = meshManager->importMeshFbx("content/Meshs/flaty.obj", grasMat);
+	mesh* mesh1 = meshManager->importMeshFbx("content/Meshs/cube2TexTest.obj", susTMMaterial);
+	mesh1->useMultipleMaterials = true;
+	mesh1->Materials.push_back(susTMMaterial);
+	mesh1->Materials.push_back(susMaterial);
 
 	//mesh1->changeLitRender(false);
 
 	//mesh* mesh3 = meshManager->importMeshFbx("content/Meshs/alyx.obj", Texture1);
-	mesh* mesh2 = meshManager->importMeshFbx("content/Meshs/skysphere.obj", Texture2);
-
-	mesh* playerCapsuleMesh = meshManager->importMeshFbx("content/Meshs/defaultCapsule.obj", Texture0);
+	mesh* mesh2 = meshManager->importMeshFbx("content/Meshs/skysphere.obj", skyspMat);
+	mesh* playerCapsuleMesh = meshManager->importMeshFbx("content/Meshs/defaultCapsule.obj", susTMMaterial);
 
 	player->CameraTranform.Location.x = 0.0f;
 	player->CameraTranform.Location.y = -10.0f;
@@ -198,11 +212,24 @@ int main(int argc, char** argv) {
 	entity* selectedEntityEngine = nullptr;
 
 	//net ui vars
-	char toConnectIP_UIChar[150];
-	char toConnectIPPORT_UIChar[150];
-	memset(toConnectIP_UIChar, 0, 150);
-	memset(toConnectIPPORT_UIChar, 0, 150);
+	char toConnectIP_UIChar[150] = { 0 };
+	char toConnectIPPORT_UIChar[150] = { 0 };
 
+	char inptmappth[100] = { 0 };
+	char inptmatpth[100] = { 0 };
+	char mattexpth[100] = { 0 };
+	char matnormpth[100] = { 0 };
+	char nameinpt[100] = { 0 };
+	bool matlitrndr = true;
+	float matspec = 0.8;
+
+	bool materialWindow = false;
+	bool netWindow = false;
+	bool nameingWind = false;
+
+	int expItm = 0;
+
+	texture mtrthumbTex = textureManager->loadTextureFromFile("materialThumb.png", false);
 
 	//editor spawnables
 	std::map<std::string, std::function<entity* ()>> spawnables;
@@ -335,34 +362,187 @@ int main(int argc, char** argv) {
 			}
 			ImGui::End();
 			//TRANSFORM WINDOW END
+
+			//MAP WINDOW
+			ImGui::SetNextWindowSize(ImVec2(display_w, 80));
+			ImGui::SetNextWindowPos(ImVec2(0, 0));
+			ImGui::Begin("vayRUS3D", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_MenuBar| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+			if (ImGui::BeginMenuBar()) {
+				if (ImGui::BeginMenu("File")) {
+					if (ImGui::MenuItem("Save Game")) {
+						engine->saveGame(std::string(inptmappth));
+					}
+					if (ImGui::MenuItem("Save Map")) {
+						engine->saveCurrentMap(std::string(inptmappth));
+					}					
+					if (ImGui::MenuItem("Open Game")) {
+						engine->loadGame(std::string(inptmappth));
+					}
+					ImGui::EndMenu();
+				}
+
+				if (ImGui::BeginMenu("Create")) {
+					if (ImGui::MenuItem("Material Creator")) {
+
+						materialWindow = true;
+					}
+
+					if (ImGui::MenuItem("Network Test")) {
+						netWindow = true;
+					}
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenuBar();
+			}
+			ImGui::PushItemWidth(200);
+			ImGui::InputText("path", inptmappth, 100);
+			ImGui::SameLine();
+			
+			ImGui::End();
+			if (materialWindow) {
+				ImGui::Begin("Material Creation", &materialWindow, ImGuiWindowFlags_NoCollapse);
+
+
+				ImGui::InputText("path", inptmatpth,100);
+				ImGui::InputText("Texture Path", mattexpth, 100);
+				ImGui::InputText("Normal Path", matnormpth,100);
+				ImGui::DragFloat("Specular", &matspec, 0.01);
+				ImGui::Selectable("Lit Render", &matlitrndr);
+				
+				if (ImGui::Button("save material")&& string(inptmatpth) != "") {
+					Material saving;
+					saving.colorTextPath = mattexpth;
+					saving.normalMapPath = matnormpth;
+					saving.litRender = matlitrndr;
+					saving.specularStrength = matspec;
+					engine->loadedMaterials[inptmatpth] = saving;
+					saving.saveMaterial(inptmatpth);
+					materialWindow = false;
+				}
+
+				ImGui::End();
+			}
+
+			//MAP WINDOW END
+
+			//nameing menu
+			ImGui::Begin("Input", &nameingWind,ImGuiWindowFlags_NoCollapse);
+			ImGui::PushItemWidth(200);
+			if (ImGui::InputText("Input", nameinpt, 100, ImGuiInputTextFlags_EnterReturnsTrue)) {
+				nameingWind = false;
+				cout << "opsfdpkgd";
+			}
+			ImGui::End();
+
+			//nameing menu END
+		
+			//ASSET WINDOW
+			ImGui::SetNextWindowSize(ImVec2(display_w-450, 300));
+			ImGui::SetNextWindowPos(ImVec2(0, display_h - 300));
+			ImGui::Begin("Asset Explorer", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+
+			ImGui::Columns(getBiggestDiv(display_w - 450, 110), "Assets",false);
+				int im = 0;
+				bool sl = false;
+
+				Material chngMat;
+
+				if (ImGui::BeginPopupContextItem("Operations"))
+				{
+					if (ImGui::MenuItem("Rename"))
+					{
+							nameingWind = true;
+					}
+					ImGui::EndPopup();
+				}
+
+				for (auto it = engine->loadedMaterials.begin(); it != engine->loadedMaterials.end(); ++it) {
+
+					Material mat = it->second;
+
+					std::string prntnm = it->first;
+					prntnm.append(".UMAT");
+					ImGui::Image((ImTextureID)mtrthumbTex, ImVec2(100, 100));
+					if (ImGui::Selectable(prntnm.c_str(), &sl)) {
+
+						//iþlemler...
+					}
+
+					if (!nameingWind) {
+
+					}
+
+					if (ImGui::IsItemHovered()) {
+						ImGui::SetTooltip("(i)Material");
+					}
+					if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(GLFW_MOUSE_BUTTON_RIGHT)) {
+						chngMat = mat;
+						ImGui::OpenPopup("Operations");
+					}
+					ImGui::NextColumn();
+					if ((im + 1) % 3 != 0) {
+						ImGui::Spacing();
+					}
+					im++;
+				}
+				ImGui::Columns(1);
+
+
+			/*
+			if (ImGui::BeginTable("Material Assets", 11)) {//table sýkýntý sil sonra
+				int im = 0;
+				ImGui::TableNextRow();
+				for (auto it = engine->loadedMaterials.begin(); it != engine->loadedMaterials.end(); ++it) {
+					Material mat = it->second;
+					if (im == 11) {
+						ImGui::TableNextRow();
+						im == 0;
+					}
+					
+					
+
+
+					ImGui::Image((ImTextureID)mtrthumbTex, ImVec2(100, 100));
+					std::string prntnm = it->first;
+					prntnm.append(".UMAT");
+					ImGui::Text(prntnm.c_str());
+					im++;
+				}
+			}
+			ImGui::EndTable();
+			*/
+			ImGui::End();
+			//ASSET WINDOW END
+
 		}
 		//editor UI end
 
 		//NET WINDOW
-		bool netWindow = 1;
-		ImGui::Begin("Connect To Server", &netWindow,ImGuiWindowFlags_NoCollapse);
+		if (netWindow) {
+			ImGui::Begin("Connect To Server", &netWindow, ImGuiWindowFlags_NoCollapse);
 
-		ImGui::Text("CONNECT:");
-		ImGui::InputText("IP", toConnectIP_UIChar, 150, ImGuiInputTextFlags_EnterReturnsTrue);
-		ImGui::InputText("PORT", toConnectIPPORT_UIChar, 150, ImGuiInputTextFlags_EnterReturnsTrue);
-		if (ImGui::Button("CONNECT")) {
+			ImGui::Text("CONNECT:");
+			ImGui::InputText("IP", toConnectIP_UIChar, 150, ImGuiInputTextFlags_EnterReturnsTrue);
+			ImGui::InputText("PORT", toConnectIPPORT_UIChar, 150, ImGuiInputTextFlags_EnterReturnsTrue);
+			if (ImGui::Button("CONNECT")) {
 				memcpy(toConnectIP_UIChar, "127.0.0.1", 9);
 				memcpy(toConnectIPPORT_UIChar, "80", 2);
-				netSys->setToConnectIPAddr(std::string(toConnectIP_UIChar),std::string(toConnectIPPORT_UIChar));
+				netSys->setToConnectIPAddr(std::string(toConnectIP_UIChar), std::string(toConnectIPPORT_UIChar));
 				memset(toConnectIP_UIChar, 0, 150);
 				memset(toConnectIPPORT_UIChar, 0, 150);
-				netSys->connectToServer();	
-		}
-		ImGui::End();
+				netSys->connectToServer();
+			}
+			ImGui::End();
 
-		ImGui::Begin("Host a Server", &netWindow, ImGuiWindowFlags_NoCollapse);
+			ImGui::Begin("Host a Server", &netWindow, ImGuiWindowFlags_NoCollapse);
 
-		ImGui::Text("Host:");
-		//ImGui::InputText("PORT", toConnectIPPORT_UIChar, 150, ImGuiInputTextFlags_EnterReturnsTrue);
-		if (ImGui::Button("Host")) {
-			netSys->startServer();
+			ImGui::Text("Host:");
+			//ImGui::InputText("PORT", toConnectIPPORT_UIChar, 150, ImGuiInputTextFlags_EnterReturnsTrue);
+			if (ImGui::Button("Host")) {
+				netSys->startServer();
+			}
+			ImGui::End();
 		}
-		ImGui::End();
 		//NET WINDOW END
 		if (engine->isServer && engine->isInServer) {
 			netTest->func_test_input.test = "im tstsr!";

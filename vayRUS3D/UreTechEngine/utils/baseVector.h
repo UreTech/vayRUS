@@ -228,6 +228,7 @@ namespace UreTechEngine {
 		vector3 Location;
 		rot Rotation;
 		vector3 Scale= vector3(1.0f, 1.0f, 1.0f);
+
 		Transform3D(vector3& _loc, rot& _rot,vector3& _scl) {
 			Location = _loc;
 			Rotation = _rot;
