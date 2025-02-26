@@ -1,7 +1,4 @@
-#include"../UreTechEngine/utils/baseVector.h"
-#include"../UreTechEngine/shaders/mesh.hpp"
-#include"entity.h"
-#include "../utils/errOut.h"
+#include<../EngineCore.h>
 
 #define entity_cpp
 

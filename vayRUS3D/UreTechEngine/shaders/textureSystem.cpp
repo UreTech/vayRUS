@@ -1,10 +1,13 @@
 #include"textureSystem.hpp"
-#include"../src/stb_image.h"
+
+#include<stb/stb_image.h>
+
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include<glm/mat4x4.hpp>
 #include<glm/gtx/matrix_transform_2d.hpp>
-#include "../utils/errOut.h"
+
+#include<../EngineCore.h>
 
 TextureManager* TextureManager::c_Instance = nullptr;
 TextureManager::TextureManager() {

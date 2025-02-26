@@ -1,10 +1,10 @@
 #include "Material.h"
-#include "../utils/errOut.h"
+
 #include"nlohmann/json.hpp"
 #include<iostream>
 #include<fstream>
-#include"../EngineBase.h"
-#include"../shaders/textureSystem.hpp"
+
+#include<../EngineCore.h>
 
 using namespace UreTechEngine;
 
@@ -20,10 +20,10 @@ void Material::saveMaterial(std::string savePath)
 	if (matf.is_open()) {
 		matf << std::setw(4) << mat << std::endl;
 		matf.close();
-		EngineERROR::consoleError("material saved as " + savePath + ".UMAT", EngineERROR::INFO_NORMAL);
+		EngineConsole::consoleError("material saved as " + savePath + ".UMAT", EngineConsole::INFO_NORMAL);
 	}
 	else {
-		EngineERROR::consoleError("can not save the material!", EngineERROR::WARN_NORMAL);
+		EngineConsole::consoleError("can not save the material!", EngineConsole::WARN_NORMAL);
 	}
 }
 

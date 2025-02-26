@@ -1,6 +1,6 @@
 #include"shaderSystem.hpp"
 #include<glm/mat3x3.hpp>
-#include"../utils/errOut.h"
+#include<../EngineCore.h>
 
 ShaderProgram::ShaderProgram()
 {
@@ -35,10 +35,10 @@ void ShaderProgram::addUniform(const std::string& varName)
 {
 	m_UniformVars[varName] = glGetUniformLocation(programID, varName.c_str());
 	if ((int)m_UniformVars[varName] == -1) {
-		UreTechEngine::EngineERROR::consoleError(varName + " " + std::to_string(m_UniformVars[varName]) + " is missing!", UreTechEngine::EngineERROR::WARN_CAN_CAUSE_ERROR);
+		UreTechEngine::EngineConsole::consoleError(varName + " " + std::to_string(m_UniformVars[varName]) + " is missing!", UreTechEngine::EngineConsole::WARN_CAN_CAUSE_ERROR);
 	}
 	else {
-		UreTechEngine::EngineERROR::consoleError(varName + " " + std::to_string(m_UniformVars[varName]), UreTechEngine::EngineERROR::INFO_NORMAL);
+		UreTechEngine::EngineConsole::consoleError(varName + " " + std::to_string(m_UniformVars[varName]), UreTechEngine::EngineConsole::INFO_NORMAL);
 	}
 }
 

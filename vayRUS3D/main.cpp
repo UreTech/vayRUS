@@ -13,32 +13,18 @@
 
 //networking
 #include<WinSock2.h>
-#include"UreTechEngine/network/network.h"
 
 #define STB_IMAGE_IMPLEMENTATION   
 #include<stb/stb_image.h>
- 
-#include"UreTechEngine/shaders/vertexStructs.hpp"
-#include"UreTechEngine/EngineBase.h"
-#include"UreTechEngine/shaders/shaderSystem.hpp"
-#include"UreTechEngine/shaders/textureSystem.hpp"
-#include"UreTechEngine/shaders/vertexArray.hpp"
-#include"UreTechEngine/shaders/MeshManager.hpp"
-#include"UreTechEngine/shaders/mesh.hpp"
-#include"UreTechEngine/utils/3DMath.hpp"
-#include"UreTechEngine/utils/Array.hpp"
-#include"UreTechEngine/utils/util.hpp"
-#include"UreTechEngine/shaders/Material.h"
 
-#include"UreTechEngine/network/network.h"
-
+#include<../EngineCore.h>
 
 #include "../content/sourceContent/vayrusCube.h"
 #include "../content/sourceContent/MyPlayerPawn.h"
 
 #include <thread>
 #include<map>
-#include "UreTechEngine/utils/errOut.h"
+
 
 
 vertexArrayObject EngineTestCubeVao;
@@ -120,11 +106,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 texture Texture0;
 texture Texture1;
 
-int main(int argc, char** argv) {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	//init engine
 	UreTechEngine::UreTechEngineClass* engine = UreTechEngine::UreTechEngineClass::getEngine();//init engine
 	if (engine == nullptr) {
-		EngineERROR::consoleError("ENGINE ERROR (0x01)", EngineERROR::ERROR_FATAL);
+		EngineConsole::consoleError("ENGINE ERROR (0x01)", EngineConsole::ERROR_FATAL);
 	}
 	GLFWwindow* window = engine->getWindow();
 	engine->setKeyCallBackFunc(key_callback, mouse_button_callback);
@@ -142,14 +128,14 @@ int main(int argc, char** argv) {
 	icon[0].pixels = icoimg;
 	glfwSetWindowIcon(window, 1, icon);
 	//******
-
+	/*
 	//textures
 	Texture0 = textureManager->loadTextureFromFile("content/Textures/susTM.png",false);
 	Texture1 = textureManager->loadTextureFromFile("content/Textures/sus.png");
 	texture grass01Texture = textureManager->loadTextureFromFile("content/Textures/grass01.jpg");
 	texture Texture2 = textureManager->loadTextureFromFile("content/Textures/skysphere01.jpg");
-	UreTechEngine::EngineERROR::consoleError(std::to_string(Texture0), UreTechEngine::EngineERROR::INFO_NORMAL);
-	UreTechEngine::EngineERROR::consoleError(std::to_string(Texture1), UreTechEngine::EngineERROR::INFO_NORMAL);
+	UreTechEngine::EngineConsole::consoleError(std::to_string(Texture0), UreTechEngine::EngineConsole::INFO_NORMAL);
+	UreTechEngine::EngineConsole::consoleError(std::to_string(Texture1), UreTechEngine::EngineConsole::INFO_NORMAL);
 
 	Material susTMMaterial;
 	susTMMaterial.colorText = Texture0;
@@ -174,7 +160,7 @@ int main(int argc, char** argv) {
 	//mesh* mesh3 = meshManager->importMeshFbx("content/Meshs/alyx.obj", Texture1);
 	mesh* mesh2 = meshManager->importMeshFbx("content/Meshs/skysphere.obj", skyspMat);
 	mesh* playerCapsuleMesh = meshManager->importMeshFbx("content/Meshs/defaultCapsule.obj", susTMMaterial);
-
+	*/
 	player->CameraTranform.Location.x = 0.0f;
 	player->CameraTranform.Location.y = -10.0f;
 	player->CameraTranform.Location.z = 3.2f;
@@ -186,12 +172,12 @@ int main(int argc, char** argv) {
 	Transform3D e(vector3(0.0f, 0.0f, 0.0f), Rotation(-30.0f, -90.0f, 0.0f), vector3(1.0f, 1.0f, 1.0f));
 	Transform3D f(vector3(0.0f, 0.0f, 1.0f), Rotation(0.0f, 0.0f, 0.0f), vector3(1.0f, 1.0f, 1.0f));
 
-	TestDumy = engine->spawnEntity(new entity(a.Location,a.Rotation,a.Scale, mesh0,"flat"));
+	//TestDumy = engine->spawnEntity(new entity(a.Location,a.Rotation,a.Scale, mesh0,"flat"));
 	//engine->spawnEntity(new entity(b.Location, b.Rotation, b.Scale, mesh1, "cube0"));
 	//engine->spawnEntity(new entity(c.Location, c.Rotation, c.Scale, mesh3, "cube1"));
-	engine->spawnEntity(new entity(d.Location, d.Rotation, d.Scale, playerCapsuleMesh, "cube2"));
-	mesh2->changeLitRender(false);
-	engine->spawnEntity(new entity(e.Location, e.Rotation, e.Scale, mesh2, "skysphere"));
+	//engine->spawnEntity(new entity(d.Location, d.Rotation, d.Scale, playerCapsuleMesh, "cube2"));
+	//mesh2->changeLitRender(false);
+	//engine->spawnEntity(new entity(e.Location, e.Rotation, e.Scale, mesh2, "skysphere"));
 
 	player->playerPawn = engine->spawnEntity(new MyPlayerPawn(nullptr, "playerPawn",f));
 	
@@ -465,7 +451,7 @@ int main(int argc, char** argv) {
 					ImGui::Image((ImTextureID)mtrthumbTex, ImVec2(100, 100));
 					if (ImGui::Selectable(prntnm.c_str(), &sl)) {
 
-						//iþlemler...
+						//bruhh
 					}
 
 					if (!nameingWind) {

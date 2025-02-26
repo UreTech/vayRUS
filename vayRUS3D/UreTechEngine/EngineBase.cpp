@@ -4,8 +4,7 @@
 #include<GLFW/glfw3.h>
 #include<glm/mat4x4.hpp>
 #include<glm/gtc/matrix_transform.hpp>
-#include"player/player.h"
-#include "utils/errOut.h"
+#include<../EngineCore.h>
 
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::c_Instance = nullptr;
 unsigned int UreTechEngine::UreTechEngineClass::displayWidth = 1000;
@@ -113,7 +112,7 @@ UreTechEngine::entity* UreTechEngine::UreTechEngineClass::spawnEntity(entity* _t
 {
 	_toSpawn->init(this);
 	_toSpawn->begin();
-	UreTechEngine::EngineERROR::consoleError(_toSpawn->entName, UreTechEngine::EngineERROR::INFO_NORMAL);
+	UreTechEngine::EngineConsole::consoleError(_toSpawn->entName, UreTechEngine::EngineConsole::INFO_NORMAL);
 	sceneEntities[countOfEntity] = _toSpawn;
 	countOfEntity++;
 	return sceneEntities[countOfEntity-1];
@@ -214,10 +213,10 @@ void UreTechEngine::UreTechEngineClass::saveCurrentMap(std::string mapPath)
 	if (file.is_open()) {
 		file << std::setw(4) << map << std::endl;
 		file.close();
-		EngineERROR::consoleError("map saved as " + mapPath + ".UMAP", EngineERROR::INFO_NORMAL);
+		EngineConsole::consoleError("map saved as " + mapPath + ".UMAP", EngineConsole::INFO_NORMAL);
 	}
 	else {
-		EngineERROR::consoleError("can not save the map!", EngineERROR::WARN_NORMAL);
+		EngineConsole::consoleError("can not save the map!", EngineConsole::WARN_NORMAL);
 	}
 
 }
@@ -237,10 +236,10 @@ void UreTechEngine::UreTechEngineClass::saveGame(std::string gamePath)
 	if (file.is_open()) {
 		file << std::setw(4) << game << std::endl;
 		file.close();
-		EngineERROR::consoleError("map saved as " + gamePath + ".UGAME", EngineERROR::INFO_NORMAL);
+		EngineConsole::consoleError("map saved as " + gamePath + ".UGAME", EngineConsole::INFO_NORMAL);
 	}
 	else {
-		EngineERROR::consoleError("can not save the GAME!", EngineERROR::WARN_NORMAL);
+		EngineConsole::consoleError("can not save the GAME!", EngineConsole::WARN_NORMAL);
 	}
 }
 
@@ -250,12 +249,12 @@ void UreTechEngine::UreTechEngineClass::loadGame(std::string gamePath)
 
 
 	if (!file.is_open()) {
-		EngineERROR::consoleError("game loading error: " + gamePath + ".UGAME", EngineERROR::ERROR_ERROR);
+		EngineConsole::consoleError("game loading error: " + gamePath + ".UGAME", EngineConsole::ERROR_ERROR);
 		return;
 	}
 
 	if (!file.good()) {
-		EngineERROR::consoleError("game loading error(buffer error): " + gamePath + ".UGAME", EngineERROR::ERROR_ERROR);
+		EngineConsole::consoleError("game loading error(buffer error): " + gamePath + ".UGAME", EngineConsole::ERROR_ERROR);
 		return;
 	}
 
@@ -284,11 +283,11 @@ void UreTechEngine::UreTechEngineClass::loadGame(std::string gamePath)
 			}
 		}
 		else {
-			EngineERROR::consoleError("game loading error(file is not valid): " + gamePath + ".UGAME", EngineERROR::ERROR_ERROR);
+			EngineConsole::consoleError("game loading error(file is not valid): " + gamePath + ".UGAME", EngineConsole::ERROR_ERROR);
 			break;
 		}
 	}
-	EngineERROR::consoleError("game loaded: " + gamePath + ".UGAME"+std::to_string(i), EngineERROR::INFO_NORMAL);
+	EngineConsole::consoleError("game loaded: " + gamePath + ".UGAME"+std::to_string(i), EngineConsole::INFO_NORMAL);
 }
 
 UreTechEngine::UreTechEngineClass::UreTechEngineClass()

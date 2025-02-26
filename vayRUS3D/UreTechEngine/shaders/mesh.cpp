@@ -1,12 +1,6 @@
 #include"mesh.hpp"
 
-#include"../UreTechEngine/EngineBase.h"
-#include"../UreTechEngine/shaders/vertexArray.hpp"
-#include"../UreTechEngine/shaders/vertexStructs.hpp"
-#include"../UreTechEngine/shaders/textureSystem.hpp"
-#include"../UreTechEngine/utils/baseVector.h"
-#include"../utils/errOut.h"
-
+#include<../EngineCore.h>
 
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
@@ -74,7 +68,7 @@ mesh::mesh(vertexArrayObject* _p_Vao, Material _mat)
 	PlayerRef= UreTechEngine::UreTechEngineClass::getEngine()->getPlayer();
 	textManager = TextureManager::getInstance();
 	if (textManager == nullptr) {
-		UreTechEngine::EngineERROR::consoleError("(Mesh): Failed to use texture system!", UreTechEngine::EngineERROR::ERROR_FATAL);
+		UreTechEngine::EngineConsole::consoleError("(Mesh): Failed to use texture system!", UreTechEngine::EngineConsole::ERROR_FATAL);
 	}
 	shaderProg = UreTechEngine::UreTechEngineClass::getEngine()->getShaderProgram();
 }

@@ -1,7 +1,5 @@
 #include "MyPlayerPawn.h"
-#include"../UreTechEngine/shaders/MeshManager.hpp"
-#include"../UreTechEngine/shaders/textureSystem.hpp"
-#include"../UreTechEngine/utils/errOut.h"
+#include<../EngineCore.h>
 
 MyPlayerPawn::MyPlayerPawn(void)
 {
@@ -20,5 +18,5 @@ void MyPlayerPawn::begin()
 	Material myMat;
 	myMat.colorText = text;
 	this->entityMesh = MeshManager::getInstance()->importMeshFbx("content/Meshs/defaultCapsule.obj", myMat);
-	UreTechEngine::EngineERROR::consoleError("oldu brom!", UreTechEngine::EngineERROR::INFO_NORMAL);
+	UreTechEngine::EngineConsole::consoleError("oldu brom!", UreTechEngine::EngineConsole::INFO_NORMAL);
 }

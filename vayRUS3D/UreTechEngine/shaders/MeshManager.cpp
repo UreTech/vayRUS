@@ -1,8 +1,8 @@
 #include"MeshManager.hpp"
-#include"vertexStructs.hpp"
+
 #include<vector>
-#include "../utils/errOut.h"
-#include "Material.h"
+
+#include<../EngineCore.h>
 
 MeshManager* MeshManager::c_Instance = nullptr;
 	
@@ -30,7 +30,7 @@ mesh* MeshManager::importMeshFbx(std::string filePath,Material _mat)
 
 	FILE* file = fopen(filePath.c_str(), "r");
 	if (file == NULL) {
-		UreTechEngine::EngineERROR::consoleError("(Mesh Loader): Can not open source file! Path:" + filePath, UreTechEngine::EngineERROR::ERROR_NORMAL);
+		UreTechEngine::EngineConsole::consoleError("(Mesh Loader): Can not open source file! Path:" + filePath, UreTechEngine::EngineConsole::ERROR_NORMAL);
 		return nullptr;
 	}
 	std::vector<triangleFace> faces;
@@ -59,7 +59,7 @@ mesh* MeshManager::importMeshFbx(std::string filePath,Material _mat)
 			temp_normals.push_back(normal);
 		}
 		else if (strcmp(lineHeader, "usemtl") == 0) {
-			UreTechEngine::EngineERROR::consoleError("(Mesh Loader): Found new texture!"+std::to_string(textureCount), UreTechEngine::EngineERROR::INFO_NORMAL);
+			UreTechEngine::EngineConsole::consoleError("(Mesh Loader): Found new texture!"+std::to_string(textureCount), UreTechEngine::EngineConsole::INFO_NORMAL);
 			textureCount++;
 		}
 		else if (strcmp(lineHeader, "f") == 0) {
@@ -67,7 +67,7 @@ mesh* MeshManager::importMeshFbx(std::string filePath,Material _mat)
 			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
 			int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
 			if (matches != 9) {
-				UreTechEngine::EngineERROR::consoleError("(Mesh Loader): Can not read source file! Path:" + filePath, UreTechEngine::EngineERROR::ERROR_NORMAL);
+				UreTechEngine::EngineConsole::consoleError("(Mesh Loader): Can not read source file! Path:" + filePath, UreTechEngine::EngineConsole::ERROR_NORMAL);
 				return nullptr;
 			}
 			vertexIndices.push_back(vertexIndex[0] - 1);

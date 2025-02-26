@@ -1,11 +1,12 @@
 #include "network.h"
+
 #include<WinSock2.h>
-#include"../UreTechEngine/utils/errOut.h"
-#include"../EngineBase.h"
 #include<string>
 
+#include<../EngineCore.h>
+
 namespace UreTechEngine {
-    class EngineERROR;
+    class EngineConsole;
 }
 
 UreTechEngine::networkSystem* UreTechEngine::networkSystem::c_NetInst = nullptr;
@@ -29,33 +30,33 @@ void UreTechEngine::networkSystem::startServer()
     // Winsock baþlatma
     result = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (result != 0) {
-        EngineERROR::consoleError(std::string("(Network Socket): Failed to WSAStartup! ERROR CODE:") + std::to_string(result), EngineERROR::ERROR_FATAL);
+        EngineConsole::consoleError(std::string("(Network Socket): Failed to WSAStartup! ERROR CODE:") + std::to_string(result), EngineConsole::ERROR_FATAL);
 
     }
 
     sock=socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
-        EngineERROR::consoleError(std::string("(Network Socket): Failed to open socket! ERROR CODE:")+ std::to_string(sock), EngineERROR::ERROR_FATAL);
+        EngineConsole::consoleError(std::string("(Network Socket): Failed to open socket! ERROR CODE:")+ std::to_string(sock), EngineConsole::ERROR_FATAL);
     }
 
     // Non-blocking mod ayarlanýyor(GPT kodu bu) // düzeltilmeli bloklamýyo ama accept edemiyor
     u_long mode = 1;
     if (ioctlsocket(sock, FIONBIO, &mode) == SOCKET_ERROR) {
-        EngineERROR::consoleError(std::string("(Network Socket): Non blocking socket error!") + std::to_string(sock), EngineERROR::ERROR_FATAL);
+        EngineConsole::consoleError(std::string("(Network Socket): Non blocking socket error!") + std::to_string(sock), EngineConsole::ERROR_FATAL);
     }
 
-    EngineERROR::consoleError("Socket: Server Socket Started!", EngineERROR::INFO_NORMAL);
+    EngineConsole::consoleError("Socket: Server Socket Started!", EngineConsole::INFO_NORMAL);
 
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY; // automatically be filled with current host's IP address
     serv_addr.sin_port = htons(port);
     int bind_Err;
     if (bind_Err = bind(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-        EngineERROR::consoleError(std::string("(Network Socket): Failed to bind! ERROR CODE:") + std::to_string(bind_Err), EngineERROR::ERROR_FATAL);
+        EngineConsole::consoleError(std::string("(Network Socket): Failed to bind! ERROR CODE:") + std::to_string(bind_Err), EngineConsole::ERROR_FATAL);
     }
 
     if (listen(sock, 5)==SOCKET_ERROR) {
-        EngineERROR::consoleError(std::string("(Network Socket): Failed to listen!"), EngineERROR::ERROR_FATAL);
+        EngineConsole::consoleError(std::string("(Network Socket): Failed to listen!"), EngineConsole::ERROR_FATAL);
     }
     clilen = sizeof(cli_addr);  
     UreTechEngineClass::getEngine()->isServer = true;
@@ -69,26 +70,26 @@ void UreTechEngine::networkSystem::connectToServer()
     // Winsock baþlatma
     result = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (result != 0) {
-        EngineERROR::consoleError(std::string("(Network Socket): Failed to WSAStartup! ERROR CODE:") + std::to_string(result), EngineERROR::ERROR_FATAL);
+        EngineConsole::consoleError(std::string("(Network Socket): Failed to WSAStartup! ERROR CODE:") + std::to_string(result), EngineConsole::ERROR_FATAL);
 
     }
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
-        EngineERROR::consoleError(std::string("(Network Socket): Failed to open socket! ERROR CODE:") + std::to_string(sock), EngineERROR::ERROR_FATAL);
+        EngineConsole::consoleError(std::string("(Network Socket): Failed to open socket! ERROR CODE:") + std::to_string(sock), EngineConsole::ERROR_FATAL);
     }
 
-    EngineERROR::consoleError("Socket: Client Socket Started!", EngineERROR::INFO_NORMAL);
+    EngineConsole::consoleError("Socket: Client Socket Started!", EngineConsole::INFO_NORMAL);
 
     UreTechEngineClass::getEngine()->isServer = false;
     UreTechEngineClass::getEngine()->isInServer = true;
 
     if (invalidIP) {
-        EngineERROR::consoleError("(Network Socket): Server is not available!",EngineERROR::ERROR_NORMAL);
+        EngineConsole::consoleError("(Network Socket): Server is not available!",EngineConsole::ERROR_NORMAL);
     }
     else {
         if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-            EngineERROR::consoleError(std::string("(Network Socket): Can not connect to server!"), EngineERROR::ERROR_NORMAL);
+            EngineConsole::consoleError(std::string("(Network Socket): Can not connect to server!"), EngineConsole::ERROR_NORMAL);
         }
     }
 }
@@ -97,7 +98,7 @@ void UreTechEngine::networkSystem::setToConnectIPAddr(std::string _ip, std::stri
 {
     serv_addr.sin_family = AF_INET;
     if (inet_pton(AF_INET, _ip.c_str(), &serv_addr.sin_addr) <= 0) { 
-        EngineERROR::consoleError(std::string("(Network Socket): Invalid ip addres!"), EngineERROR::ERROR_NORMAL);
+        EngineConsole::consoleError(std::string("(Network Socket): Invalid ip addres!"), EngineConsole::ERROR_NORMAL);
         invalidIP = true;
     }
     else {
@@ -148,11 +149,11 @@ void UreTechEngine::networkSystem::sendRecvToServer()
     int n;
 
     n = recv(sock, buffer, sizeof(replicating_func_dat_size), 0);
-    EngineERROR::consoleError(std::string("(DEBUG): return:")+std::to_string(n), EngineERROR::INFO_NORMAL);
+    EngineConsole::consoleError(std::string("(DEBUG): return:")+std::to_string(n), EngineConsole::INFO_NORMAL);
     if (n >= 0) {
         memcpy(replicating_func_dat_i, buffer, sizeof(replicating_func_dat_size));
         if (n != sizeof(networkReplicationStruct)) {
-            EngineERROR::consoleError(std::string("(Network Socket): Package is not valid! !="+ std::to_string(sizeof(networkReplicationStruct)) +" bytes"), EngineERROR::ERROR_NORMAL);
+            EngineConsole::consoleError(std::string("(Network Socket): Package is not valid! !="+ std::to_string(sizeof(networkReplicationStruct)) +" bytes"), EngineConsole::ERROR_NORMAL);
         }
     }
    // EngineERROR::consoleError("(DEBUG): enter message", EngineERROR::INFO_NORMAL);
@@ -160,9 +161,9 @@ void UreTechEngine::networkSystem::sendRecvToServer()
     memcpy(buffer, &replicating_func_dat_o, sizeof(replicating_func_dat_size));
 
     n = send(sock, buffer, sizeof(replicating_func_dat_size), 0);
-    EngineERROR::consoleError(std::string(buffer), EngineERROR::ERROR_ERROR);
+    EngineConsole::consoleError(std::string(buffer), EngineConsole::ERROR_ERROR);
     if (n < 0) {
-        EngineERROR::consoleError(std::string("(Network Socket): Can not write to server!"), EngineERROR::ERROR_NORMAL);
+        EngineConsole::consoleError(std::string("(Network Socket): Can not write to server!"), EngineConsole::ERROR_NORMAL);
     }
 }
 
@@ -179,10 +180,10 @@ void UreTechEngine::networkSystem::sendRecvToClient()
         n = recv(toSendSock->sock, (char*)replicating_func_dat_i, sizeof(replicating_func_dat_size), 0);
 
         if (n >= 0) {
-            EngineERROR::consoleError(std::string("(DEBUG): return:") + std::to_string(n), EngineERROR::INFO_NORMAL);
-            EngineERROR::consoleError(std::string("(Network Socket): Read to socket:") + std::string(buffer), EngineERROR::INFO_NORMAL);
+            EngineConsole::consoleError(std::string("(DEBUG): return:") + std::to_string(n), EngineConsole::INFO_NORMAL);
+            EngineConsole::consoleError(std::string("(Network Socket): Read to socket:") + std::string(buffer), EngineConsole::INFO_NORMAL);
             if (n != 255) {
-                EngineERROR::consoleError(std::string("(Network Socket): Package is not valid! <13 bytes"), EngineERROR::ERROR_NORMAL);
+                EngineConsole::consoleError(std::string("(Network Socket): Package is not valid! <13 bytes"), EngineConsole::ERROR_NORMAL);
             }
         }
         /*if (n < 0) {

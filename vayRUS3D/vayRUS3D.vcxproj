@@ -134,7 +134,7 @@
       <AdditionalLibraryDirectories>$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <AddModuleNamesToAssembly>
@@ -179,7 +179,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -222,7 +222,8 @@
     <ClCompile Include="UreTechEngine\shaders\vertexArray.cpp" />
     <ClCompile Include="UreTechEngine\shaders\vertexStructs.cpp" />
     <ClCompile Include="UreTechEngine\utils\Array.cpp" />
-    <ClCompile Include="UreTechEngine\utils\errOut.cpp" />
+    <ClCompile Include="UreTechEngine\utils\EngineConsole.cpp" />
+    <ClCompile Include="UreTechEngine\utils\util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="content\shaders\baseFS.glsl">
@@ -239,6 +240,7 @@
     <ClInclude Include="content\sourceContent\MyPlayerPawn.h" />
     <ClInclude Include="content\sourceContent\networkStructs\defaultNetworkStructs.h" />
     <ClInclude Include="content\sourceContent\vayrusCube.h" />
+    <ClInclude Include="EngineCore.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
@@ -266,85 +268,14 @@
     <ClInclude Include="UreTechEngine\utils\3DMath.hpp" />
     <ClInclude Include="UreTechEngine\utils\Array.hpp" />
     <ClInclude Include="UreTechEngine\utils\baseVector.h" />
-    <ClInclude Include="UreTechEngine\utils\errOut.h" />
+    <ClInclude Include="UreTechEngine\utils\EngineConsole.h" />
     <ClInclude Include="UreTechEngine\utils\util.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="vayRUS3D.rc" />
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="content\Textures\grass01.jpg">
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Textures/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\icon.png">
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Textures/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\skysphere01.jpg">
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Textures/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\sus.png">
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Textures/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\susTM.png">
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Textures/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\text.jpg">
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Textures/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\text2.png">
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Textures/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\wood01.jpg">
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Textures/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\bodycolor.png">
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Textures/</DestinationFolders>
-    </CopyFileToFolders>
     <Image Include="icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="content\Meshs\a.obj">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Meshs/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\cube.obj">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Meshs/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\flaty.obj">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Meshs/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\skysphere.obj">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Meshs/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\test.obj">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Meshs/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\yes.obj">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Meshs/</DestinationFolders>
-    </CopyFileToFolders>
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="content\Meshs\alyx.obj">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Meshs/</DestinationFolders>
-    </CopyFileToFolders>
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="content\Meshs\defaultCapsule.obj">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Meshs/</DestinationFolders>
-    </CopyFileToFolders>
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="content\Meshs\cube2TexTest.obj">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)content/Meshs/</DestinationFolders>
-    </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

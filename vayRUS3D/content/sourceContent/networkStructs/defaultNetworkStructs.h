@@ -1,8 +1,6 @@
 #pragma once
 
-#include"../UreTechEngine/EngineBase.h"
-#include "../UreTechEngine/network/network.h"
-#include "../UreTechEngine/utils/errOut.h"
+#include<../EngineCore.h>
 #include<string>
 
 using namespace UreTechEngine;

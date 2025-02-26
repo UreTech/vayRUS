@@ -25,9 +25,6 @@
     <Filter Include="Source Files\UreTechEngine\entity">
       <UniqueIdentifier>{85fc24c0-bf96-4c39-9c28-4083fcf29227}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\UreTechEngine\defaultEngineShapes">
-      <UniqueIdentifier>{e6cb6ffe-7d5c-4261-a48f-8019a77dcf6e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\UreTechEngine\player">
       <UniqueIdentifier>{b2872e87-0850-4bff-aecf-75d79995c370}</UniqueIdentifier>
     </Filter>
@@ -40,14 +37,8 @@
     <Filter Include="content">
       <UniqueIdentifier>{f3777729-a023-4b06-b212-1a0eddf69952}</UniqueIdentifier>
     </Filter>
-    <Filter Include="content\Meshs">
-      <UniqueIdentifier>{7664bd27-32f1-4d66-9216-0ce8bb6ef425}</UniqueIdentifier>
-    </Filter>
     <Filter Include="content\shaders">
       <UniqueIdentifier>{f57a6ddb-186e-4451-b65c-c2023dfef1ec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="content\Textures">
-      <UniqueIdentifier>{f3c9e414-9381-45a3-b708-906a6cd36e1b}</UniqueIdentifier>
     </Filter>
     <Filter Include="content\sourceContent">
       <UniqueIdentifier>{58c9a1b8-4b7f-4491-9168-a7a8459c9d11}</UniqueIdentifier>
@@ -111,7 +102,7 @@
     <ClCompile Include="UreTechEngine\shaders\MeshManager.cpp">
       <Filter>Source Files\UreTechEngine\shaders</Filter>
     </ClCompile>
-    <ClCompile Include="UreTechEngine\utils\errOut.cpp">
+    <ClCompile Include="UreTechEngine\utils\EngineConsole.cpp">
       <Filter>Source Files\UreTechEngine\utils</Filter>
     </ClCompile>
     <ClCompile Include="UreTechEngine\utils\Array.cpp">
@@ -131,6 +122,9 @@
     </ClCompile>
     <ClCompile Include="UreTechEngine\shaders\Material.cpp">
       <Filter>Source Files\UreTechEngine\shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="UreTechEngine\utils\util.cpp">
+      <Filter>Source Files\UreTechEngine\utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -209,7 +203,7 @@
     <ClInclude Include="UreTechEngine\utils\baseVector.h">
       <Filter>Source Files\UreTechEngine\utils</Filter>
     </ClInclude>
-    <ClInclude Include="UreTechEngine\utils\errOut.h">
+    <ClInclude Include="UreTechEngine\utils\EngineConsole.h">
       <Filter>Source Files\UreTechEngine\utils</Filter>
     </ClInclude>
     <ClInclude Include="UreTechEngine\utils\3DMath.hpp">
@@ -233,6 +227,9 @@
     <ClInclude Include="UreTechEngine\utils\util.hpp">
       <Filter>Source Files\UreTechEngine\utils</Filter>
     </ClInclude>
+    <ClInclude Include="EngineCore.h">
+      <Filter>Source Files\UreTechEngine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="vayRUS3D.rc">
@@ -245,65 +242,11 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="content\Meshs\a.obj">
-      <Filter>content\Meshs</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\cube.obj">
-      <Filter>content\Meshs</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\flaty.obj">
-      <Filter>content\Meshs</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\skysphere.obj">
-      <Filter>content\Meshs</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\test.obj">
-      <Filter>content\Meshs</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\yes.obj">
-      <Filter>content\Meshs</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\grass01.jpg">
-      <Filter>content\Textures</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\icon.png">
-      <Filter>content\Textures</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\skysphere01.jpg">
-      <Filter>content\Textures</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\sus.png">
-      <Filter>content\Textures</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\susTM.png">
-      <Filter>content\Textures</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\text.jpg">
-      <Filter>content\Textures</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\text2.png">
-      <Filter>content\Textures</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\wood01.jpg">
-      <Filter>content\Textures</Filter>
-    </CopyFileToFolders>
     <CopyFileToFolders Include="content\shaders\baseFS.glsl">
       <Filter>content\shaders</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="content\shaders\baseVS.glsl">
       <Filter>content\shaders</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\alyx.obj">
-      <Filter>content\Meshs</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Textures\bodycolor.png">
-      <Filter>content\Textures</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\defaultCapsule.obj">
-      <Filter>content\Meshs</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\Meshs\cube2TexTest.obj">
-      <Filter>content\Meshs</Filter>
     </CopyFileToFolders>
   </ItemGroup>
 </Project>
