@@ -46,6 +46,9 @@
     <Filter Include="content\sourceContent\networkStructs">
       <UniqueIdentifier>{6f73517b-e332-4350-bfbf-9d1cfeef6cd5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\UreTechEngine\upk">
+      <UniqueIdentifier>{e59f7e18-29c1-44f5-871e-efac5c58d75a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp">
@@ -125,6 +128,18 @@
     </ClCompile>
     <ClCompile Include="UreTechEngine\utils\util.cpp">
       <Filter>Source Files\UreTechEngine\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="UreTechEngine\upk\encryptor.cpp">
+      <Filter>Source Files\UreTechEngine\upk</Filter>
+    </ClCompile>
+    <ClCompile Include="UreTechEngine\upk\misc.cpp">
+      <Filter>Source Files\UreTechEngine\upk</Filter>
+    </ClCompile>
+    <ClCompile Include="UreTechEngine\upk\fileSystem.cpp">
+      <Filter>Source Files\UreTechEngine\upk</Filter>
+    </ClCompile>
+    <ClCompile Include="UreTechEngine\upk\upk.cpp">
+      <Filter>Source Files\UreTechEngine\upk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -232,6 +247,24 @@
     </ClInclude>
     <ClInclude Include="UreTechEngine\config.h">
       <Filter>Source Files\UreTechEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="UreTechEngine\upk\upk.h">
+      <Filter>Source Files\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="UreTechEngine\upk\includes.h">
+      <Filter>Source Files\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="UreTechEngine\upk\encryptor.h">
+      <Filter>Source Files\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="UreTechEngine\upk\upkConfig.h">
+      <Filter>Source Files\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="UreTechEngine\upk\misc.h">
+      <Filter>Source Files\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="UreTechEngine\upk\fileSystem.h">
+      <Filter>Source Files\UreTechEngine\upk</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

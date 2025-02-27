@@ -4,6 +4,11 @@
 #include <string>
 
 namespace UreTechEngine {
+	struct conMessage {
+		std::string msg;// message
+		float color[3];// rgb color
+	};
+
 	class EngineConsole {
 	public:
 		enum t_error {
@@ -16,6 +21,7 @@ namespace UreTechEngine {
 			DEBUG,
 		};
 		static void log(std::string logMessage,t_error logType);
+		static std::vector<conMessage> messages;
 	private:
 		static void forceToExit();
 		EngineConsole();

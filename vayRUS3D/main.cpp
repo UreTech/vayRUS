@@ -37,6 +37,12 @@ float editorCamPos[3] = { 0.0f,0.0f,0.0f };
 //change this later
 bool rClickL = false;
 
+#define ImGui_Max_InputChars 256
+// editor/game ImGui Vars
+bool consoleWindow = false;
+bool autoScroll = true;
+char consoleInputBuffer[ImGui_Max_InputChars];
+
 UreTechEngine::Player* player = nullptr;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -242,8 +248,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-		//editor UI
 
+		//editor gui
 #ifdef ENGINE_BUILD
 
 		//MAP WINDOW
@@ -275,6 +281,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				}
 				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("Engine")) {
+				if (ImGui::MenuItem("Console")) {
+
+					consoleWindow = !consoleWindow;
+				}
+				ImGui::EndMenu();
+			}
 			ImGui::EndMenuBar();
 		}
 		//ImGui::PushItemWidth(200);
@@ -288,6 +302,42 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//editor UI end
 
 #endif // ENGINE_BUILD
+
+		// gui build (dedicated server doesn't have ImGui window)
+#if defined(ENGINE_BUILD) or defined(GAME_BUILD)
+		if (consoleWindow) {
+			ImGui::Begin("vConsole 1.0", &consoleWindow);
+
+			ImVec2 windowSize = ImGui::GetWindowSize();
+
+
+			ImGui::BeginChild("ConsoleOutput", ImVec2(0, windowSize.y - 100), true);
+			for (const auto& item : EngineConsole::messages) {
+				ImGui::TextColored(ImVec4(item.color[0], item.color[1], item.color[2], 1.0f), item.msg.c_str());
+			}
+
+			if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+				ImGui::SetScrollHereY(1.0f);
+			ImGui::EndChild();
+
+			ImGui::InputText("Command", consoleInputBuffer, ImGui_Max_InputChars, ImGuiInputTextFlags_EnterReturnsTrue);
+			if (ImGui::IsItemActivated()) {
+				std::string conInputStr(consoleInputBuffer); // string saved
+
+				consoleInputBuffer[0] = '\0'; // Cleared after bruh
+			}
+
+			ImGui::BeginGroup();
+			if (ImGui::Button("Clear")) EngineConsole::messages.clear();
+			ImGui::SameLine();
+			if (ImGui::Button("Copy Last")) EngineConsole::messages[0];
+			ImGui::SameLine();
+			ImGui::Checkbox("Auto Scroll", &autoScroll);
+			ImGui::EndGroup();
+			ImGui::End();
+		}
+#endif // (ENGINE_BUILD) or defined(GAME_BUILD)
+
 
 	// ImGui render
 		ImGui::EndFrame();

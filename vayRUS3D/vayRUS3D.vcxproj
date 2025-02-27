@@ -125,7 +125,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>Default</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -177,6 +177,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;D:\vayRUS\vayRUS3D\content\sourceContent;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -221,6 +222,10 @@
     <ClCompile Include="UreTechEngine\shaders\textureSystem.cpp" />
     <ClCompile Include="UreTechEngine\shaders\vertexArray.cpp" />
     <ClCompile Include="UreTechEngine\shaders\vertexStructs.cpp" />
+    <ClCompile Include="UreTechEngine\upk\encryptor.cpp" />
+    <ClCompile Include="UreTechEngine\upk\fileSystem.cpp" />
+    <ClCompile Include="UreTechEngine\upk\misc.cpp" />
+    <ClCompile Include="UreTechEngine\upk\upk.cpp" />
     <ClCompile Include="UreTechEngine\utils\Array.cpp" />
     <ClCompile Include="UreTechEngine\utils\EngineConsole.cpp" />
     <ClCompile Include="UreTechEngine\utils\util.cpp" />
@@ -266,6 +271,12 @@
     <ClInclude Include="UreTechEngine\shaders\textureSystem.hpp" />
     <ClInclude Include="UreTechEngine\shaders\vertexArray.hpp" />
     <ClInclude Include="UreTechEngine\shaders\vertexStructs.hpp" />
+    <ClInclude Include="UreTechEngine\upk\encryptor.h" />
+    <ClInclude Include="UreTechEngine\upk\fileSystem.h" />
+    <ClInclude Include="UreTechEngine\upk\includes.h" />
+    <ClInclude Include="UreTechEngine\upk\misc.h" />
+    <ClInclude Include="UreTechEngine\upk\upk.h" />
+    <ClInclude Include="UreTechEngine\upk\upkConfig.h" />
     <ClInclude Include="UreTechEngine\utils\3DMath.hpp" />
     <ClInclude Include="UreTechEngine\utils\Array.hpp" />
     <ClInclude Include="UreTechEngine\utils\baseVector.h" />
