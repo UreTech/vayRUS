@@ -1,5 +1,3 @@
-#define Editor_Mode true
-
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -25,24 +23,18 @@
 #include <thread>
 #include<map>
 
-
-
-vertexArrayObject EngineTestCubeVao;
-vertexArrayObject EngineTestPyramidVao;
-
 #define fpslock 60
 int display_w, display_h;
-bool isEditor = 0;
+
 using namespace std;
 using namespace UreTechEngine;
 
-entity* TestDumy = nullptr;
-
+//for debug now
 float editorCamRoll=0.0f;
 float editorCamYaw = 0.0f;
-
 float editorCamPos[3] = { 0.0f,0.0f,0.0f };
 
+//change this later
 bool rClickL = false;
 
 UreTechEngine::Player* player = nullptr;
@@ -103,30 +95,54 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 	}
 }
 
-texture Texture0;
-texture Texture1;
+void enableANSI() {
+	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if (hOut == INVALID_HANDLE_VALUE) return;
+
+	DWORD dwMode = 0;
+	if (!GetConsoleMode(hOut, &dwMode)) return;
+
+	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+	SetConsoleMode(hOut, dwMode);
+}
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-	//init engine
-	UreTechEngine::UreTechEngineClass* engine = UreTechEngine::UreTechEngineClass::getEngine();//init engine
-	if (engine == nullptr) {
-		EngineConsole::consoleError("ENGINE ERROR (0x01)", EngineConsole::ERROR_FATAL);
+	// start external console
+	if (USE_EXTERNAL_CONSOLE) {
+		AllocConsole();
+		FILE* f;
+		freopen_s(&f, "CONOUT$", "w", stdout);
+		freopen_s(&f, "CONIN$", "r", stdin);
+		enableANSI();
 	}
+
+	// init engine
+	UreTechEngine::UreTechEngineClass* engine = UreTechEngine::UreTechEngineClass::getEngine();// init engine
+	if (engine == nullptr) {
+		EngineConsole::log("ENGINE ERROR (0x01)", EngineConsole::ERROR_FATAL);
+	}
+
+	// get widow and set callback funcs
 	GLFWwindow* window = engine->getWindow();
 	engine->setKeyCallBackFunc(key_callback, mouse_button_callback);
-	//init net system
+
+	// init net system
 	UreTechEngine::networkSystem* netSys = UreTechEngine::networkSystem::getNetworkSystem();
 
-	player = engine->getPlayer();//get player ref
-	TextureManager* textureManager = TextureManager::getInstance();//create texture manager
-	MeshManager* meshManager = MeshManager::getInstance();
+	player = engine->getPlayer();// store player pointer localy
+	TextureManager* textureManager = TextureManager::getInstance();// create texture manager
+	MeshManager* meshManager = MeshManager::getInstance();// create mesh manager
+
+	// change window icon
 	int icoW, icoH, icoC;
-	unsigned char* icoimg = stbi_load("content/Textures/icon.png", &icoW, &icoH, &icoC, 0);
+	unsigned char* icoimg = stbi_load("icon.png", &icoW, &icoH, &icoC, 0);
+	//unsigned char* icoimg = stbi_load_from_memory("content/Textures/icon.png", &icoW, &icoH, &icoC, 0); // used for upk
 	GLFWimage icon[1];
 	icon[0].width = icoW;
 	icon[0].height = icoH;
 	icon[0].pixels = icoimg;
 	glfwSetWindowIcon(window, 1, icon);
+
 	//******
 	/*
 	//textures
@@ -161,85 +177,38 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	mesh* mesh2 = meshManager->importMeshFbx("content/Meshs/skysphere.obj", skyspMat);
 	mesh* playerCapsuleMesh = meshManager->importMeshFbx("content/Meshs/defaultCapsule.obj", susTMMaterial);
 	*/
-	player->CameraTranform.Location.x = 0.0f;
-	player->CameraTranform.Location.y = -10.0f;
-	player->CameraTranform.Location.z = 3.2f;
 
-	Transform3D a(vector3(0.0f, 0.0f, -1.8f), Rotation(0.0f, 0.0f, 0.0f), vector3(60.0f, 60.0f, 60.0f));
-	Transform3D b(vector3(-1.0f, 1.0f, -0.6f), Rotation(90.0f, 0.0f, 0.0f), vector3(0.0f, 0.0f, 0.0f));
-	Transform3D c(vector3(1.0f, -1.0f, -0.6f), Rotation(0.0f, 0.0f, 0.0f), vector3(0.0f, 0.0f, 0.0f));
-	Transform3D d(vector3(-1.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), vector3(1.0f, 1.0f, 1.0f));
-	Transform3D e(vector3(0.0f, 0.0f, 0.0f), Rotation(-30.0f, -90.0f, 0.0f), vector3(1.0f, 1.0f, 1.0f));
-	Transform3D f(vector3(0.0f, 0.0f, 1.0f), Rotation(0.0f, 0.0f, 0.0f), vector3(1.0f, 1.0f, 1.0f));
+	//null for now
+	//player->CameraTranform.Location.x = 0.0f;
+	//player->CameraTranform.Location.y = -10.0f;
+	//player->CameraTranform.Location.z = 3.2f;
 
-	//TestDumy = engine->spawnEntity(new entity(a.Location,a.Rotation,a.Scale, mesh0,"flat"));
-	//engine->spawnEntity(new entity(b.Location, b.Rotation, b.Scale, mesh1, "cube0"));
-	//engine->spawnEntity(new entity(c.Location, c.Rotation, c.Scale, mesh3, "cube1"));
-	//engine->spawnEntity(new entity(d.Location, d.Rotation, d.Scale, playerCapsuleMesh, "cube2"));
-	//mesh2->changeLitRender(false);
-	//engine->spawnEntity(new entity(e.Location, e.Rotation, e.Scale, mesh2, "skysphere"));
+	//player->playerPawn = engine->spawnEntity(new MyPlayerPawn(nullptr, "playerPawn",f)); // used for debug
 
-	player->playerPawn = engine->spawnEntity(new MyPlayerPawn(nullptr, "playerPawn",f));
-	
-
-	float rot = 0;
-
+	// prepare ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 	ImGui::StyleColorsDark();
 
-	Transform3D editorEditTransform(vector3(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), vector3(1.0f, 1.0f, 1.0f));
-	float editorTransformLoc[3] = { 0.0f,0.0f,0.0f };
-	float editorTransformRot[3] = { 0.0f,0.0f,0.0f };
-	float editorTransformScl[3] = { 1.0f,1.0f,1.0f };
+	texture materialThumbTexture = textureManager->loadTextureFromFile("materialThumb.png", false);
 
-	entity* selectedEntityEngine = nullptr;
-
-	//net ui vars
-	char toConnectIP_UIChar[150] = { 0 };
-	char toConnectIPPORT_UIChar[150] = { 0 };
-
-	char inptmappth[100] = { 0 };
-	char inptmatpth[100] = { 0 };
-	char mattexpth[100] = { 0 };
-	char matnormpth[100] = { 0 };
-	char nameinpt[100] = { 0 };
-	bool matlitrndr = true;
-	float matspec = 0.8;
-
-	bool materialWindow = false;
-	bool netWindow = false;
-	bool nameingWind = false;
-
-	int expItm = 0;
-
-	texture mtrthumbTex = textureManager->loadTextureFromFile("materialThumb.png", false);
-
-	//editor spawnables
+	// spawnables
 	std::map<std::string, std::function<entity* ()>> spawnables;
-
 	spawnables["entity"] = []() { return new entity(); };
 	spawnables["vayrusCube"] = []() { return new vayrusCube(); };
 
-	networkReplicationStruct* netTest = new networkReplicationStruct();
-	networkReplicationStruct* netTest2 = new networkReplicationStruct();
-	memcpy(&netTest->func_notify[0],"func_rep_Test",13);
-	netSys->replicating_func_dat_o = netTest;
-	netSys->replicating_func_dat_i = netTest2;
-	netSys->replicating_func_dat_size = sizeof(networkReplicationStruct);
-
-	//while (1) {}
-
+	// main loop
 	while (!glfwWindowShouldClose(window)) {
+		// render stuff
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		engine->getShaderProgram()->use();
 
+		// mouse input and other stuff
 		double xpos, ypos;
 		double lxpos, lypos;
-
 		glfwGetCursorPos(window, &xpos, &ypos);
 		if (rClickL) {
 			editorCamYaw += lxpos - xpos;
@@ -247,320 +216,85 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 			if (editorCamRoll > 90.0f) {
 				editorCamRoll = 90.0f;
-			}else if (editorCamRoll < -90.0f) {
+			}
+			else if (editorCamRoll < -90.0f) {
 				editorCamRoll = -90.0f;
 			}
 		}
-		//end of exec
 		lxpos = xpos;
 		lypos = ypos;
 
-		player->CameraTranform.Rotation.roll = editorCamRoll;
-		player->CameraTranform.Rotation.yaw = editorCamYaw;
-
-		player->playerPawn->transform.Rotation.yaw = -1*editorCamYaw;
-
-		player->playerPawn->transform.Location.x = editorCamPos[0];
-		player->playerPawn->transform.Location.y = editorCamPos[1];
+		//not useable while player pawn is null
+		//player->CameraTranform.Rotation.roll = editorCamRoll;
+		//player->CameraTranform.Rotation.yaw = editorCamYaw;
+		//player->playerPawn->transform.Rotation.yaw = -1*editorCamYaw;
+		//player->playerPawn->transform.Location.x = editorCamPos[0];
+		//player->playerPawn->transform.Location.y = editorCamPos[1];
 		//player->CameraTranform.Location.z = editorCamPos[2];
 
 		player->updateCamera();
 
+		// tick
 		glfwPollEvents();
 		engine->engineTick();
 
+		//ui
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		//editor UI
-		if(Editor_Mode)
-			{
-			//SPAWN WINDOW
-			ImGui::SetNextWindowPos(ImVec2(display_w - 450, display_h - 880));
-			ImGui::SetNextWindowSize(ImVec2(450, 80));
-			ImGui::Begin("Creator", NULL, ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoCollapse);
-			char editorSpawnTextInput[150];
-			memset(editorSpawnTextInput, 0, 150);
-			ImGui::Text("Class Name:");
-			if (ImGui::InputText("class", editorSpawnTextInput, 150, ImGuiInputTextFlags_EnterReturnsTrue)) {
-					auto it = spawnables.find(string(editorSpawnTextInput));
-					if (it != spawnables.end()) {
-						entity* spawned = engine->spawnEntity(it->second());
-					}
+
+#ifdef ENGINE_BUILD
+
+		//MAP WINDOW
+		ImGui::SetNextWindowSize(ImVec2(display_w, 80));
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::Begin("vayRUS3D", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+		if (ImGui::BeginMenuBar()) {
+			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("Save Game")) {
+					//engine->saveGame(std::string(inptmappth));
+				}
+				if (ImGui::MenuItem("Save Map")) {
+					//engine->saveCurrentMap(std::string(inptmappth));
+				}
+				if (ImGui::MenuItem("Open Game")) {
+					//engine->loadGame(std::string(inptmappth));
+				}
+				ImGui::EndMenu();
 			}
 
-			ImGui::End();
-			//SPAWN WINDOW END
+			if (ImGui::BeginMenu("Create")) {
+				if (ImGui::MenuItem("Material Creator")) {
 
-			//EXPLORER WINDOW
-			ImGui::SetNextWindowPos(ImVec2(display_w - 450, display_h - 800));
-			ImGui::SetNextWindowSize(ImVec2(450, 500));
-			ImGui::Begin("Explorer", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-
-			for (int i = 0; i < engine->getCountOfEntity(); i++) {
-				ImGui::PushItemWidth(450);
-				ImGui::Text(engine->getEntityWithIndex(i)->entName.c_str());
-				ImGui::SameLine();
-				ImGui::PushID(to_string(i).c_str());
-				if (ImGui::Button(string(string("select ") + engine->getEntityWithIndex(i)->entName).c_str())) {
-					selectedEntityEngine = engine->getEntityWithIndex(i);
-					editorEditTransform = engine->getEntityWithIndex(i)->transform;
-					editorTransformLoc[0] = editorEditTransform.Location.fx();
-					editorTransformLoc[1] = editorEditTransform.Location.fy();
-					editorTransformLoc[2] = editorEditTransform.Location.fz();
-
-					editorTransformRot[0] = editorEditTransform.Rotation.fRoll();
-					editorTransformRot[1] = editorEditTransform.Rotation.fPitch();
-					editorTransformRot[2] = editorEditTransform.Rotation.fYaw();
-
-					editorTransformScl[0] = editorEditTransform.Scale.fx();
-					editorTransformScl[1] = editorEditTransform.Scale.fy();
-					editorTransformScl[2] = editorEditTransform.Scale.fz();
+					//materialWindow = true;
 				}
-				ImGui::SameLine();
-				if (ImGui::Button(string(string("destroy ") + engine->getEntityWithIndex(i)->entName).c_str())) {
-					engine->killEntity(engine->getEntityWithIndex(i));
-					selectedEntityEngine = nullptr;
+
+				if (ImGui::MenuItem("Network Test")) {
+					//netWindow = true;
 				}
-				ImGui::PopID();
+				ImGui::EndMenu();
 			}
-			ImGui::End();
-			//EXPLORER WINDOW END
-
-			//TRANSFORM WINDOW
-			ImGui::SetNextWindowPos(ImVec2(display_w - 450, display_h - 300));
-			ImGui::SetNextWindowSize(ImVec2(450, 300));
-			if (selectedEntityEngine == nullptr) {
-				ImGui::Begin("Transform", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-			}
-
-			if (selectedEntityEngine != nullptr) {
-				ImGui::Begin(string(string("Transform ") + selectedEntityEngine->entName).c_str(), &isEditor, ImGuiWindowFlags_NoMove);
-				ImGui::Text("Location");
-				ImGui::PushItemWidth(360);
-				ImGui::DragFloat3("Location", editorTransformLoc,0.1f);
-				ImGui::PushItemWidth(360);
-				ImGui::Text("Rotation");
-				ImGui::DragFloat3("Rotation", editorTransformRot,2.0f);
-				ImGui::PushItemWidth(360);
-				ImGui::Text("Scale");
-				ImGui::DragFloat3("Scale", editorTransformScl, 0.1f);
-			}
-			ImGui::End();
-			//TRANSFORM WINDOW END
-
-			//MAP WINDOW
-			ImGui::SetNextWindowSize(ImVec2(display_w, 80));
-			ImGui::SetNextWindowPos(ImVec2(0, 0));
-			ImGui::Begin("vayRUS3D", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_MenuBar| ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-			if (ImGui::BeginMenuBar()) {
-				if (ImGui::BeginMenu("File")) {
-					if (ImGui::MenuItem("Save Game")) {
-						engine->saveGame(std::string(inptmappth));
-					}
-					if (ImGui::MenuItem("Save Map")) {
-						engine->saveCurrentMap(std::string(inptmappth));
-					}					
-					if (ImGui::MenuItem("Open Game")) {
-						engine->loadGame(std::string(inptmappth));
-					}
-					ImGui::EndMenu();
-				}
-
-				if (ImGui::BeginMenu("Create")) {
-					if (ImGui::MenuItem("Material Creator")) {
-
-						materialWindow = true;
-					}
-
-					if (ImGui::MenuItem("Network Test")) {
-						netWindow = true;
-					}
-					ImGui::EndMenu();
-				}
-				ImGui::EndMenuBar();
-			}
-			ImGui::PushItemWidth(200);
-			ImGui::InputText("path", inptmappth, 100);
-			ImGui::SameLine();
-			
-			ImGui::End();
-			if (materialWindow) {
-				ImGui::Begin("Material Creation", &materialWindow, ImGuiWindowFlags_NoCollapse);
-
-
-				ImGui::InputText("path", inptmatpth,100);
-				ImGui::InputText("Texture Path", mattexpth, 100);
-				ImGui::InputText("Normal Path", matnormpth,100);
-				ImGui::DragFloat("Specular", &matspec, 0.01);
-				ImGui::Selectable("Lit Render", &matlitrndr);
-				
-				if (ImGui::Button("save material")&& string(inptmatpth) != "") {
-					Material saving;
-					saving.colorTextPath = mattexpth;
-					saving.normalMapPath = matnormpth;
-					saving.litRender = matlitrndr;
-					saving.specularStrength = matspec;
-					engine->loadedMaterials[inptmatpth] = saving;
-					saving.saveMaterial(inptmatpth);
-					materialWindow = false;
-				}
-
-				ImGui::End();
-			}
-
-			//MAP WINDOW END
-
-			//nameing menu
-			ImGui::Begin("Input", &nameingWind,ImGuiWindowFlags_NoCollapse);
-			ImGui::PushItemWidth(200);
-			if (ImGui::InputText("Input", nameinpt, 100, ImGuiInputTextFlags_EnterReturnsTrue)) {
-				nameingWind = false;
-				cout << "opsfdpkgd";
-			}
-			ImGui::End();
-
-			//nameing menu END
-		
-			//ASSET WINDOW
-			ImGui::SetNextWindowSize(ImVec2(display_w-450, 300));
-			ImGui::SetNextWindowPos(ImVec2(0, display_h - 300));
-			ImGui::Begin("Asset Explorer", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
-
-			ImGui::Columns(getBiggestDiv(display_w - 450, 110), "Assets",false);
-				int im = 0;
-				bool sl = false;
-
-				Material chngMat;
-
-				if (ImGui::BeginPopupContextItem("Operations"))
-				{
-					if (ImGui::MenuItem("Rename"))
-					{
-							nameingWind = true;
-					}
-					ImGui::EndPopup();
-				}
-
-				for (auto it = engine->loadedMaterials.begin(); it != engine->loadedMaterials.end(); ++it) {
-
-					Material mat = it->second;
-
-					std::string prntnm = it->first;
-					prntnm.append(".UMAT");
-					ImGui::Image((ImTextureID)mtrthumbTex, ImVec2(100, 100));
-					if (ImGui::Selectable(prntnm.c_str(), &sl)) {
-
-						//bruhh
-					}
-
-					if (!nameingWind) {
-
-					}
-
-					if (ImGui::IsItemHovered()) {
-						ImGui::SetTooltip("(i)Material");
-					}
-					if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(GLFW_MOUSE_BUTTON_RIGHT)) {
-						chngMat = mat;
-						ImGui::OpenPopup("Operations");
-					}
-					ImGui::NextColumn();
-					if ((im + 1) % 3 != 0) {
-						ImGui::Spacing();
-					}
-					im++;
-				}
-				ImGui::Columns(1);
-
-
-			/*
-			if (ImGui::BeginTable("Material Assets", 11)) {//table sýkýntý sil sonra
-				int im = 0;
-				ImGui::TableNextRow();
-				for (auto it = engine->loadedMaterials.begin(); it != engine->loadedMaterials.end(); ++it) {
-					Material mat = it->second;
-					if (im == 11) {
-						ImGui::TableNextRow();
-						im == 0;
-					}
-					
-					
-
-
-					ImGui::Image((ImTextureID)mtrthumbTex, ImVec2(100, 100));
-					std::string prntnm = it->first;
-					prntnm.append(".UMAT");
-					ImGui::Text(prntnm.c_str());
-					im++;
-				}
-			}
-			ImGui::EndTable();
-			*/
-			ImGui::End();
-			//ASSET WINDOW END
-
+			ImGui::EndMenuBar();
 		}
-		//editor UI end
+		//ImGui::PushItemWidth(200);
+		//ImGui::InputText("path", inptmappth, 100);
+		//ImGui::SameLine();
 
-		//NET WINDOW
-		if (netWindow) {
-			ImGui::Begin("Connect To Server", &netWindow, ImGuiWindowFlags_NoCollapse);
+		ImGui::End();
 
-			ImGui::Text("CONNECT:");
-			ImGui::InputText("IP", toConnectIP_UIChar, 150, ImGuiInputTextFlags_EnterReturnsTrue);
-			ImGui::InputText("PORT", toConnectIPPORT_UIChar, 150, ImGuiInputTextFlags_EnterReturnsTrue);
-			if (ImGui::Button("CONNECT")) {
-				memcpy(toConnectIP_UIChar, "127.0.0.1", 9);
-				memcpy(toConnectIPPORT_UIChar, "80", 2);
-				netSys->setToConnectIPAddr(std::string(toConnectIP_UIChar), std::string(toConnectIPPORT_UIChar));
-				memset(toConnectIP_UIChar, 0, 150);
-				memset(toConnectIPPORT_UIChar, 0, 150);
-				netSys->connectToServer();
-			}
-			ImGui::End();
+		//MAP WINDOW END
 
-			ImGui::Begin("Host a Server", &netWindow, ImGuiWindowFlags_NoCollapse);
+	//editor UI end
 
-			ImGui::Text("Host:");
-			//ImGui::InputText("PORT", toConnectIPPORT_UIChar, 150, ImGuiInputTextFlags_EnterReturnsTrue);
-			if (ImGui::Button("Host")) {
-				netSys->startServer();
-			}
-			ImGui::End();
-		}
-		//NET WINDOW END
-		if (engine->isServer && engine->isInServer) {
-			netTest->func_test_input.test = "im tstsr!";
-			netSys->connectionRequest();
-			netSys->sendRecvToClient();
-		}
-		if (!engine->isServer && engine->isInServer) {
-			netSys->sendRecvToServer();
-			netTest2->run_noticed_funcs();
-		}
+#endif // ENGINE_BUILD
 
-
+	// ImGui render
 		ImGui::EndFrame();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-		
-		if (selectedEntityEngine != nullptr) {
-			editorEditTransform.Location.x = editorTransformLoc[0];
-			editorEditTransform.Location.y = editorTransformLoc[1];
-			editorEditTransform.Location.z = editorTransformLoc[2];
 
-			editorEditTransform.Rotation.roll = editorTransformRot[0];
-			editorEditTransform.Rotation.pitch = editorTransformRot[1];
-			editorEditTransform.Rotation.yaw = editorTransformRot[2];
-
-			editorEditTransform.Scale.x = editorTransformScl[0];
-			editorEditTransform.Scale.y = editorTransformScl[1];
-			editorEditTransform.Scale.z = editorTransformScl[2];
-
-			selectedEntityEngine->transform = editorEditTransform;
-		}
-
+		// render end stuff
 		glfwGetFramebufferSize(window, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
 		UreTechEngine::UreTechEngineClass::displayWidth = display_w;

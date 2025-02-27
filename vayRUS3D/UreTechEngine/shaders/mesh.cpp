@@ -68,7 +68,7 @@ mesh::mesh(vertexArrayObject* _p_Vao, Material _mat)
 	PlayerRef= UreTechEngine::UreTechEngineClass::getEngine()->getPlayer();
 	textManager = TextureManager::getInstance();
 	if (textManager == nullptr) {
-		UreTechEngine::EngineConsole::consoleError("(Mesh): Failed to use texture system!", UreTechEngine::EngineConsole::ERROR_FATAL);
+		UreTechEngine::EngineConsole::log("(Mesh): Failed to use texture system!", UreTechEngine::EngineConsole::ERROR_FATAL);
 	}
 	shaderProg = UreTechEngine::UreTechEngineClass::getEngine()->getShaderProgram();
 }

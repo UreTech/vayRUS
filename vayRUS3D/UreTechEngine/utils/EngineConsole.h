@@ -2,6 +2,7 @@
 #define errOut_h
 #include<stdio.h>
 #include <string>
+
 namespace UreTechEngine {
 	class EngineConsole {
 	public:
@@ -12,8 +13,9 @@ namespace UreTechEngine {
 			WARN_NORMAL,
 			WARN_CAN_CAUSE_ERROR,
 			INFO_NORMAL,
+			DEBUG,
 		};
-		static void consoleError(std::string _errMsg,t_error errTyp);
+		static void log(std::string logMessage,t_error logType);
 	private:
 		static void forceToExit();
 		EngineConsole();

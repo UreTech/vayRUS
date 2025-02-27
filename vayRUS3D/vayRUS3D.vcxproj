@@ -254,6 +254,7 @@
     <ClInclude Include="include\GLFW\include\GLFW\glfw3native.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\stb_image.h" />
+    <ClInclude Include="UreTechEngine\config.h" />
     <ClInclude Include="UreTechEngine\EngineBase.h" />
     <ClInclude Include="UreTechEngine\entity\entity.h" />
     <ClInclude Include="UreTechEngine\network\network.h" />

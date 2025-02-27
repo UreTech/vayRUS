@@ -18,5 +18,5 @@ void MyPlayerPawn::begin()
 	Material myMat;
 	myMat.colorText = text;
 	this->entityMesh = MeshManager::getInstance()->importMeshFbx("content/Meshs/defaultCapsule.obj", myMat);
-	UreTechEngine::EngineConsole::consoleError("oldu brom!", UreTechEngine::EngineConsole::INFO_NORMAL);
+	UreTechEngine::EngineConsole::log("oldu brom!", UreTechEngine::EngineConsole::INFO_NORMAL);
 }

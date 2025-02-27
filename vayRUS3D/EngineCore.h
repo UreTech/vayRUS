@@ -2,6 +2,8 @@
 #include<../UreTechEngine/shaders/vertexStructs.hpp>
 #include<../UreTechEngine/EngineBase.h>
 
+#include<../UreTechEngine/config.h>
+
 #include<../UreTechEngine/player/player.h>
 #include<../UreTechEngine/entity/entity.h>
 

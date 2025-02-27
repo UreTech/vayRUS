@@ -20,10 +20,10 @@ void Material::saveMaterial(std::string savePath)
 	if (matf.is_open()) {
 		matf << std::setw(4) << mat << std::endl;
 		matf.close();
-		EngineConsole::consoleError("material saved as " + savePath + ".UMAT", EngineConsole::INFO_NORMAL);
+		EngineConsole::log("material saved as " + savePath + ".UMAT", EngineConsole::INFO_NORMAL);
 	}
 	else {
-		EngineConsole::consoleError("can not save the material!", EngineConsole::WARN_NORMAL);
+		EngineConsole::log("can not save the material!", EngineConsole::WARN_NORMAL);
 	}
 }
 

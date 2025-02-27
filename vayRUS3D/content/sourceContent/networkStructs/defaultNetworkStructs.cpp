@@ -2,9 +2,9 @@
 
 void func_rep_Test(char* input) {
 	func_rep_Test_input_struct* inputData = (func_rep_Test_input_struct*)input;
-	EngineConsole::consoleError("(Network Replication)[DEBUG]: Now replicating...", EngineConsole::INFO_NORMAL);
-	EngineConsole::consoleError("(Network Replication)[DEBUG]:" + std::string(inputData->test), EngineConsole::INFO_NORMAL);
-	EngineConsole::consoleError("(Network Replication)[DEBUG]:" + std::to_string(inputData->test_val0), EngineConsole::INFO_NORMAL);
+	EngineConsole::log("(Network Replication)[DEBUG]: Now replicating...", EngineConsole::INFO_NORMAL);
+	EngineConsole::log("(Network Replication)[DEBUG]:" + std::string(inputData->test), EngineConsole::INFO_NORMAL);
+	EngineConsole::log("(Network Replication)[DEBUG]:" + std::to_string(inputData->test_val0), EngineConsole::INFO_NORMAL);
 }
 
 networkReplicationStruct::networkReplicationStruct()
@@ -24,10 +24,10 @@ void networkReplicationStruct::run_noticed_funcs()
 	for (int i = 0; i < network_max_func_per_tick; i++) {
 		if (_netSys->rep_func_map.find(func_notify[i]) != _netSys->rep_func_map.end()) {
 			_netSys->rep_func_map[func_notify[i]]((char*)_netSys->rep_func_inputs[func_notify[i]]);
-			EngineConsole::consoleError("(Network Replication): Replicating function:" + std::string(func_notify[i]), EngineConsole::ERROR_NORMAL);
+			EngineConsole::log("(Network Replication): Replicating function:" + std::string(func_notify[i]), EngineConsole::ERROR_NORMAL);
 		}
 		else {
-			EngineConsole::consoleError("(Network Replication): Can not find this replicate function:" + std::string(func_notify[i]), EngineConsole::ERROR_NORMAL);
+			EngineConsole::log("(Network Replication): Can not find this replicate function:" + std::string(func_notify[i]), EngineConsole::ERROR_NORMAL);
 		}
 	}
 }
