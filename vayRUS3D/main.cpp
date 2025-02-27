@@ -112,6 +112,64 @@ void enableANSI() {
 	SetConsoleMode(hOut, dwMode);
 }
 
+std::vector<std::string> parseWith(std::string str, char c) {
+	std::vector<std::string> res;
+	std::string block;
+	for (uint64_t i = 0; i < str.size(); i++) {
+		if (str[i] != c) {
+			block.push_back(str[i]);
+		}
+		else {
+			res.push_back(block);
+			block = "";
+		}
+	}
+	res.push_back(block);
+	return res;
+}
+
+typedef std::vector<std::string> conArgs;
+
+typedef void (*conFunc)(conArgs);
+
+struct commandStruct {
+	std::string commandName = "";
+	conFunc func = nullptr;
+	commandStruct(std::string _commandName, conFunc _func) {
+		commandName = _commandName;
+		func = _func;
+	}
+};
+
+std::vector<commandStruct> conFuncs;
+
+void executeCommand(std::string commandLine) {
+	conArgs args = parseWith(commandLine, ' ');
+	std::string command = args[0];
+	args.erase(args.begin());
+	for (uint64_t i = 0; i < conFuncs.size(); i++) {
+		if (command == conFuncs[i].commandName) {
+			conFuncs[i].func(args);
+			return;
+		}
+	}
+	EngineConsole::log("Invalid command", EngineConsole::ERROR_NORMAL);
+}
+
+void con_command_quit(conArgs args) {
+	EngineConsole::log("Quiting...", EngineConsole::INFO_NORMAL);
+	exit(0);
+}
+
+void con_command_info(conArgs args) {
+	EngineConsole::log(FULL_ENGINE_DESCRIPTION, EngineConsole::INFO_NORMAL);
+}
+
+void initCommands() {
+	conFuncs.push_back(commandStruct("quit", con_command_quit));
+	conFuncs.push_back(commandStruct("info", con_command_info));
+}
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	// start external console
 	if (USE_EXTERNAL_CONSOLE) {
@@ -127,6 +185,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (engine == nullptr) {
 		EngineConsole::log("ENGINE ERROR (0x01)", EngineConsole::ERROR_FATAL);
 	}
+
+	initCommands();// init main commands
 
 	// get widow and set callback funcs
 	GLFWwindow* window = engine->getWindow();
@@ -320,10 +380,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				ImGui::SetScrollHereY(1.0f);
 			ImGui::EndChild();
 
-			ImGui::InputText("Command", consoleInputBuffer, ImGui_Max_InputChars, ImGuiInputTextFlags_EnterReturnsTrue);
-			if (ImGui::IsItemActivated()) {
+			if (ImGui::InputText("Command", consoleInputBuffer, ImGui_Max_InputChars, ImGuiInputTextFlags_EnterReturnsTrue)) {
 				std::string conInputStr(consoleInputBuffer); // string saved
-
+				executeCommand(conInputStr);
 				consoleInputBuffer[0] = '\0'; // Cleared after bruh
 			}
 
