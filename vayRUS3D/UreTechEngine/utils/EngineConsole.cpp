@@ -1,4 +1,7 @@
-#include<../EngineCore.h>
+#include<../UreTechEngine/utils/string/string.h>
+#include "EngineConsole.h"
+#include <../EngineCore.h>
+
 #include <string>
 #include <iostream>
 #include<conio.h>
@@ -29,16 +32,16 @@ namespace UreTechEngine {
 #define BRIGHT_CYAN    "\033[96m"
 #define BRIGHT_WHITE   "\033[97m"
 
-std::vector<conMessage> UreTechEngine::EngineConsole::messages = {};
+UreTechEngine::dArray<conMessage> UreTechEngine::EngineConsole::messages = {};
 
-void UreTechEngine::EngineConsole::log(std::string logMessage, t_error logType)
+void UreTechEngine::EngineConsole::log(UreTechEngine::uStr logMessage, t_error logType)
 {
-	std::wstring a = L"(!)FATAL ERROR:" + std::wstring(logMessage.begin(), logMessage.end());
 	conMessage msg;
+	std::wstring a;
 	switch (logType)
 	{
 	case UreTechEngine::EngineConsole::ERROR_ERROR:
-		cout << "(" << BLUE << "?" << RESET << ")[" << BLUE << "UNKNOWN ERROR" << RESET << "] " << logMessage << endl;
+		cout << "(" << BLUE << "?" << RESET << ")[" << BLUE << "UNKNOWN ERROR" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(?)[UNKNOWN ERROR] " + logMessage;
 		msg.color[0] = 0;
 		msg.color[1] = 0;
@@ -46,17 +49,18 @@ void UreTechEngine::EngineConsole::log(std::string logMessage, t_error logType)
 		EngineConsole::messages.push_back(msg);
 		break;
 	case UreTechEngine::EngineConsole::ERROR_FATAL:
-		cout << "("<< RED << "!" << RESET <<")[" << RED << "FATAL ERROR" << RESET << "] " << logMessage << endl;
+		cout << "("<< RED << "!" << RESET <<")[" << RED << "FATAL ERROR" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(!)[FATAL ERROR] " + logMessage;
 		msg.color[0] = 1.0f;
 		msg.color[1] = 0;
 		msg.color[2] = 0;
 		EngineConsole::messages.push_back(msg);
+		a = L"(!)FATAL ERROR:" + std::wstring(logMessage.data(), logMessage.data() + logMessage.lenght());
 		MessageBox(NULL, a.c_str(), L"Internal Engine ERROR!", MB_ICONERROR);
 		forceToExit();
 		break;
 	case UreTechEngine::EngineConsole::ERROR_NORMAL:
-		cout << "(" << RED << "i" << RESET << ")[" << RED << "ERROR" << RESET << "] " << logMessage << endl;
+		cout << "(" << RED << "i" << RESET << ")[" << RED << "ERROR" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(i)[ERROR] " + logMessage;
 		msg.color[0] = 1.0f;
 		msg.color[1] = 0;
@@ -64,7 +68,7 @@ void UreTechEngine::EngineConsole::log(std::string logMessage, t_error logType)
 		EngineConsole::messages.push_back(msg);
 		break;
 	case UreTechEngine::EngineConsole::WARN_NORMAL:
-		cout << "(" << BRIGHT_YELLOW << "i" << RESET << ")[" << BRIGHT_YELLOW << "WARN" << RESET << "] " << logMessage << endl;
+		cout << "(" << BRIGHT_YELLOW << "i" << RESET << ")[" << BRIGHT_YELLOW << "WARN" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(i)[WARN] " + logMessage;
 		msg.color[0] = 1.0f;
 		msg.color[1] = 1.0f;
@@ -72,7 +76,7 @@ void UreTechEngine::EngineConsole::log(std::string logMessage, t_error logType)
 		EngineConsole::messages.push_back(msg);
 		break;
 	case UreTechEngine::EngineConsole::WARN_CAN_CAUSE_ERROR:
-		cout << "(" << YELLOW << "!" << RESET << ")[" << YELLOW << "WARN" << RESET << "] " << logMessage << endl;
+		cout << "(" << YELLOW << "!" << RESET << ")[" << YELLOW << "WARN" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(!)[WARN] " + logMessage;
 		msg.color[0] = 1.0f;
 		msg.color[1] = 0.5f;
@@ -80,7 +84,7 @@ void UreTechEngine::EngineConsole::log(std::string logMessage, t_error logType)
 		EngineConsole::messages.push_back(msg);
 		break;
 	case UreTechEngine::EngineConsole::INFO_NORMAL:
-		cout << "(" << GREEN << "i" << RESET << ")[" << GREEN << "INFO" << RESET << "] " << logMessage << endl;
+		cout << "(" << GREEN << "i" << RESET << ")[" << GREEN << "INFO" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(i)[INFO] " + logMessage;
 		msg.color[0] = 0;
 		msg.color[1] = 1.0f;
@@ -88,7 +92,7 @@ void UreTechEngine::EngineConsole::log(std::string logMessage, t_error logType)
 		EngineConsole::messages.push_back(msg);
 		break;
 	case UreTechEngine::EngineConsole::DEBUG:
-		cout << "(" << MAGENTA << "D" << RESET << ")[" << MAGENTA << "DEBUG" << RESET << "] " << logMessage << endl;
+		cout << "(" << MAGENTA << "D" << RESET << ")[" << MAGENTA << "DEBUG" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(D)[DEBUG] " + logMessage;
 		msg.color[0] = 1.0f;
 		msg.color[1] = 0;
@@ -112,3 +116,14 @@ void UreTechEngine::EngineConsole::forceToExit()
 	while (getch()!= 27) {}
 	exit(-1);
 }
+
+void strLogFunc(const char* _msgStr, bool isFatal) {
+	if (isFatal) {
+		UreTechEngine::EngineConsole::log(_msgStr, UreTechEngine::EngineConsole::t_error::ERROR_FATAL);
+	}
+	else {
+		UreTechEngine::EngineConsole::log(_msgStr, UreTechEngine::EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
+	}
+}
+
+uStrConsoleLogFuncPtr UreTechEngine::strLog = strLogFunc;

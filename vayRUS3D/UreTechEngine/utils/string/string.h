@@ -1,9 +1,12 @@
-#ifndef vayRUS_string_hpp
-#define vayRUS_string_hpp
-#include <../EngineCore.h>
-namespace UreTechEngine {
+#pragma once
+#include <string>
+#include <iostream>
 
-	class string {
+namespace UreTechEngine {
+	class EngineConsole;
+	typedef void (*uStrConsoleLogFuncPtr)(const char*, bool);
+	extern uStrConsoleLogFuncPtr strLog;
+	class uStr {
 	private:
 		char* s_data = nullptr;// data
 		size_t s_size = 0;// data size
@@ -11,72 +14,126 @@ namespace UreTechEngine {
 		// cstr to string
 		void assign_cstr_type(const char* _cstr) {
 			this->clear();
-			while (_cstr != '\0') {
-				this->push_back(*_cstr);
-				_cstr++;
-			}
+			size_t strLen = strlen(_cstr);
+			this->assign((char*)_cstr, strLen);
 		}
 	public:
 		bool haltWithFatalError = false;
 
-		
-
 		// c1
-		string() {
+		uStr() {
 			// null array
 		}
 
 		// c2
-		string(size_t _size) {
-			s_data = new char[_size];
+		uStr(char* _str, size_t _lenght) {
+			this->assign(_str, _lenght);
 		}
 
 		// c3
-		string(char* _str, size_t _lenght) {
-			s_data = new char[_lenght];
-			s_size = _lenght;
-			memcpy(s_data, _str, _lenght * sizeof(char));
+		uStr(const char* _str) {
+			assign_cstr_type(_str);
 		}
 
 		// c4
-		string(const char* _str) {
-			
+		uStr(std::string _str) {
+			assign_cstr_type(_str.c_str());
 		}
 
 		// index operator
 		char& operator[](size_t index) {
-			return *(s_data + index);
+			return s_data[index];
+		}
+
+		// string cmp operator
+		bool operator==(const uStr& other) {
+			if (this->s_size == other.s_size) {
+				return memcmp(this->s_data, other.s_data, this->s_size);
+			}
+			else {
+				return false;
+			}
 		}
 
 		// copies data into it self
-		string& operator=(string other) {
+		uStr& operator=(uStr other) {
 			this->assign(other.s_data, other.s_size);
 			return *this;
 		}
 
 		// copies data into it self
-		string operator=(const char* _str) {
+		uStr operator=(const char* _str) {
 			this->assign_cstr_type(_str);
 			return *this;
 		}
 
+		// append operator
+		uStr& operator+=(uStr other) {
+			this->append(other);
+			return *this;
+		}
+
+		// string + string add operator
+		uStr& operator+(uStr other) {
+			uStr tmp(*this);
+			tmp.append(other);
+			return tmp;
+		}
+
+		// string + std::string add operator
+		uStr& operator+(std::string other) {
+			uStr tmp(*this);
+			tmp.append(uStr(other.c_str()));
+			return tmp;
+		}
+
+		// string + char add operator
+		uStr& operator+(const char* other)const {
+			uStr tmp(*this);
+			tmp.append(uStr(other));
+			return tmp;
+		}
+
+		// char + string add operator
+		friend uStr operator+(const char* other0, uStr& other1) {
+			uStr tmp(other0);
+			tmp.append(other1);
+			return tmp;
+		}
+
+		// std::string + string add operator
+		friend uStr operator+(std::string& other0, uStr& other1) {
+			uStr tmp(other0.c_str());
+			tmp.append(other1);
+			return tmp;
+		}
+
+		// std::string convertion
 		operator std::string() {
 			return std::string(s_data, s_size);
+		}
+
+		// is empty
+		bool empty() {
+			return s_size == 0;
 		}
 
 		// pushes new item to end
 		size_t push_back(char c) {
 			s_size++;
-			s_data = (char*)realloc(s_data, s_size * sizeof(char));
-			if (s_data == nullptr) {
+			char* new_s_data = (char*)realloc(s_data, s_size * sizeof(char));
+			if (new_s_data == nullptr) {
 				if (haltWithFatalError) {
-					EngineConsole::log("string: Invalid resize operation in 'push_back'! (FATAL STRING)", EngineConsole::t_error::ERROR_FATAL);
+					strLog("string: Invalid resize operation in 'push_back'! (FATAL STRING)", true);
 				}
 				else {
-					EngineConsole::log("string: Invalid resize operation in 'push_back'! (CAN CAUSE FATAL ERROR)", EngineConsole::t_error::ERROR_NORMAL);
+					strLog("string: Invalid resize operation in 'push_back'! (CAN CAUSE FATAL ERROR)", false);
 				}
 			}
-			this[s_size - 1] = c;
+			else {
+				s_data = new_s_data;
+			}
+			s_data[s_size - 1] = c;
 			return this->s_size - 1;
 		}
 
@@ -86,8 +143,8 @@ namespace UreTechEngine {
 				return *(s_data + i);
 			}
 			else {
-				EngineConsole::log("string: Invalid array access in 'at'!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
-				return;
+				strLog("string: Invalid array access in 'at'!", false);
+				return *(s_data);// maybe ultra unsafe
 			}
 		}
 
@@ -97,18 +154,26 @@ namespace UreTechEngine {
 			s_data = (char*)realloc(s_data, s_size * sizeof(char));
 			if (s_data == nullptr) {
 				if (haltWithFatalError) {
-					EngineConsole::log("string: Invalid resize operation in 'pop_back'! (FATAL STRING)", EngineConsole::t_error::ERROR_FATAL);
+					strLog("string: Invalid resize operation in 'pop_back'! (FATAL STRING)", true);
 				}
 				else {
-					EngineConsole::log("string: Invalid resize operation in 'pop_back'! (CAN CAUSE FATAL ERROR)", EngineConsole::t_error::ERROR_NORMAL);
+					strLog("string: Invalid resize operation in 'pop_back'! (CAN CAUSE FATAL ERROR)", false);
 				}
 			}
+		}
+
+		// += operator
+		uStr& append(const uStr& other) {
+			for (uint64_t i = 0; i < other.s_size; i++) {
+				this->push_back(other.s_data[i]);
+			}
+			return *this;
 		}
 
 		// removes index
 		bool remove(size_t index) {
 			if (index >= s_size) {
-				EngineConsole::log("string: Invalid array access in 'remove'!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
+				strLog("string: Invalid array access in 'remove'!", false);
 				return false;
 			}
 
@@ -126,10 +191,11 @@ namespace UreTechEngine {
 			s_data = (char*)realloc(s_data, size * sizeof(char));
 			if (s_data == nullptr) {
 				if (haltWithFatalError) {
-					EngineConsole::log("string: Invalid resize operation in 'resize'! (FATAL STRING)", EngineConsole::t_error::ERROR_FATAL);
+					strLog("string: Invalid resize operation in 'resize'! (FATAL STRING)", true);
+
 				}
 				else {
-					EngineConsole::log("string: Invalid resize operation in 'resize'! (CAN CAUSE FATAL ERROR)", EngineConsole::t_error::ERROR_NORMAL);
+					strLog("string: Invalid resize operation in 'resize'! (CAN CAUSE FATAL ERROR)", false);
 				}
 			}
 		}
@@ -149,7 +215,7 @@ namespace UreTechEngine {
 				this->at(i2) = tmp;
 			}
 			else {
-				EngineConsole::log("string: Invalid array access in 'swap'!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
+				strLog("string: Invalid array access in 'swap'!", false);
 			}
 		}
 
@@ -163,11 +229,25 @@ namespace UreTechEngine {
 			return s_size;
 		}
 
+		//converts c string type (\0)
+		const char* c_str() {
+			char* buf = (char*)malloc(s_size + 1);
+			buf[s_size] = '\0';
+			memcpy(buf, s_data, s_size);
+			return buf;
+		}
+
+		//converts to std::string
+		std::string std_str() {
+			return std::string(this->s_data, this->s_size);
+		}
+
 		// copies data into it self
 		void assign(char* data, size_t size) {
 			this->clear();
-			s_data = new char[size+1];
+			s_data = new char[size];
 			memcpy((void*)s_data, data, size * sizeof(char));
+			s_size = size;
 		}
 
 		// sets direct pointer to data
@@ -178,4 +258,4 @@ namespace UreTechEngine {
 		}
 	};
 }
-#endif // !vayRUS_string_hpp
+#define uStr_def_end

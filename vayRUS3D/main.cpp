@@ -279,6 +279,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->entityConstructors.push_back(entConstructStruct("vayrusCube"  , []() { return dynamic_cast<entity*>(new vayrusCube()); }));
 	engine->entityConstructors.push_back(entConstructStruct("MyPlayerPawn", []() { return dynamic_cast<entity*>(new MyPlayerPawn()); }));
 	engInf = "Engine initiated.";
+
+
+	UreTechEngine::uStr a = "BRUH MESSAGE";
+
+	UreTechEngine::EngineConsole::log(a, UreTechEngine::EngineConsole::t_error::DEBUG);
 	// main loop
 	while (!glfwWindowShouldClose(window)) {
 		// render stuff
@@ -325,7 +330,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		//editor gui
 #ifdef ENGINE_BUILD
-		UreTechEngine::string a = "sadas";
 		//MENU WINDOW
 		ImGui::SetNextWindowSize(ImVec2(display_w, 70));
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -486,8 +490,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
 			ImGui::BeginChild("ConsoleOutput", ImVec2(0, windowSize.y - 100), true);
-			for (const auto& item : EngineConsole::messages) {
-				ImGui::TextColored(ImVec4(item.color[0], item.color[1], item.color[2], 1.0f), item.msg.c_str());
+			for (uint64_t i = 0; i < EngineConsole::messages.size(); i++) {
+				ImGui::TextColored(ImVec4(EngineConsole::messages[i].color[0], EngineConsole::messages[i].color[1], EngineConsole::messages[i].color[2], 1.0f), EngineConsole::messages[i].msg.c_str());
 			}
 
 			if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())

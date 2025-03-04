@@ -1,7 +1,9 @@
 #ifndef Array_hpp
 #define Array_hpp
 #include <initializer_list>
+#include <../UreTechEngine/utils/string/string.h>
 namespace UreTechEngine {
+	extern uStrConsoleLogFuncPtr strLog;
 	template<typename arrType>
 	class dArray {
 	private:
@@ -55,13 +57,13 @@ namespace UreTechEngine {
 			a_data = (arrType*)realloc(a_data, a_size * sizeof(arrType));
 			if (a_data == nullptr) {
 				if (haltWithFatalError) {
-					EngineConsole::log("Array: Invalid resize operation in 'push_back'! (FATAL ARRAY)", EngineConsole::t_error::ERROR_FATAL);
+					strLog("Array: Invalid resize operation in 'push_back'! (FATAL ARRAY)", true);
 				}
 				else {
-					EngineConsole::log("Array: Invalid resize operation in 'push_back'! (CAN CAUSE FATAL ERROR)", EngineConsole::t_error::ERROR_NORMAL);
+					strLog("Array: Invalid resize operation in 'push_back'! (CAN CAUSE FATAL ERROR)", false);
 				}
 			}
-			this[a_size - 1] = v;// type must have operator=
+			memcpy(&a_data[a_size - 1], &v, sizeof(arrType));
 			return this->a_size - 1;
 		}
 
@@ -71,8 +73,8 @@ namespace UreTechEngine {
 				return *(a_data + i);
 			}
 			else {
-				EngineConsole::log("Array: Invalid array access in 'at'!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
-				return;
+				strLog("Array: Invalid array access in 'at'!", false);
+				return *(a_data);// maybe ultra unsafe too :_(
 			}
 		}
 
@@ -82,10 +84,10 @@ namespace UreTechEngine {
 			a_data = (arrType*)realloc(a_data, a_size * sizeof(arrType));
 			if (a_data == nullptr) {
 				if (haltWithFatalError) {
-					EngineConsole::log("Array: Invalid resize operation in 'pop_back'! (FATAL ARRAY)", EngineConsole::t_error::ERROR_FATAL);
+					strLog("Array: Invalid resize operation in 'pop_back'! (FATAL ARRAY)", true);
 				}
 				else {
-					EngineConsole::log("Array: Invalid resize operation in 'pop_back'! (CAN CAUSE FATAL ERROR)", EngineConsole::t_error::ERROR_NORMAL);
+					strLog("Array: Invalid resize operation in 'pop_back'! (CAN CAUSE FATAL ERROR)", false);
 				}
 			}
 		}
@@ -93,7 +95,7 @@ namespace UreTechEngine {
 		// removes index
 		bool remove(size_t index) {
 			if (index >= a_size) {
-				EngineConsole::log("Array: Invalid array access in 'remove'!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
+				strLog("Array: Invalid array access in 'remove'!", false);
 				return false;
 			}
 
@@ -111,10 +113,10 @@ namespace UreTechEngine {
 			a_data = (arrType*)realloc(a_data, size * sizeof(arrType));
 			if (a_data == nullptr) {
 				if (haltWithFatalError) {
-					EngineConsole::log("Array: Invalid resize operation in 'resize'! (FATAL ARRAY)", EngineConsole::t_error::ERROR_FATAL);
+					strLog("Array: Invalid resize operation in 'resize'! (FATAL ARRAY)", true);
 				}
 				else {
-					EngineConsole::log("Array: Invalid resize operation in 'resize'! (CAN CAUSE FATAL ERROR)", EngineConsole::t_error::ERROR_NORMAL);
+					strLog("Array: Invalid resize operation in 'resize'! (CAN CAUSE FATAL ERROR)", false);
 				}
 			}
 		}
@@ -134,7 +136,7 @@ namespace UreTechEngine {
 				this->at(i2) = tmp;
 			}
 			else {
-				EngineConsole::log("Array: Invalid array access in 'swap'!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
+				strLog("Array: Invalid array access in 'swap'!", false);
 			}
 		}
 

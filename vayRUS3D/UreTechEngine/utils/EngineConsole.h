@@ -1,11 +1,11 @@
-#ifndef errOut_h
-#define errOut_h
+#pragma once
 #include<stdio.h>
-#include <string>
+#include <../EngineCore.h>
+using namespace UreTechEngine;
 
 namespace UreTechEngine {
 	struct conMessage {
-		std::string msg;// message
+		UreTechEngine::uStr msg;// message
 		float color[3];// rgb color
 	};
 
@@ -20,12 +20,10 @@ namespace UreTechEngine {
 			INFO_NORMAL,
 			DEBUG,
 		};
-		static void log(std::string logMessage,t_error logType);
-		static std::vector<conMessage> messages;
+		static void log(UreTechEngine::uStr logMessage,t_error logType);
+		static UreTechEngine::dArray<conMessage> messages;
 	private:
 		static void forceToExit();
 		EngineConsole();
 	};
 }
-
-#endif // !errOut_h
