@@ -7,7 +7,6 @@
 using namespace UreTechEngine;
 class MyPlayerPawn : public UreTechEngine::entity{
 public:
-	std::string entClassName = "MyPlayerPawn";
 	MyPlayerPawn(void);
 	MyPlayerPawn(mesh* _mesh, std::string _entName, UreTechEngine::Transform3D trnsfrm = Transform3D(vector3(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f), vector3(1.0f, 1.0f, 1.0f)));
 	void begin();

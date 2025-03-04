@@ -1,5 +1,5 @@
 #include"defaultNetworkStructs.h"
-
+/*
 void func_rep_Test(char* input) {
 	func_rep_Test_input_struct* inputData = (func_rep_Test_input_struct*)input;
 	EngineConsole::log("(Network Replication)[DEBUG]: Now replicating...", EngineConsole::INFO_NORMAL);
@@ -31,3 +31,4 @@ void networkReplicationStruct::run_noticed_funcs()
 		}
 	}
 }
+*/

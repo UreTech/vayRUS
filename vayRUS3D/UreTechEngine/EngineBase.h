@@ -2,10 +2,7 @@
 #ifndef enginebase_h
 #define enginebase_h
 
-#include"../UreTechEngine/utils/baseVector.h"
-#include"../UreTechEngine/player/player.h"
-#include"../UreTechEngine/shaders/shaderSystem.hpp"
-#include"../UreTechEngine/entity/entity.h"
+#include <../EngineCore.h>
 
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
@@ -20,6 +17,26 @@ class Material;
 namespace UreTechEngine {
 	class entity;
 	class Player;
+
+	typedef entity* (*entConstructFunc)();
+
+	struct entConstructStruct {
+		std::string entClassName;
+		entConstructFunc constructor = nullptr;
+		entConstructStruct() {
+			entClassName = "ERROR CLASS TYPE";
+			constructor = nullptr;
+		}
+		entConstructStruct(std::string _entClassName , entConstructFunc _constructor ) {
+			entClassName = _entClassName;
+			constructor = _constructor;
+		}
+		entConstructStruct& operator=(const entConstructStruct& other) {
+			this->entClassName = other.entClassName;
+			this->constructor = other.constructor;
+		}
+	};
+
 	class UreTechEngineClass {
 	typedef unsigned char texture;
 	public:
@@ -31,6 +48,8 @@ namespace UreTechEngine {
 		std::map<std::string, Material> loadedMaterials;
 		std::map<std::string, texture> loadedTextures;
 
+		dArray<entConstructStruct> entityConstructors;
+
 		ShaderProgram* mainShaderProgram = nullptr;
 		static UreTechEngineClass* c_Instance;
 		static UreTechEngineClass* getEngine();
@@ -41,7 +60,9 @@ namespace UreTechEngine {
 		entity* spawnEntity(entity* _toSpawn);
 		entity* getEntityWithIndex(unsigned int _index);
 		entity* getEntityWithName(std::string _entName);
+		entity* getEntityWithID(uint64_t id);
 		bool isThisEntNameAvilable(std::string _entName);
+		bool isValidEntity(uint64_t id);
 		unsigned int getCountOfEntity();
 
 		void engineTick();
@@ -58,8 +79,8 @@ namespace UreTechEngine {
 		nlohmann::json mapJson;
 		Player* defPlayer = nullptr;
 		GLFWwindow* window = nullptr;
-		unsigned int countOfEntity = 0;
-		entity* sceneEntities[1000];
+		uint64_t lastID = 0x000a0000; // BEGIN_ENT_ID define
+		dArray<entity*> sceneEntities;
 		unsigned int netPlayersCount = 0;
 		Player* netPlayers[5];
 		UreTechEngineClass();

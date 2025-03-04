@@ -2,6 +2,8 @@
 
 //upk standalone API
 
+using namespace UreTechEngine;
+
 std::string extractRootFromLine(const std::string& line) {
 	const std::string prefix = "-root=";
 	if (line.find(prefix) == 0) {
@@ -26,7 +28,7 @@ void parseFilePath(const std::string& filePath, std::string& fileName, std::stri
 	fileName = filePath.substr(0, P_pos);
 
 	if (P_pos != std::string::npos) {
-		size_t end = min(filePath.length(), min(L_pos, S_pos));
+		size_t end = std::min(filePath.length(), std::min(L_pos, S_pos));
 		P_param = filePath.substr(P_pos + 2, end - P_pos - 2);
 	}
 
@@ -160,7 +162,7 @@ std::string findAndReplace(std::string str, char toRemove, char toReplace) {
 	return str;
 }
 
-UreTechEngine::Buffer upk_API::get(std::string path)
+Buffer upk_API::get(std::string path)
 {
 	path = findAndReplace(path, '/', '\\');
 	std::string removingPart = rootPath + "";

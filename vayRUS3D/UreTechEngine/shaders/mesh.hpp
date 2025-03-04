@@ -1,14 +1,7 @@
 #ifndef mesh_hpp
 #define mesh_hpp
-#include"../UreTechEngine/shaders/shaderSystem.hpp"
-#include"../UreTechEngine/shaders/vertexArray.hpp"
-#include"../UreTechEngine/shaders/vertexStructs.hpp"
-#include"../UreTechEngine/shaders/textureSystem.hpp"
-#include"../UreTechEngine/utils/baseVector.h"
-#include"../UreTechEngine/player/player.h"
-#include"../shaders/Material.h"
-#include"../utils/Array.hpp"
-
+#include<../EngineCore.h>
+#include<../UreTechEngine/shaders/Material.h>
 #include<vector>
 
 

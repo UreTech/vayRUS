@@ -1,5 +1,9 @@
 #pragma once
 #include"includes.h"
+#include <../EngineCore.h>
+#include <string>
+
+using namespace UreTechEngine;
 
 struct fileStruct {
 	std::string directory = "";

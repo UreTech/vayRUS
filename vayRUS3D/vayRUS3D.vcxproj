@@ -226,7 +226,6 @@
     <ClCompile Include="UreTechEngine\upk\fileSystem.cpp" />
     <ClCompile Include="UreTechEngine\upk\misc.cpp" />
     <ClCompile Include="UreTechEngine\upk\upk.cpp" />
-    <ClCompile Include="UreTechEngine\utils\Array.cpp" />
     <ClCompile Include="UreTechEngine\utils\EngineConsole.cpp" />
     <ClCompile Include="UreTechEngine\utils\util.cpp" />
   </ItemGroup>
@@ -278,9 +277,10 @@
     <ClInclude Include="UreTechEngine\upk\upk.h" />
     <ClInclude Include="UreTechEngine\upk\upkConfig.h" />
     <ClInclude Include="UreTechEngine\utils\3DMath.hpp" />
-    <ClInclude Include="UreTechEngine\utils\Array.hpp" />
+    <ClInclude Include="UreTechEngine\utils\dArray.h" />
     <ClInclude Include="UreTechEngine\utils\baseVector.h" />
     <ClInclude Include="UreTechEngine\utils\EngineConsole.h" />
+    <ClInclude Include="UreTechEngine\utils\string\string.h" />
     <ClInclude Include="UreTechEngine\utils\util.hpp" />
   </ItemGroup>
   <ItemGroup>

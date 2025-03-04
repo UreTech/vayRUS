@@ -6,6 +6,8 @@
 #include<glm/gtc/matrix_transform.hpp>
 #include<../EngineCore.h>
 
+using namespace UreTechEngine;
+
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::c_Instance = nullptr;
 unsigned int UreTechEngine::UreTechEngineClass::displayWidth = 1000;
 unsigned int UreTechEngine::UreTechEngineClass::displayHeight = 1000;
@@ -110,12 +112,13 @@ GLFWwindow* UreTechEngine::UreTechEngineClass::getWindow()
 
 UreTechEngine::entity* UreTechEngine::UreTechEngineClass::spawnEntity(entity* _toSpawn)
 {
+	_toSpawn->entityID = lastID;
+	lastID++;
 	_toSpawn->init(this);
 	_toSpawn->begin();
-	UreTechEngine::EngineConsole::log(_toSpawn->entName, UreTechEngine::EngineConsole::INFO_NORMAL);
-	sceneEntities[countOfEntity] = _toSpawn;
-	countOfEntity++;
-	return sceneEntities[countOfEntity-1];
+	UreTechEngine::EngineConsole::log(_toSpawn->entName + " spawned with id " + intToHex(_toSpawn->entityID), UreTechEngine::EngineConsole::INFO_NORMAL);
+	sceneEntities.push_back(_toSpawn);
+	return sceneEntities[sceneEntities.size() - 1];
 }
 
 UreTechEngine::entity* UreTechEngine::UreTechEngineClass::getEntityWithIndex(unsigned int _index)
@@ -125,8 +128,18 @@ UreTechEngine::entity* UreTechEngine::UreTechEngineClass::getEntityWithIndex(uns
 
 UreTechEngine::entity* UreTechEngine::UreTechEngineClass::getEntityWithName(std::string _entName)
 {
-	for (int i = 0; i < countOfEntity; i++) {
+	for (int i = 0; i < sceneEntities.size(); i++) {
 		if (sceneEntities[i]->entName == _entName) {
+			return sceneEntities[i];
+		}
+	}
+	return nullptr;
+}
+
+entity* UreTechEngine::UreTechEngineClass::getEntityWithID(uint64_t id)
+{
+	for (uint64_t i = 0; i < sceneEntities.size(); i++) {
+		if (sceneEntities[i]->entityID == id) {
 			return sceneEntities[i];
 		}
 	}
@@ -135,7 +148,7 @@ UreTechEngine::entity* UreTechEngine::UreTechEngineClass::getEntityWithName(std:
 
 bool UreTechEngine::UreTechEngineClass::isThisEntNameAvilable(std::string _entName)
 {
-	for (int i = 0; i < countOfEntity; i++) {
+	for (int i = 0; i < sceneEntities.size(); i++) {
 		if (sceneEntities[i]->entName == _entName) {
 			return false;
 		}
@@ -143,47 +156,58 @@ bool UreTechEngine::UreTechEngineClass::isThisEntNameAvilable(std::string _entNa
 	return true;
 }
 
-unsigned int UreTechEngine::UreTechEngineClass::getCountOfEntity()
+bool UreTechEngine::UreTechEngineClass::isValidEntity(uint64_t id)
 {
-	return countOfEntity;
-}
-
-void UreTechEngine::UreTechEngineClass::engineTick()
-{
-	for (int i = 0; i < countOfEntity; i++) {
-		glm::vec4 a(1.0f, 1.0f, 1.0f, 1.0f);
-		mainShaderProgram->setVec4("uLightColor", a);
-		sceneEntities[i]->updateVisual();
-	}
-}
-
-bool UreTechEngine::UreTechEngineClass::killEntity(entity* _ent)
-{
-	for (int i = 0; i < countOfEntity; i++) {
-		if (sceneEntities[i] == _ent) {
-			free(sceneEntities[i]);
-			for (int c = i; c < 8; ++c) {
-				sceneEntities[c] = sceneEntities[c + 1];
-			}
-			countOfEntity--;
+	for (uint64_t i = 0; i < sceneEntities.size(); i++) {
+		if (sceneEntities[i]->entityID == id) {
 			return true;
 		}
 	}
 	return false;
 }
 
-bool UreTechEngine::UreTechEngineClass::killEntity(std::string _entName)
+unsigned int UreTechEngine::UreTechEngineClass::getCountOfEntity()
 {
-	for (int i = 0; i < countOfEntity; i++) {
-		if (sceneEntities[i]->entName == _entName) {
+	return sceneEntities.size();
+}
+
+void UreTechEngine::UreTechEngineClass::engineTick()
+{
+	for (int i = 0; i < sceneEntities.size(); i++) {
+		if (sceneEntities[i] != nullptr) {
+			glm::vec4 a(1.0f, 1.0f, 1.0f, 1.0f);
+			mainShaderProgram->setVec4("uLightColor", a);
+			sceneEntities[i]->updateVisual();
+		}
+		else {
+			EngineConsole::log("Invalid entity update!", EngineConsole::ERROR_NORMAL);
+		}
+	}
+}
+
+bool UreTechEngine::UreTechEngineClass::killEntity(entity* _ent)
+{
+	for (uint64_t i = 0; i < sceneEntities.size(); i++) {
+		if (_ent == sceneEntities[i]) {
 			free(sceneEntities[i]);
-			for (int c = i; c < 8; ++c) {
-				sceneEntities[c] = sceneEntities[c + 1];
-			}
-			countOfEntity--;
+			sceneEntities.remove(i);
 			return true;
 		}
 	}
+	EngineConsole::log("Invalid entity kill attemp!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
+	return false;
+}
+
+bool UreTechEngine::UreTechEngineClass::killEntity(std::string _entName)
+{
+	for (uint64_t i = 0; i < sceneEntities.size(); i++) {
+		if (_entName == sceneEntities[i]->entName) {
+			free(sceneEntities[i]);
+			sceneEntities.remove(i);
+			return true;
+		}
+	}
+	EngineConsole::log("Invalid entity kill attemp!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
 	return false;
 }
 
@@ -191,7 +215,7 @@ void UreTechEngine::UreTechEngineClass::saveCurrentMap(std::string mapPath)
 {
 	nlohmann::json map;
 
-	for (int i = 0; i < this->countOfEntity; i++) {
+	for (int i = 0; i < this->sceneEntities.size(); i++) {
 		map["OBJECT" + std::to_string(i)]["CLASS"] = sceneEntities[i]->entClassName;
 		map["OBJECT" + std::to_string(i)]["NAME"] = sceneEntities[i]->entName;
 		map["OBJECT" + std::to_string(i)]["CUSTOM"] = sceneEntities[i]->entCustomSets;

@@ -3,6 +3,7 @@
 
 MyPlayerPawn::MyPlayerPawn(void)
 {
+	entClassName = "MyPlayerPawn";
 }
 
 MyPlayerPawn::MyPlayerPawn(mesh* _mesh, std::string _entName, UreTechEngine::Transform3D trnsfrm)

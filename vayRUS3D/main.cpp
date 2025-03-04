@@ -22,6 +22,7 @@
 
 #include <thread>
 #include<map>
+#include "UreTechEngine/utils/string/string.h"
 
 #define fpslock 60
 int display_w, display_h;
@@ -37,12 +38,25 @@ float editorCamPos[3] = { 0.0f,0.0f,0.0f };
 //change this later
 bool rClickL = false;
 
-#define ImGui_Max_InputChars 256
+#define ImGui_Max_InputChars 512
 // editor/game ImGui Vars
 bool consoleWindow = false;
 bool autoScroll = true;
 char consoleInputBuffer[ImGui_Max_InputChars];
 
+std::string engInf;
+
+bool sceneExplorer = false;
+entID entToModify = -1;
+
+bool entityTableWindow = false;
+
+bool modifyWindow = false;
+
+bool renameEntWindow = false;
+char renameEntInputBuffer[ImGui_Max_InputChars];
+
+//bruh
 UreTechEngine::Player* player = nullptr;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -192,8 +206,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	GLFWwindow* window = engine->getWindow();
 	engine->setKeyCallBackFunc(key_callback, mouse_button_callback);
 
-	// init net system
-	UreTechEngine::networkSystem* netSys = UreTechEngine::networkSystem::getNetworkSystem();
+	// init net system un used for now
+	//UreTechEngine::networkSystem* netSys = UreTechEngine::networkSystem::getNetworkSystem(); 
 
 	player = engine->getPlayer();// store player pointer localy
 	TextureManager* textureManager = TextureManager::getInstance();// create texture manager
@@ -261,10 +275,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	texture materialThumbTexture = textureManager->loadTextureFromFile("materialThumb.png", false);
 
 	// spawnables
-	std::map<std::string, std::function<entity* ()>> spawnables;
-	spawnables["entity"] = []() { return new entity(); };
-	spawnables["vayrusCube"] = []() { return new vayrusCube(); };
-
+	engine->entityConstructors.push_back(entConstructStruct("entity"      , []() { return new entity(); }));
+	engine->entityConstructors.push_back(entConstructStruct("vayrusCube"  , []() { return dynamic_cast<entity*>(new vayrusCube()); }));
+	engine->entityConstructors.push_back(entConstructStruct("MyPlayerPawn", []() { return dynamic_cast<entity*>(new MyPlayerPawn()); }));
+	engInf = "Engine initiated.";
 	// main loop
 	while (!glfwWindowShouldClose(window)) {
 		// render stuff
@@ -311,11 +325,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		//editor gui
 #ifdef ENGINE_BUILD
-
-		//MAP WINDOW
-		ImGui::SetNextWindowSize(ImVec2(display_w, 80));
+		UreTechEngine::string a = "sadas";
+		//MENU WINDOW
+		ImGui::SetNextWindowSize(ImVec2(display_w, 70));
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::Begin("vayRUS3D", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+		ImGui::Begin("vayRUS 3D", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
 		if (ImGui::BeginMenuBar()) {
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Save Game")) {
@@ -344,21 +358,121 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 			if (ImGui::BeginMenu("Engine")) {
 				if (ImGui::MenuItem("Console")) {
-
 					consoleWindow = !consoleWindow;
+					engInf = "Open console";
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Window")) {
+				if (ImGui::MenuItem("Scene Explorer")) {
+
+					sceneExplorer = !sceneExplorer;
+				}
+				if (ImGui::MenuItem("Entity Table")) {
+
+					entityTableWindow = !entityTableWindow;
 				}
 				ImGui::EndMenu();
 			}
 			ImGui::EndMenuBar();
 		}
-		//ImGui::PushItemWidth(200);
-		//ImGui::InputText("path", inptmappth, 100);
-		//ImGui::SameLine();
-
+		ImGui::Text(engInf.c_str());
 		ImGui::End();
+		//MENU WINDOW END
 
-		//MAP WINDOW END
+		//SCENE EXPLORER WINDOW
+		if (sceneExplorer) {
+			ImGui::Begin("Scene Explorer", &sceneExplorer);
+			ImVec2 windowSize = ImGui::GetWindowSize();
+			ImGui::BeginChild("ENTITIES", ImVec2(0, windowSize.y - 100), true);
+			for (uint64_t i = 0; i < engine->getCountOfEntity(); i++) {
+				ImGui::PushID(i);
+				std::string bruh = engine->getEntityWithIndex(i)->entClassName;
+				ImGui::Text(std::string(engine->getEntityWithIndex(i)->entClassName + ": " + engine->getEntityWithIndex(i)->entName).c_str());
+				ImGui::SameLine();
+				ImGui::SetCursorPosX(windowSize.x - 180);
+				if (ImGui::Button("Delete",ImVec2(70,20))) {
+					engine->killEntity(engine->getEntityWithIndex(i));
+					engInf = "Delete entity";
+				}
+				ImGui::SetCursorPosX(windowSize.x - 90);
+				ImGui::SameLine();
+				if (ImGui::Button("Modify", ImVec2(70, 20))) {
+					entToModify = engine->getEntityWithIndex(i)->entityID;
+					modifyWindow = true;
+					engInf = "Modify entity";
+				}
+				ImGui::PopID();
+			}
+			ImGui::EndChild();
+			ImGui::End();
+		}
+		//SCENE EXPLORER WINDOW END
 
+		//ENTITY TABLE WINDOW
+		if (entityTableWindow) {
+			ImGui::Begin("Entity Table", &entityTableWindow);
+			ImVec2 windowSize = ImGui::GetWindowSize();
+			ImGui::BeginChild("ENTITIES", ImVec2(0, windowSize.y - 100), true);
+			for (uint64_t i = 0; i < engine->entityConstructors.size(); i++) {
+				ImGui::Text(engine->entityConstructors[i].entClassName.c_str());
+				ImGui::SameLine();
+				ImGui::SetCursorPosX(windowSize.x - 90);
+				ImGui::PushID(i);
+				if (ImGui::Button("ADD",ImVec2(70,20))) {
+					engine->spawnEntity(engine->entityConstructors[i].constructor());
+					engInf = "Add entity";
+				}
+				ImGui::PopID();
+			}
+			ImGui::EndChild();
+			ImGui::End();
+		}
+		//ENTITY TABLE WINDOW END
+
+		//MODIFY WINDOW
+		if (modifyWindow) {
+			ImGui::Begin("Modify", &modifyWindow);
+			if (engine->isValidEntity(entToModify)) {
+				ImGui::Text(std::string("Entity --> " + engine->getEntityWithID(entToModify)->entName).c_str());
+				ImGui::DragScalarN("Location", ImGuiDataType_Double, &engine->getEntityWithID(entToModify)->transform.Location, 3);
+				ImGui::DragScalarN("Rotation", ImGuiDataType_Double, &engine->getEntityWithID(entToModify)->transform.Rotation, 3);
+				ImGui::DragScalarN("Scale", ImGuiDataType_Double, &engine->getEntityWithID(entToModify)->transform.Scale, 3);
+				if (ImGui::Button("Rename Entity")){
+					renameEntWindow = true;
+					engInf = "Rename entity";
+				}
+			}
+			else {
+				ImGui::Text("Invalid entity.");
+			}
+			ImGui::End();
+		}
+		//MODIFY WINDOW END
+
+		//RENAME WINDOW
+		if (renameEntWindow) {
+			ImGui::Begin("Rename Entity", &modifyWindow);
+			if (engine->isValidEntity(entToModify)) {
+				ImGui::Text(std::string("Entity --> " + engine->getEntityWithID(entToModify)->entName).c_str());
+				ImGui::InputText("New Name", renameEntInputBuffer, ImGui_Max_InputChars);
+				ImGui::SameLine();
+				if (ImGui::Button("Apply")) {
+					std::string newName(renameEntInputBuffer, ImGui_Max_InputChars);
+					engine->getEntityWithID(entToModify)->entName = newName;
+					renameEntInputBuffer[0] = '\0';
+					renameEntWindow = false;
+					engInf = "Entity renamed";
+				}
+			}
+			else {
+				ImGui::Text("Invalid entity.");
+			}
+			ImGui::End();
+		}
+		//RENAME WINDOW END
+		
 	//editor UI end
 
 #endif // ENGINE_BUILD

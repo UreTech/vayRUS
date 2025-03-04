@@ -6,7 +6,6 @@
 
 class vayrusCube :public UreTechEngine::entity {
 public:
-	std::string entClassName = "vayrusCube";
 	vayrusCube(void);
 	void begin();
 	void tick();

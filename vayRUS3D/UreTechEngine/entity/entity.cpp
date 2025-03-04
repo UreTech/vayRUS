@@ -22,6 +22,12 @@ void UreTechEngine::entity::tick()
 {
 }
 
+UreTechEngine::entity::entity()
+{
+	entClassName = "entity";
+	entityMesh = nullptr;
+}
+
 UreTechEngine::entity::entity(UreTechEngine::vector3& location,UreTechEngine::Rotation& rot,UreTechEngine::vector3& scale, mesh* _mesh, std::string _entName)
 	{
 		transform.Location = location;

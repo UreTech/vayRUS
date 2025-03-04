@@ -5,6 +5,7 @@
 #include <Windows.h>
 
 using namespace std;
+using namespace UreTechEngine;
 namespace UreTechEngine {
 	class EngineConsole;
 }

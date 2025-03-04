@@ -49,6 +49,9 @@
     <Filter Include="Source Files\UreTechEngine\upk">
       <UniqueIdentifier>{e59f7e18-29c1-44f5-871e-efac5c58d75a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\UreTechEngine\utils\string">
+      <UniqueIdentifier>{fc0126ef-da09-4680-a4c6-6465359835f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp">
@@ -106,9 +109,6 @@
       <Filter>Source Files\UreTechEngine\shaders</Filter>
     </ClCompile>
     <ClCompile Include="UreTechEngine\utils\EngineConsole.cpp">
-      <Filter>Source Files\UreTechEngine\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="UreTechEngine\utils\Array.cpp">
       <Filter>Source Files\UreTechEngine\utils</Filter>
     </ClCompile>
     <ClCompile Include="UreTechEngine\EngineBase.cpp">
@@ -212,7 +212,7 @@
     <ClInclude Include="UreTechEngine\shaders\mesh.hpp">
       <Filter>Source Files\UreTechEngine\shaders</Filter>
     </ClInclude>
-    <ClInclude Include="UreTechEngine\utils\Array.hpp">
+    <ClInclude Include="UreTechEngine\utils\dArray.h">
       <Filter>Source Files\UreTechEngine\utils</Filter>
     </ClInclude>
     <ClInclude Include="UreTechEngine\utils\baseVector.h">
@@ -265,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="UreTechEngine\upk\fileSystem.h">
       <Filter>Source Files\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="UreTechEngine\utils\string\string.h">
+      <Filter>Source Files\UreTechEngine\utils\string</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

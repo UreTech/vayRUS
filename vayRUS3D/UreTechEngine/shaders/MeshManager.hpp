@@ -1,6 +1,8 @@
 #ifndef meshManager_hpp
 #define meshManager_hpp
 #include"mesh.hpp"
+class mesh;
+class Material;
 class MeshManager {
 public:
 	static MeshManager* getInstance();

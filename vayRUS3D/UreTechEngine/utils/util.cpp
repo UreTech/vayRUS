@@ -15,3 +15,11 @@ int UreTechEngine::getBiggestDiv(int divided, int dividing)
 
     return result;
 }
+
+std::string UreTechEngine::intToHex(int value)
+{
+    std::stringstream ss;
+    ss << "0x" << std::hex << std::uppercase << value;
+    return ss.str();
+}
+

@@ -1,10 +1,11 @@
 #ifndef textureSystem_hpp
 #define textureSystem_hpp
+
 #include<string>
 #include<map>
-#include"../UreTechEngine/shaders/shaderSystem.hpp"
-#include "../EngineBase.h"
-#include"../utils/Array.hpp"
+#include<vector>
+#include<../EngineCore.h>
+
 typedef unsigned int texture;
 
 namespace UreTechEngine {

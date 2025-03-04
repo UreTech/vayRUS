@@ -1,4 +1,3 @@
-#pragma once
 #include<../UreTechEngine/shaders/vertexStructs.hpp>
 #include<../UreTechEngine/EngineBase.h>
 
@@ -17,7 +16,9 @@
 #include<../UreTechEngine/shaders/Material.h>
 
 #include<../UreTechEngine/utils/3DMath.hpp>
-#include<../UreTechEngine/utils/Array.hpp>
+#include<../UreTechEngine/utils/dArray.h>
+#include<../UreTechEngine/utils/string.h>
+#include<../UreTechEngine/utils/baseVector.h>
 #include<../UreTechEngine/utils/util.hpp>
 
 
