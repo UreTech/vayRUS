@@ -18,6 +18,6 @@ void MyPlayerPawn::begin()
 	texture text = TextureManager::getInstance()->loadTextureFromFile("content/Textures/susTM.png");
 	Material myMat;
 	myMat.colorText = text;
-	this->entityMesh = MeshManager::getInstance()->importMeshFbx("content/Meshs/defaultCapsule.obj", myMat);
+	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("content/Meshs/defaultCapsule.obj", myMat);
 	UreTechEngine::EngineConsole::log("oldu brom!", UreTechEngine::EngineConsole::INFO_NORMAL);
 }

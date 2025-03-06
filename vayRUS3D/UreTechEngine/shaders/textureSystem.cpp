@@ -38,7 +38,14 @@ unsigned int TextureManager::loadTextureFromFile(std::string fileName, bool texA
 
 		stbi_set_flip_vertically_on_load(1);
 
-		unsigned char* textureAddr = stbi_load(fileName.c_str(), &t_width, &t_height, &nrChannels, 4);
+		unsigned char* textureAddr = 0;
+		if (UPK_ENABLE_PACKAGE_SYSTEM) {
+			Buffer icoTmpBuf = engine->package->get(fileName);
+			textureAddr = stbi_load_from_memory(icoTmpBuf.pointer, icoTmpBuf.size, &t_width, &t_height, &nrChannels, 4);
+		}
+		else {
+			textureAddr = stbi_load(fileName.c_str(), &t_width, &t_height, &nrChannels, 4);
+		}
 
 		unsigned int texture;
 		glGenTextures(1, &texture);

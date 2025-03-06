@@ -5,7 +5,7 @@ using namespace UreTechEngine;
 
 namespace UreTechEngine {
 	struct conMessage {
-		UreTechEngine::uStr msg;// message
+		UreTechEngine::string msg;// message
 		float color[3];// rgb color
 	};
 
@@ -20,7 +20,7 @@ namespace UreTechEngine {
 			INFO_NORMAL,
 			DEBUG,
 		};
-		static void log(UreTechEngine::uStr logMessage,t_error logType);
+		static void log(UreTechEngine::string logMessage,t_error logType);
 		static UreTechEngine::dArray<conMessage> messages;
 	private:
 		static void forceToExit();

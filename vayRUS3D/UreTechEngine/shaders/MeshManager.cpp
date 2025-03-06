@@ -20,8 +20,9 @@ MeshManager* MeshManager::getInstance()
 	}
 }
 
-mesh* MeshManager::importMeshFbx(std::string filePath,Material _mat)
+mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat)
 {
+
 	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices,finalIndices;
 	std::vector< glm::vec3 > temp_vertices;
 	std::vector< glm::vec2 > temp_uvs;

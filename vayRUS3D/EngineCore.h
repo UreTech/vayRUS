@@ -20,6 +20,8 @@
 #include<../UreTechEngine/shaders/mesh.hpp>
 #include<../UreTechEngine/shaders/Material.h>
 
+#include<../UreTechEngine/upk/upk.h>
+
 #include<../UreTechEngine/utils/3DMath.hpp>
 #include<../UreTechEngine/utils/util.hpp>
 

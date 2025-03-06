@@ -12,7 +12,7 @@ void vayrusCube::begin() {
 	texture tex = TextureManager::getInstance()->loadTextureFromFile("textures/text2.png");
 	Material mymat;
 	mymat.colorText = tex;
-	entityMesh = MeshManager::getInstance()->importMeshFbx("a.obj",mymat);
+	entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("a.obj",mymat);
 	entName = "vayrusCube";
 	UreTechEngine::EngineConsole::log("vayRUS cube Spawned!", UreTechEngine::EngineConsole::t_error::DEBUG);
 }

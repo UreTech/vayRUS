@@ -7,7 +7,8 @@
 #include <chrono>
 #include <sstream>
 #include <cmath>
-#include <../EngineCore.h>
+#include<../UreTechEngine/utils/util.hpp>
+#include<../UreTechEngine/utils/EngineConsole.h>
 #include"upkConfig.h"
 #include"upk.h"
 #include"fileSystem.h"

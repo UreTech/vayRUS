@@ -199,6 +199,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (engine == nullptr) {
 		EngineConsole::log("ENGINE ERROR (0x01)", EngineConsole::ERROR_FATAL);
 	}
+	if (UPK_ENABLE_PACKAGE_SYSTEM) {
+		engine->init_upk_system(UPK_PACKAGE_PATH,UPK_PACKAGE_ENC_KEY);
+	}
 
 	initCommands();// init main commands
 
@@ -215,8 +218,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// change window icon
 	int icoW, icoH, icoC;
-	unsigned char* icoimg = stbi_load("icon.png", &icoW, &icoH, &icoC, 0);
-	//unsigned char* icoimg = stbi_load_from_memory("content/Textures/icon.png", &icoW, &icoH, &icoC, 0); // used for upk
+	unsigned char* icoimg = nullptr;
+	if (UPK_ENABLE_PACKAGE_SYSTEM) {
+		Buffer icoTmpBuf = engine->package->get("/engine/res/icon.png");
+		icoimg = stbi_load_from_memory(icoTmpBuf.pointer, icoTmpBuf.size, &icoW, &icoH, &icoC, 0);
+	}
+	else {
+		icoimg = stbi_load("icon.png", &icoW, &icoH, &icoC, 0);
+	}
 	GLFWimage icon[1];
 	icon[0].width = icoW;
 	icon[0].height = icoH;
@@ -279,11 +288,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->entityConstructors.push_back(entConstructStruct("vayrusCube"  , []() { return dynamic_cast<entity*>(new vayrusCube()); }));
 	engine->entityConstructors.push_back(entConstructStruct("MyPlayerPawn", []() { return dynamic_cast<entity*>(new MyPlayerPawn()); }));
 	engInf = "Engine initiated.";
+	UreTechEngine::EngineConsole::log("Engine successfuly initiated!", UreTechEngine::EngineConsole::t_error::INFO_NORMAL);
 
+	UreTechEngine::string a = "BRUH MESSAGE";//string test bruh
+	UreTechEngine::EngineConsole::log("(i)[INFO] " + a, UreTechEngine::EngineConsole::t_error::DEBUG);
 
-	UreTechEngine::uStr a = "BRUH MESSAGE";
+	for (uint64_t i = 0; i < EngineConsole::messages.size(); i++) {
+		std::cout << EngineConsole::messages[i].msg.data() << "\n";
+	}
 
-	UreTechEngine::EngineConsole::log(a, UreTechEngine::EngineConsole::t_error::DEBUG);
 	// main loop
 	while (!glfwWindowShouldClose(window)) {
 		// render stuff
@@ -392,7 +405,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			ImGui::BeginChild("ENTITIES", ImVec2(0, windowSize.y - 100), true);
 			for (uint64_t i = 0; i < engine->getCountOfEntity(); i++) {
 				ImGui::PushID(i);
-				std::string bruh = engine->getEntityWithIndex(i)->entClassName;
 				ImGui::Text(std::string(engine->getEntityWithIndex(i)->entClassName + ": " + engine->getEntityWithIndex(i)->entName).c_str());
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(windowSize.x - 180);
@@ -524,8 +536,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		// render end stuff
 		glfwGetFramebufferSize(window, &display_w, &display_h);
 		glViewport(0, 0, display_w, display_h);
-		UreTechEngine::UreTechEngineClass::displayWidth = display_w;
-		UreTechEngine::UreTechEngineClass::displayHeight = display_h;
+		if (display_w != 0 && display_h != 0) {
+			UreTechEngine::UreTechEngineClass::displayWidth = display_w;
+			UreTechEngine::UreTechEngineClass::displayHeight = display_h;
+			UreTechEngine::UreTechEngineClass::windowMinmized = false;
+		}
+		else {
+			UreTechEngine::UreTechEngineClass::windowMinmized = true;
+		}
 
 		glfwSwapInterval(1);
 		glfwSwapBuffers(window);

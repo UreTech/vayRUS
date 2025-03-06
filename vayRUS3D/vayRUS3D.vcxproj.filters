@@ -141,6 +141,9 @@
     <ClCompile Include="UreTechEngine\upk\upk.cpp">
       <Filter>Source Files\UreTechEngine\upk</Filter>
     </ClCompile>
+    <ClCompile Include="UreTechEngine\utils\string\string.cpp">
+      <Filter>Source Files\UreTechEngine\utils\string</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

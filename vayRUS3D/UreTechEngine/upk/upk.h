@@ -1,7 +1,7 @@
 #pragma once
 #include"includes.h"
-#include <../EngineCore.h>
 #include <string>
+
 
 using namespace UreTechEngine;
 
@@ -28,6 +28,7 @@ public:
 	Buffer get(std::string path);
 	void extractTo(std::string toExtractPath);
 	void setEncryptionKey(std::string key);
+	std::string packageInfo();
 private:
 	std::vector<inPackageFile> allFilesInPackage;
 	std::string rootPath;

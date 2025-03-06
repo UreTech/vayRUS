@@ -63,7 +63,7 @@ namespace UreTechEngine {
 					strLog("Array: Invalid resize operation in 'push_back'! (CAN CAUSE FATAL ERROR)", false);
 				}
 			}
-			memcpy(&a_data[a_size - 1], &v, sizeof(arrType));
+			a_data[a_size - 1] = v;
 			return this->a_size - 1;
 		}
 

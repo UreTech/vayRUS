@@ -11,8 +11,11 @@
 
 #include"nlohmann/json.hpp"
 
+#include<../UreTechEngine/upk/upk.h>
+
 class mesh;
 class Material;
+class upk_API;
 
 namespace UreTechEngine {
 	class entity;
@@ -42,8 +45,13 @@ namespace UreTechEngine {
 	public:
 		static unsigned int displayWidth;
 		static unsigned int displayHeight;
+		static bool windowMinmized;
 		bool isInServer = false;
 		bool isServer = true;
+
+		upk_API* package = nullptr;
+
+		bool useUpkSystem = false;
 
 		std::map<std::string, Material> loadedMaterials;
 		std::map<std::string, texture> loadedTextures;
@@ -70,6 +78,9 @@ namespace UreTechEngine {
 		bool killEntity(entity* _ent);
 		bool killEntity(std::string entName);
 
+		void init_upk_system(string path, string encKey = "NOKEY");
+		upk_API* imp_upk_package(string path, string encKey = "NOKEY");
+
 		void loadMap(std::string mapPath);
 		void saveCurrentMap(std::string mapPath);
 		void saveGame(std::string gamePath);
@@ -81,6 +92,7 @@ namespace UreTechEngine {
 		GLFWwindow* window = nullptr;
 		uint64_t lastID = 0x000a0000; // BEGIN_ENT_ID define
 		dArray<entity*> sceneEntities;
+		dArray<upk_API*> loadedPackages;
 		unsigned int netPlayersCount = 0;
 		Player* netPlayers[5];
 		UreTechEngineClass();

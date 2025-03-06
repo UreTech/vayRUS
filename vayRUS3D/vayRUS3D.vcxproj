@@ -227,6 +227,7 @@
     <ClCompile Include="UreTechEngine\upk\misc.cpp" />
     <ClCompile Include="UreTechEngine\upk\upk.cpp" />
     <ClCompile Include="UreTechEngine\utils\EngineConsole.cpp" />
+    <ClCompile Include="UreTechEngine\utils\string\string.cpp" />
     <ClCompile Include="UreTechEngine\utils\util.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -12,10 +12,10 @@
 //#define debugZeroByteFileOutput //debugs zero byte files output
 
 
-#define upkVersion std::string("upk.version:    1.6 Stable")
+#define upkVersion std::string("upk.version:    1.7 Stable")
 #define upkEncryptorVersion std::string("upk.encryption: basicEncryptor: v1.1")
 #define upkEncryptorModel std::string("upk.encryption.model: encryptor model 1.0X/N")
-#define upkBuild std::string("upk.build:      b.3434")
+#define upkBuild std::string("upk.build:      b.5445")
 
 #define upk_PackagerHeaderTitle std::string("upk.package:")
 #define upk_EncryptorHeaderTitle std::string("upk.encrypt:")

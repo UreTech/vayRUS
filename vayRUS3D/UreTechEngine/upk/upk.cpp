@@ -54,8 +54,11 @@ void upk_API::readAndCreateTree(std::string path)
 
 	//read encrypt or decrypt file
 	UreTechEngine::Buffer hFileBuff = fileSys::readFile(path);
+	if (hFileBuff.pointer == nullptr) {
+		EngineConsole::log(upk_PackagerHeaderTitle + upk_error + "Can not read header file!", EngineConsole::t_error::ERROR_NORMAL);
+		return;
+	}
 	headerLine = std::string((char*)hFileBuff.pointer, hFileBuff.size);
-	//remove_prefix(headerLine, '\n'); dont use that buggy
 
 	//reading header
 	if (headerLine.substr(0, 10) == "-encrypted") {
@@ -233,4 +236,11 @@ void upk_API::extractTo(std::string toExtractPath)
 void upk_API::setEncryptionKey(std::string key)
 {
 	this->encryptionKey = key;
+}
+
+std::string upk_API::packageInfo()
+{
+	std::string res = "upk version: v1.7\n";
+	res += "file: " + this->fileName;
+	return res;
 }
