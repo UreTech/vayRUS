@@ -14,6 +14,11 @@ void UreTechEngine::entity::init(UreTechEngineClass* _ptr)
 	engineRef = _ptr;
 }
 
+void UreTechEngine::entity::print(string message)
+{
+	EngineConsole::log(this->entClassName + ":" + this->entName + "(" +intToHex(this->entityID) + ")-->" + message, EngineConsole::DEBUG);
+}
+
 void UreTechEngine::entity::begin()
 {
 }

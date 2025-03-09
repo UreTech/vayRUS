@@ -24,7 +24,7 @@ namespace UreTechEngine {
 	typedef entity* (*entConstructFunc)();
 
 	struct entConstructStruct {
-		std::string entClassName;
+		string entClassName;
 		entConstructFunc constructor = nullptr;
 		entConstructStruct() {
 			entClassName = "ERROR CLASS TYPE";
@@ -33,10 +33,6 @@ namespace UreTechEngine {
 		entConstructStruct(std::string _entClassName , entConstructFunc _constructor ) {
 			entClassName = _entClassName;
 			constructor = _constructor;
-		}
-		entConstructStruct& operator=(const entConstructStruct& other) {
-			this->entClassName = other.entClassName;
-			this->constructor = other.constructor;
 		}
 	};
 
@@ -76,7 +72,7 @@ namespace UreTechEngine {
 		void engineTick();
 
 		bool killEntity(entity* _ent);
-		bool killEntity(std::string entName);
+		bool killEntity(string entName);
 
 		void init_upk_system(string path, string encKey = "NOKEY");
 		upk_API* imp_upk_package(string path, string encKey = "NOKEY");

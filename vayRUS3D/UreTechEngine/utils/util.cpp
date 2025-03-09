@@ -23,3 +23,28 @@ std::string UreTechEngine::intToHex(int value)
     return ss.str();
 }
 
+//for debug bugs
+
+bool UreTechEngine::isValidPtr(void* ptr)
+{
+#ifdef _DEBUG
+    return !(ptr == nullptr || ptr == (void*)0xcdcdcdcdcdcdcdcd);
+#else
+    return ptr != nullptr;
+#endif // _DEBUG
+}
+
+void* UreTechEngine::safePtr(void* ptr)
+{
+#ifdef _DEBUG
+    if (ptr == (void*)0xcdcdcdcdcdcdcdcd) {
+        return nullptr;
+    }
+    else {
+        return ptr;
+    }
+#else
+    return ptr;
+#endif // _DEBUG
+}
+

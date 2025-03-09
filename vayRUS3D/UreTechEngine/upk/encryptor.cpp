@@ -7,11 +7,13 @@ UreTechEngine::Buffer encryptor::xorEncryptDecrypt(UreTechEngine::Buffer input, 
     size_t keyLength = key.size();
 
     for (size_t i = 0; i < input.size; ++i) {
-        output[i] = *(input.pointer + i) ^ key[i % keyLength];  // Anahtarý döngüsel olarak kullan
+        output[i] = *(input.pointer + i) ^ key[i % keyLength];
     }
     UreTechEngine::Buffer result;
     result.pointer = (uint8_t*)malloc(output.size());
     result.size = output.size();
-    memcpy(result.pointer, output.data(), result.size);
+    if (result.pointer != nullptr) {
+        memcpy(result.pointer, output.data(), result.size);
+    }
     return result;
 }

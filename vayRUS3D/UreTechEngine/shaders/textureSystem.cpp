@@ -30,8 +30,17 @@ TextureManager* TextureManager::getInstance()
 unsigned int TextureManager::loadTextureFromFile(std::string fileName, bool texAntiAlising)
 {
 	unsigned int texID = -1;
-	if (L_TextureMap.count(fileName) != 0) {
-		texID = L_TextureMap[fileName];
+	bool isFound = false;
+	loadedTexture foundOne;
+	for (uint64_t i = 0; i < loadedTexts.size(); i++) {
+		if (loadedTexts[i].texuteLoadName == fileName) {
+			isFound = true;
+			foundOne = loadedTexts[i];
+			break;
+		}
+	}
+	if (isFound) {
+		texID = foundOne.texId;
 	}
 	else {
 		int t_width, t_height, nrChannels;
@@ -66,6 +75,11 @@ unsigned int TextureManager::loadTextureFromFile(std::string fileName, bool texA
 		texID = texture;
 
 		stbi_image_free(textureAddr);
+		if (texID != -1) {
+			foundOne.texuteLoadName = fileName;
+			foundOne.texId = texID;
+			loadedTexts.push_back(foundOne);
+		}
 	}
 	return texID;
 }

@@ -12,6 +12,11 @@ namespace UreTechEngine {
 	class UreTechEngineClass;
 }
 
+struct loadedTexture {
+	UreTechEngine::string texuteLoadName = "NO NAME";
+	texture texId = -1;
+};
+
 class TextureManager{
 
 public:
@@ -26,7 +31,7 @@ private:
 	UreTechEngine::UreTechEngineClass* engine;
 	TextureManager();
 	static TextureManager* c_Instance;
-	std::map<std::string, unsigned int> L_TextureMap;
+	UreTechEngine::dArray<loadedTexture> loadedTexts;
 };
 
 

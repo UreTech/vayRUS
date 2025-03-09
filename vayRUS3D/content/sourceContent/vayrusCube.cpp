@@ -13,8 +13,11 @@ void vayrusCube::begin() {
 	Material mymat;
 	mymat.colorText = tex;
 	entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("a.obj",mymat);
+	if (entityMesh == nullptr) {
+		UreTechEngine::EngineConsole::log("vayRUS cube can not load mesh!", UreTechEngine::EngineConsole::t_error::ERROR_NORMAL);
+	}
 	entName = "vayrusCube";
-	UreTechEngine::EngineConsole::log("vayRUS cube Spawned!", UreTechEngine::EngineConsole::t_error::DEBUG);
+	print("vayRUS cube Spawned!");
 }
 
 void vayrusCube::tick() {

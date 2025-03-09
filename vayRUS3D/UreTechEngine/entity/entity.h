@@ -15,15 +15,16 @@ namespace UreTechEngine {
 	class UreTechEngineClass;
 	class entity {
 	public:
-		std::string entName = "NULL ENTITY";
-		std::string entClassName = "UNDEFINED ENTITY CLASS";
-		std::string entCustomSets = "null";
+		string entName = "NULL ENTITY";
+		string entClassName = "UNDEFINED ENTITY CLASS";
+		string entCustomSets = "null";
 		entID entityID = NULL_ENT_ID;
 		UreTechEngine::Transform3D transform;
 		mesh* entityMesh;
 		UreTechEngineClass* engineRef=nullptr;
 		void updateVisual();
 		void init(UreTechEngineClass* _ptr);
+		void print(string message);
 		virtual void begin();
 		virtual void tick();
 		entity();

@@ -128,9 +128,14 @@ void upk_API::readAndCreateTree(std::string path)
 		if (!(partition.empty() || partition.empty())) {
 			temporal.directory = filePath;
 			//console::print(upk_PackagerHeaderTitle + upk_info, partition);
-			temporal.partition = std::stoull(partition);
-			temporal.locationInPartition = std::stoull(locationInPartition);
-			temporal.fileSize = std::stoull(sizeInStr);
+			try {
+				temporal.partition = std::stoull(partition);
+				temporal.locationInPartition = std::stoull(locationInPartition);
+				temporal.fileSize = std::stoull(sizeInStr);
+			}
+			catch (std::exception e) {
+
+			}
 			allFilesInPackage.push_back(temporal);
 		}
 	}
@@ -206,7 +211,6 @@ Buffer upk_API::get(std::string path)
 			break;
 		}
 		if (isEncrypted) {
-			EngineConsole::log(upk_PackagerHeaderTitle + " Decrypting file inside partition...", EngineConsole::t_error::INFO_NORMAL);
 			UreTechEngine::Buffer decrypted = encryptor::xorEncryptDecrypt(readFileData, encryptionKey);
 			free(readFileData.pointer);
 			readFileData = decrypted;
@@ -225,6 +229,12 @@ Buffer upk_API::get(std::string path)
 	/*if (notFound) {
 		passFileData.pointer = nullptr;
 	}*/
+	if (passFileData.pointer != nullptr) {
+		EngineConsole::log(upk_PackagerHeaderTitle + " File loaded: " + path, EngineConsole::t_error::INFO_NORMAL);
+	}
+	else {
+		EngineConsole::log(upk_PackagerHeaderTitle + upk_error + " Can not open file: " + path, EngineConsole::t_error::ERROR_NORMAL);
+	}
 	return passFileData;
 }
 

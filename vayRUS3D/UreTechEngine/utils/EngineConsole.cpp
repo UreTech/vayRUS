@@ -69,7 +69,7 @@ void UreTechEngine::EngineConsole::log(UreTechEngine::string logMessage, t_error
 		break;
 	case UreTechEngine::EngineConsole::WARN_NORMAL:
 		cout << "(" << BRIGHT_YELLOW << "i" << RESET << ")[" << BRIGHT_YELLOW << "WARN" << RESET << "] " << logMessage.std_str() << endl;
-		msg.msg = new ("(i)[WARN] " + logMessage);
+		msg.msg = "(i)[WARN] " + logMessage;
 		msg.color[0] = 1.0f;
 		msg.color[1] = 1.0f;
 		msg.color[2] = 0;

@@ -54,8 +54,8 @@ namespace UreTechEngine {
 		// pushes new item to end
 		size_t push_back(arrType v) {
 			a_size++;
-			a_data = (arrType*)realloc(a_data, a_size * sizeof(arrType));
-			if (a_data == nullptr) {
+			arrType* new_a_data = (arrType*)realloc(a_data, a_size * sizeof(arrType));
+			if (new_a_data == nullptr) {
 				if (haltWithFatalError) {
 					strLog("Array: Invalid resize operation in 'push_back'! (FATAL ARRAY)", true);
 				}
@@ -63,6 +63,10 @@ namespace UreTechEngine {
 					strLog("Array: Invalid resize operation in 'push_back'! (CAN CAUSE FATAL ERROR)", false);
 				}
 			}
+			else {
+				a_data = new_a_data;
+			}
+			memset(&a_data[a_size - 1], 0, sizeof(arrType));
 			a_data[a_size - 1] = v;
 			return this->a_size - 1;
 		}
@@ -121,10 +125,15 @@ namespace UreTechEngine {
 			}
 		}
 
+		// return is empty
+		bool empty() {
+			return a_size == 0;
+		}
+
 		// clears everything
 		void clear() {
 			a_size = 0;
-			delete[] a_data;
+			delete a_data;
 		}
 
 		// swaps two item

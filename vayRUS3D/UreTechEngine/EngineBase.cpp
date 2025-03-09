@@ -200,7 +200,7 @@ bool UreTechEngine::UreTechEngineClass::killEntity(entity* _ent)
 	return false;
 }
 
-bool UreTechEngine::UreTechEngineClass::killEntity(std::string _entName)
+bool UreTechEngine::UreTechEngineClass::killEntity(string _entName)
 {
 	for (uint64_t i = 0; i < sceneEntities.size(); i++) {
 		if (_entName == sceneEntities[i]->entName) {
@@ -237,9 +237,9 @@ void UreTechEngine::UreTechEngineClass::saveCurrentMap(std::string mapPath)
 	nlohmann::json map;
 
 	for (int i = 0; i < this->sceneEntities.size(); i++) {
-		map["OBJECT" + std::to_string(i)]["CLASS"] = sceneEntities[i]->entClassName;
-		map["OBJECT" + std::to_string(i)]["NAME"] = sceneEntities[i]->entName;
-		map["OBJECT" + std::to_string(i)]["CUSTOM"] = sceneEntities[i]->entCustomSets;
+		map["OBJECT" + std::to_string(i)]["CLASS"] = sceneEntities[i]->entClassName.std_str();
+		map["OBJECT" + std::to_string(i)]["NAME"] = sceneEntities[i]->entName.std_str();
+		map["OBJECT" + std::to_string(i)]["CUSTOM"] = sceneEntities[i]->entCustomSets.std_str();
 
 		map["OBJECT" + std::to_string(i)]["TRANSFORM"]["LOCX"] = sceneEntities[i]->transform.Location.x;
 		map["OBJECT" + std::to_string(i)]["TRANSFORM"]["LOCY"] = sceneEntities[i]->transform.Location.y;

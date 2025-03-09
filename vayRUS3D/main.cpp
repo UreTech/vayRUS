@@ -23,6 +23,8 @@
 #include <thread>
 #include<map>
 #include "UreTechEngine/utils/string/string.h"
+#include <corecrt_io.h>
+#include <fcntl.h>
 
 #define fpslock 60
 int display_w, display_h;
@@ -126,9 +128,9 @@ void enableANSI() {
 	SetConsoleMode(hOut, dwMode);
 }
 
-std::vector<std::string> parseWith(std::string str, char c) {
-	std::vector<std::string> res;
-	std::string block;
+dArray<UreTechEngine::string> parseWith(std::string str, char c) {
+	dArray<UreTechEngine::string> res;
+	UreTechEngine::string block;
 	for (uint64_t i = 0; i < str.size(); i++) {
 		if (str[i] != c) {
 			block.push_back(str[i]);
@@ -142,14 +144,14 @@ std::vector<std::string> parseWith(std::string str, char c) {
 	return res;
 }
 
-typedef std::vector<std::string> conArgs;
+typedef dArray<UreTechEngine::string> conArgs;
 
 typedef void (*conFunc)(conArgs);
 
 struct commandStruct {
-	std::string commandName = "";
+	UreTechEngine::string commandName = "";
 	conFunc func = nullptr;
-	commandStruct(std::string _commandName, conFunc _func) {
+	commandStruct(UreTechEngine::string _commandName, conFunc _func) {
 		commandName = _commandName;
 		func = _func;
 	}
@@ -157,11 +159,10 @@ struct commandStruct {
 
 std::vector<commandStruct> conFuncs;
 
-void executeCommand(std::string commandLine) {
+void executeCommand(UreTechEngine::string commandLine) {
 	conArgs args = parseWith(commandLine, ' ');
-	std::string command = args[0];
-	args.erase(args.begin());
-	for (uint64_t i = 0; i < conFuncs.size(); i++) {
+	UreTechEngine::string command = args[0];
+	for (uint64_t i = 1; i < conFuncs.size(); i++) {
 		if (command == conFuncs[i].commandName) {
 			conFuncs[i].func(args);
 			return;
@@ -179,9 +180,42 @@ void con_command_info(conArgs args) {
 	EngineConsole::log(FULL_ENGINE_DESCRIPTION, EngineConsole::INFO_NORMAL);
 }
 
+void con_command_console(conArgs args) {
+	if (args.size() == 2) {
+		if (args[1] == "free") {
+			HWND hwnd = GetConsoleWindow();
+			ShowWindow(hwnd, SW_HIDE);
+			FILE* f;
+			freopen_s(&f, "NUL", "w", stdout);
+			freopen_s(&f, "NUL", "r", stdin);
+			freopen_s(&f, "NUL", "w", stderr);
+			FreeConsole();
+			EngineConsole::log("External console closed.", EngineConsole::INFO_NORMAL);
+		}
+		else if (args[1] == "alloc") {
+			HWND hwnd = GetConsoleWindow();
+			ShowWindow(hwnd, SW_SHOW);
+			AllocConsole();  
+			FILE* f;
+			freopen_s(&f, "CONOUT$", "w", stdout);
+			freopen_s(&f, "CONIN$", "r", stdin);
+			freopen_s(&f, "CONOUT$", "w", stderr);
+			enableANSI();
+			EngineConsole::log("External console opened.", EngineConsole::INFO_NORMAL);
+		}
+		else {
+			EngineConsole::log("Invalid argument!", EngineConsole::ERROR_NORMAL);
+		}
+	}
+	else {
+		EngineConsole::log("Unexpected argument!", EngineConsole::ERROR_NORMAL);
+	}
+}
+
 void initCommands() {
 	conFuncs.push_back(commandStruct("quit", con_command_quit));
 	conFuncs.push_back(commandStruct("info", con_command_info));
+	conFuncs.push_back(commandStruct("console", con_command_console));
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
@@ -291,11 +325,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	UreTechEngine::EngineConsole::log("Engine successfuly initiated!", UreTechEngine::EngineConsole::t_error::INFO_NORMAL);
 
 	UreTechEngine::string a = "BRUH MESSAGE";//string test bruh
-	UreTechEngine::EngineConsole::log("(i)[INFO] " + a, UreTechEngine::EngineConsole::t_error::DEBUG);
-
-	for (uint64_t i = 0; i < EngineConsole::messages.size(); i++) {
-		std::cout << EngineConsole::messages[i].msg.data() << "\n";
-	}
+	UreTechEngine::EngineConsole::log("brub " + a, UreTechEngine::EngineConsole::t_error::DEBUG);
 
 	// main loop
 	while (!glfwWindowShouldClose(window)) {
@@ -503,7 +533,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 			ImGui::BeginChild("ConsoleOutput", ImVec2(0, windowSize.y - 100), true);
 			for (uint64_t i = 0; i < EngineConsole::messages.size(); i++) {
-				ImGui::TextColored(ImVec4(EngineConsole::messages[i].color[0], EngineConsole::messages[i].color[1], EngineConsole::messages[i].color[2], 1.0f), EngineConsole::messages[i].msg.c_str());
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(EngineConsole::messages[i].color[0], EngineConsole::messages[i].color[1], EngineConsole::messages[i].color[2], 1.0f));
+				if (ImGui::Selectable(EngineConsole::messages[i].msg.c_str(), false)) {
+					ImGui::SetClipboardText(EngineConsole::messages[i].msg.c_str());
+				}
+				ImGui::PopStyleColor();
 			}
 
 			if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
@@ -517,9 +551,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 
 			ImGui::BeginGroup();
-			if (ImGui::Button("Clear")) EngineConsole::messages.clear();
-			ImGui::SameLine();
-			if (ImGui::Button("Copy Last")) EngineConsole::messages[0];
+			if (ImGui::Button("Clear")) { EngineConsole::messages.clear(); system("cls"); }
 			ImGui::SameLine();
 			ImGui::Checkbox("Auto Scroll", &autoScroll);
 			ImGui::EndGroup();
