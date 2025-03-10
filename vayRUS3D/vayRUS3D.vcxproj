@@ -635,19 +635,9 @@
     <ClCompile Include="UreTechEngine\utils\util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="content\shaders\baseFS.glsl">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|x64'">$(OutDir)content/shaders/</DestinationFolders>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|x64'">$(OutDir)content/shaders/</DestinationFolders>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release Game Build|x64'">$(OutDir)content/shaders/</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\shaders\baseVS.glsl">
-      <FileType>Document</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|x64'">$(OutDir)content/shaders/</DestinationFolders>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|x64'">$(OutDir)content/shaders/</DestinationFolders>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release Game Build|x64'">$(OutDir)content/shaders/</DestinationFolders>
-    </CopyFileToFolders>
     <None Include="packages.config" />
+    <None Include="testContent\shaders\baseFS.glsl" />
+    <None Include="testContent\shaders\baseVS.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="content\sourceContent\MyPlayerPawn.h" />

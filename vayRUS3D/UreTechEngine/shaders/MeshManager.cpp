@@ -1,6 +1,7 @@
 #include"MeshManager.hpp"
 
 #include<vector>
+#include<string>
 
 #include<../EngineCore.h>
 
@@ -20,22 +21,64 @@ MeshManager* MeshManager::getInstance()
 	}
 }
 
+glm::vec3 calculateNormal(const Vertex& v0, const Vertex& v1, const Vertex& v2) {
+	glm::vec3 edge1 = v1.pos - v0.pos;
+	glm::vec3 edge2 = v2.pos - v0.pos;
+	return glm::normalize(glm::cross(edge1, edge2));
+}
+
+void calculateSmoothNormals(std::vector<triangleFace>& faces) {
+	std::unordered_map<int, glm::vec3> vertexNormals;
+	std::unordered_map<int, int> vertexCount;
+
+	for (const auto& face : faces) {
+		glm::vec3 normal = calculateNormal(face.v0, face.v1, face.v2);
+
+		vertexNormals[face.v0.textureIndex] += normal;
+		vertexNormals[face.v1.textureIndex] += normal;
+		vertexNormals[face.v2.textureIndex] += normal;
+
+		vertexCount[face.v0.textureIndex]++;
+		vertexCount[face.v1.textureIndex]++;
+		vertexCount[face.v2.textureIndex]++;
+	}
+
+	for (auto& entry : vertexNormals) {
+		int vertexIndex = entry.first;
+		glm::vec3 avgNormal = entry.second / float(vertexCount[vertexIndex]);
+		vertexNormals[vertexIndex] = glm::normalize(avgNormal);
+
+		for (auto& face : faces) {
+			if (face.v0.textureIndex == vertexIndex) {
+				face.v0.norm = vertexNormals[vertexIndex];
+			}
+			if (face.v1.textureIndex == vertexIndex) {
+				face.v1.norm = vertexNormals[vertexIndex];
+			}
+			if (face.v2.textureIndex == vertexIndex) {
+				face.v2.norm = vertexNormals[vertexIndex];
+			}
+		}
+	}
+}
+
 mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat)
 {
 	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices,finalIndices;
 	std::vector< glm::vec3 > temp_vertices;
 	std::vector< glm::vec2 > temp_uvs;
 	std::vector< glm::vec3 > temp_normals;
+	std::vector< uint64_t > temp_face_smoothGroups;
 	std::vector< int > tmp_face_texture_index;
 	std::string file;
 
 	if (UPK_ENABLE_PACKAGE_SYSTEM) {
 		Buffer objImpBuf = UreTechEngineClass::getEngine()->package->get(filePath);
 		file = string((char*)objImpBuf.pointer, objImpBuf.size);
-		if (objImpBuf.pointer = nullptr) {
+		if (objImpBuf.pointer == nullptr) {
 			UreTechEngine::EngineConsole::log("(Mesh Loader): Can not open source file! (UPK) Path:" + filePath, UreTechEngine::EngineConsole::ERROR_NORMAL);
+			return nullptr;
 		}
-		return nullptr;
 	}
 	else {
 		UreTechEngine::EngineConsole::log("(Mesh Loader): Can not open source file! (NOT UPK) Path:" + filePath, UreTechEngine::EngineConsole::ERROR_NORMAL);
@@ -43,59 +86,83 @@ mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat)
 	}
 
 	std::vector<triangleFace> faces;
-	int textureCount=-1;
+	int textureCount = -1;
+	uint64_t smoothGroup = 0;
 
-	while (1) {
-		char lineHeader[128];
+	dArray <string> lines = parseWith(file, '\n');
 
-		int res = sscanf(file.c_str(), "%s", lineHeader);
-		if (res == EOF) break;
-
-		if (strcmp(lineHeader, "v") == 0) {
-			glm::vec3 vertex;
-			sscanf(file.c_str(), "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
-			temp_vertices.push_back(vertex);
-		}
-		else if (strcmp(lineHeader, "vt") == 0) {
-			glm::vec2 uv;
-			sscanf(file.c_str(), "%f %f\n", &uv.x, &uv.y);
-			temp_uvs.push_back(uv);
-		}
-		else if (strcmp(lineHeader, "vn") == 0) {
-			glm::vec3 normal;
-			sscanf(file.c_str(), "%f %f %f\n", &normal.x, &normal.y, &normal.z);
-			temp_normals.push_back(normal);
-		}
-		else if (strcmp(lineHeader, "usemtl") == 0) {
-			UreTechEngine::EngineConsole::log("(Mesh Loader): Found new texture!"+std::to_string(textureCount), UreTechEngine::EngineConsole::INFO_NORMAL);
-			textureCount++;
-		}
-		else if (strcmp(lineHeader, "f") == 0) {
-			std::string vertex1, vertex2, vertex3;
-			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
-			int matches = sscanf(file.c_str(), "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
-			if (matches != 9) {
-				UreTechEngine::EngineConsole::log("(Mesh Loader): Can not read source file! Path:" + filePath, UreTechEngine::EngineConsole::ERROR_NORMAL);
-				return nullptr;
+	for (uint64_t i = 0; i < lines.size(); i++) {
+		if (!lines[i].empty()) {
+			if (lines[i].substr(2) == "v ") {// vertex (3 input x, y, z)
+				dArray <string> vReadStr = parseWith(lines[i], ' ');
+				if (vReadStr.size() == 4) {
+					float x = std::atof(vReadStr[1].c_str());
+					float y = std::atof(vReadStr[2].c_str());
+					float z = std::atof(vReadStr[3].c_str());
+					temp_vertices.push_back(glm::vec3(x, y, z));
+				}
+				else {
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex data! " + filePath + "-->" + std::to_string(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+				}
 			}
-			vertexIndices.push_back(vertexIndex[0] - 1);
-			vertexIndices.push_back(vertexIndex[1] - 1);
-			vertexIndices.push_back(vertexIndex[2] - 1);
-			uvIndices.push_back(uvIndex[0] - 1);
-			uvIndices.push_back(uvIndex[1] - 1);
-			uvIndices.push_back(uvIndex[2] - 1);
-			normalIndices.push_back(normalIndex[0] - 1);
-			normalIndices.push_back(normalIndex[1] - 1);
-			normalIndices.push_back(normalIndex[2] - 1);
-			if (textureCount == -1) {
-				tmp_face_texture_index.push_back(0);
-				tmp_face_texture_index.push_back(0);
-				tmp_face_texture_index.push_back(0);
+			else if (lines[i].substr(3) == "vn ") {// vertex normal
+				dArray <string> vnReadStr = parseWith(lines[i], ' ');
+				if (vnReadStr.size() == 4) {
+					float x = std::atof(vnReadStr[1].c_str());
+					float y = std::atof(vnReadStr[2].c_str());
+					float z = std::atof(vnReadStr[3].c_str());
+					temp_normals.push_back(glm::vec3(x, y, z));
+				}
+				else {
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex normal data! " + filePath + "-->" + std::to_string(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+				}
 			}
-			else {
-				tmp_face_texture_index.push_back(textureCount);
-				tmp_face_texture_index.push_back(textureCount);
-				tmp_face_texture_index.push_back(textureCount);
+			else if (lines[i].substr(3) == "vt ") {// texture cord
+				dArray <string> vtReadStr = parseWith(lines[i], ' ');
+				if (vtReadStr.size() == 3) {
+					float x = std::atof(vtReadStr[1].c_str());
+					float y = std::atof(vtReadStr[2].c_str());
+					temp_uvs.push_back(glm::vec2(x, y));
+				}
+				else {
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex uv data! " + filePath + "-->" + std::to_string(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+				}
+			}
+			else if (lines[i].substr(2) == "s ") {// smooth group
+				try {
+					smoothGroup = std::stoull(lines[i].substr(INT64_MAX, 2));
+				}
+				catch (std::exception) {
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid smooth group data! " + filePath + "-->" + std::to_string(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+				}
+			}
+			else if (lines[i].substr(2) == "f ") {// face (must be 3 at each line)
+				if (textureCount == -1) {
+					textureCount = 0;
+				}
+				dArray <string> f0ReadStr = parseWith(lines[i], ' ');
+				if (f0ReadStr.size() == 4) {
+					// read verts
+					for (uint64_t j = 1; j < 4; j++) {
+						dArray <string> f1ReadStr = parseWith(f0ReadStr[j], '/');
+						if (f1ReadStr.size() == 3) {
+							vertexIndices.push_back(std::stoull(f1ReadStr[0])-1);
+							uvIndices.push_back(std::stoull(f1ReadStr[1])-1);
+							normalIndices.push_back(std::stoull(f1ReadStr[2])-1);
+							temp_face_smoothGroups.push_back(smoothGroup);
+							tmp_face_texture_index.push_back(textureCount);
+						}
+						else {
+							UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid f1 data! " + filePath + "-i>" + std::to_string(i) + "-j>" + std::to_string(j), UreTechEngine::EngineConsole::ERROR_NORMAL);
+						}
+					}
+				}
+				else {
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid f0 data! " + filePath + "-->" + std::to_string(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+				}
+			}
+			else if (lines[i].substr(6) == "usemtl") {
+				textureCount++;
 			}
 		}
 	}
@@ -105,10 +172,42 @@ mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat)
 		face.v0 = Vertex(temp_vertices[vertexIndices[(a)]], temp_uvs[uvIndices[(a)]], temp_normals[normalIndices[(a)]], tmp_face_texture_index[(a)]);
 		face.v1 = Vertex(temp_vertices[vertexIndices[(a)+1]], temp_uvs[uvIndices[(a) + 1]], temp_normals[normalIndices[(a) + 1]], tmp_face_texture_index[(a+1)]);
 		face.v2 = Vertex(temp_vertices[vertexIndices[(a)+2]], temp_uvs[uvIndices[(a) + 2]], temp_normals[normalIndices[(a) + 2]], tmp_face_texture_index[(a+2)]);
+		face.smoothGroup = temp_face_smoothGroups[a / 3];// div by 3 because 3 vertices
 		faces.push_back(face);
 		finalIndices.push_back((a));
 		finalIndices.push_back((a) + 1);
 		finalIndices.push_back((a) + 2);
+	}
+
+	std::vector<std::vector<triangleFace>> smoothTempFaces;
+	for (uint64_t i = 0; i < faces.size(); i++) {
+		if (smoothTempFaces.size() == 0) {
+			smoothTempFaces.push_back(std::vector<triangleFace>());
+			smoothTempFaces[0].push_back(faces[i]);
+		}
+		else {
+			bool found = false;
+			for (uint64_t j = 0; j < smoothTempFaces.size(); j++) {
+				if (faces[i].smoothGroup == smoothTempFaces[j][0].smoothGroup) {
+					smoothTempFaces[j].push_back(faces[i]);
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				smoothTempFaces.push_back(std::vector<triangleFace>());
+				smoothTempFaces[smoothTempFaces.size() - 1].push_back(faces[i]);
+			}
+		}
+	}
+	for (uint64_t i = 0; i < smoothTempFaces.size(); i++) {
+		calculateSmoothNormals(smoothTempFaces[i]);
+	}
+	faces.clear();
+	for (uint64_t i = 0; i < smoothTempFaces.size(); i++) {
+		for (uint64_t j = 0; j < smoothTempFaces[i].size(); j++) {
+			faces.push_back(smoothTempFaces[i][j]);
+		}
 	}
 
 	std::vector<Vertex>tmpVert;
@@ -126,6 +225,6 @@ mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat)
 	unsigned int vertCount = temp_vertices.size();
 	_vao->createObject(tmpVert[0], tmpVert.size(), finalIndices[0], finalIndices.size());
 	mesh* result = new mesh(_vao, _mat);
-
+	UreTechEngine::EngineConsole::log("(Mesh Loader): Obj loaded! Path:" + filePath, UreTechEngine::EngineConsole::INFO_NORMAL);
 	return result;
 }

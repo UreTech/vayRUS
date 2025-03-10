@@ -17,5 +17,6 @@ struct triangleFace {
 	Vertex v0;
 	Vertex v1;
 	Vertex v2;
+	uint64_t smoothGroup = 0;
 };
 #endif 

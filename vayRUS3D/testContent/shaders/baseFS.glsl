@@ -36,10 +36,9 @@ uniform sampler2D texture5;
         vec3 lightDir = normalize(lightPos - FragPos);  
 
         float diff = max(dot(norm, lightDir), 0.0);
-        vec4 diffuse = diff * uLightColor;
 
         float brightness = 0.2;
-        vec4 brightnessLvl = (brightness+diffuse) * uLightColor;
+        vec4 brightnessLvl = (brightness+diff) * uLightColor;
 
         switch (vertTextureLevel) {
             case 0:

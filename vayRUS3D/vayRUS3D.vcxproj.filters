@@ -37,9 +37,6 @@
     <Filter Include="content">
       <UniqueIdentifier>{f3777729-a023-4b06-b212-1a0eddf69952}</UniqueIdentifier>
     </Filter>
-    <Filter Include="content\shaders">
-      <UniqueIdentifier>{f57a6ddb-186e-4451-b65c-c2023dfef1ec}</UniqueIdentifier>
-    </Filter>
     <Filter Include="content\sourceContent">
       <UniqueIdentifier>{58c9a1b8-4b7f-4491-9168-a7a8459c9d11}</UniqueIdentifier>
     </Filter>
@@ -51,6 +48,9 @@
     </Filter>
     <Filter Include="Source Files\UreTechEngine\utils\string">
       <UniqueIdentifier>{fc0126ef-da09-4680-a4c6-6465359835f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine\IN PACKAGE SHADERS">
+      <UniqueIdentifier>{1a1d6237-1ce1-4eb7-a1c3-1debc89eb913}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +147,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="testContent\shaders\baseVS.glsl">
+      <Filter>Source Files\UreTechEngine\IN PACKAGE SHADERS</Filter>
+    </None>
+    <None Include="testContent\shaders\baseFS.glsl">
+      <Filter>Source Files\UreTechEngine\IN PACKAGE SHADERS</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imstb_truetype.h">
@@ -282,13 +288,5 @@
     <Image Include="icon.ico">
       <Filter>Resource Files</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="content\shaders\baseFS.glsl">
-      <Filter>content\shaders</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="content\shaders\baseVS.glsl">
-      <Filter>content\shaders</Filter>
-    </CopyFileToFolders>
   </ItemGroup>
 </Project>

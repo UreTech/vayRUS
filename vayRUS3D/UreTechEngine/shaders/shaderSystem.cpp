@@ -19,10 +19,9 @@ void ShaderProgram::link()
 	int isLinkd;
 	char log[512];
 	glGetProgramiv(programID, GL_LINK_STATUS, &isLinkd);
-    
 	if (!isLinkd) {
 		glGetProgramInfoLog(programID, 512, 0, log);
-		std::cout << "Linking Error!" << std::endl << log << std::endl;
+		UreTechEngine::EngineConsole::log("Shader Linking Error!\n" + string(log), UreTechEngine::EngineConsole::ERROR_FATAL);
 	}
 }
 
@@ -98,7 +97,7 @@ void ShaderProgram::setTexture(const std::string& varName, int _textureLvl)
 	 glGetShaderiv(shaderID, GL_COMPILE_STATUS, &isCompl);
 	 if (!isCompl) {
 		 glGetShaderInfoLog(shaderID, 512, 0, log);
-		 std::cout << "ShaderType:" << shaderType << std::endl << log << std::endl;
+		 UreTechEngine::EngineConsole::log("ShaderType:" + std::to_string(shaderType) + "\n" + log, UreTechEngine::EngineConsole::ERROR_FATAL);
 	 }
 
 	 glAttachShader(programID, shaderID);
@@ -108,16 +107,21 @@ void ShaderProgram::setTexture(const std::string& varName, int _textureLvl)
 
  std::string ShaderProgram::getShaderFromFile(const char* fileName)
  {
-	 std::ifstream file(fileName);
 	 std::string data;
-
-	 if (file.is_open()) {
-		 char readingChar;
-		 while ((readingChar = file.get()) != EOF) {
-			 data += readingChar;
-		 }
-		 file.close();
+	 if (UPK_ENABLE_PACKAGE_SYSTEM) {
+		 Buffer shaderBuf = UreTechEngine::UreTechEngineClass::getEngine()->package->get(fileName);
+		 data = string((char*)shaderBuf.pointer, shaderBuf.size);
 	 }
-
+	 else {
+		 std::ifstream file(fileName);
+		 
+		 if (file.is_open()) {
+			 char readingChar;
+			 while ((readingChar = file.get()) != EOF) {
+				 data += readingChar;
+			 }
+			 file.close();
+		 }
+	 }
 	 return data;
  }

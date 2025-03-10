@@ -1,4 +1,5 @@
 #include "util.hpp"
+#include "dArray.h"
 
 int UreTechEngine::getBiggestDiv(int divided, int dividing)
 {
@@ -16,11 +17,28 @@ int UreTechEngine::getBiggestDiv(int divided, int dividing)
     return result;
 }
 
-std::string UreTechEngine::intToHex(int value)
+std::string UreTechEngine::intToHex(uint64_t value)
 {
     std::stringstream ss;
     ss << "0x" << std::hex << std::uppercase << value;
     return ss.str();
+}
+
+UreTechEngine::dArray<UreTechEngine::string> UreTechEngine::parseWith(std::string str, char c)
+{
+    UreTechEngine::dArray<UreTechEngine::string> res;
+    UreTechEngine::string block;
+    for (uint64_t i = 0; i < str.size(); i++) {
+        if (str[i] != c) {
+            block.push_back(str[i]);
+        }
+        else {
+            res.push_back(block);
+            block = "";
+        }
+    }
+    res.push_back(block);
+    return res;
 }
 
 //for debug bugs

@@ -9,6 +9,7 @@
 
 void mesh::draw(UreTechEngine::Transform3D _addTrnsfm)
 {
+	if (this == nullptr)return;
 	shaderProg->setTexture("texture0", 0);
 	shaderProg->setTexture("texture1", 1);
 	shaderProg->setTexture("texture2", 2);
@@ -25,17 +26,26 @@ void mesh::draw(UreTechEngine::Transform3D _addTrnsfm)
 	else {
 		textManager->applyTexture(GL_TEXTURE0, Materials[0].colorText);
 	}
-	glm::vec3 TransformTransliton = glm::vec3(transform.Location.fx() + _addTrnsfm.Location.fx(), transform.Location.fy() + _addTrnsfm.Location.fy(), transform.Location.fz() + _addTrnsfm.Location.fz());
-	UreTechEngine::Rotation _rot;
-	_rot.roll += _addTrnsfm.Rotation.roll;
-	_rot.pitch += _addTrnsfm.Rotation.pitch;
-	_rot.yaw += _addTrnsfm.Rotation.yaw;
-	glm::vec3 TransformRotation = glm::vec3(_rot.fRoll(), _rot.fPitch(), _rot.fYaw());
-	glm::mat4 TransformScale = glm::scale(glm::mat4(1), glm::vec3(transform.Scale.fx() * _addTrnsfm.Scale.fx(), transform.Scale.fy() * _addTrnsfm.Scale.fy(), transform.Scale.fz() * _addTrnsfm.Scale.fz()));
+	// t*r*s
+	modelMatrix = glm::mat4(1.0f);
 
-	shaderProg->setVec3("uTranslation", TransformTransliton);
-	shaderProg->setVec3("uRotation", TransformRotation);
-	shaderProg->setMat4("uScale", &TransformScale);
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(_addTrnsfm.Rotation.roll + this->transform.Rotation.roll), glm::vec3(1, 0, 0)); // X
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(_addTrnsfm.Rotation.pitch + this->transform.Rotation.pitch), glm::vec3(0, 1, 0)); // Y
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(_addTrnsfm.Rotation.yaw + this->transform.Rotation.yaw), glm::vec3(0, 0, 1)); // Z
+
+	modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(
+		_addTrnsfm.Location.x + this->transform.Location.x,
+		_addTrnsfm.Location.y + this->transform.Location.y,
+		_addTrnsfm.Location.z + this->transform.Location.z)) * modelMatrix;
+
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(
+		_addTrnsfm.Scale.x * this->transform.Scale.x,
+		_addTrnsfm.Scale.y * this->transform.Scale.y,
+		_addTrnsfm.Scale.z * this->transform.Scale.z));
+
+	shaderProg->setMat4("uMtxModel", &modelMatrix);
+
+
 
 	for (int i = 0; i < Materials.size(); i++) {
 		shaderProg->setBool("litRender"+std::to_string(i), Materials[i].litRender);

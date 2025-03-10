@@ -9,11 +9,11 @@ vayrusCube::vayrusCube(void) {
 }
 void vayrusCube::begin() {
 	//add your begin commands here
-	texture tex = TextureManager::getInstance()->loadTextureFromFile("textures/text2.png");
+	texture tex = TextureManager::getInstance()->loadTextureFromFile("/test/tText0.jpg");
 	Material mymat;
 	mymat.colorText = tex;
-	entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("a.obj",mymat);
-	if (entityMesh == nullptr) {
+	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/monke.obj",mymat);
+	if (this->entityMesh == nullptr) {
 		UreTechEngine::EngineConsole::log("vayRUS cube can not load mesh!", UreTechEngine::EngineConsole::t_error::ERROR_NORMAL);
 	}
 	entName = "vayrusCube";

@@ -5,11 +5,11 @@
 #include<glm/gtc/matrix_transform.hpp>
 namespace UreTechEngine {
 	struct vector4 {
-		double x = 0;
-		double y = 0;
-		double z = 0;
-		double w = 0;
-		vector4(double _x = 0.0, double _y = 0.0, double _z = 0.0, double _w = 0.0) {
+		float x = 0;
+		float y = 0;
+		float z = 0;
+		float w = 0;
+		vector4(float _x = 0.0, float _y = 0.0, float _z = 0.0, float _w = 0.0) {
 			x = _x;
 			y = _y;
 			z = _z;
@@ -29,10 +29,10 @@ namespace UreTechEngine {
 		}
 	};
 	struct vector3 {
-		double x = 0;
-		double y = 0;
-		double z = 0;
-		vector3(double _x=0.0f, double _y = 0.0f, double _z = 0.0f) {
+		float x = 0;
+		float y = 0;
+		float z = 0;
+		vector3(float _x=0.0f, float _y = 0.0f, float _z = 0.0f) {
 			x = _x;
 			y = _y;
 			z = _z;
@@ -42,13 +42,13 @@ namespace UreTechEngine {
 			y = _val.y;
 			z = _val.z;
 		}
-		void addX(double _x) {
+		void addX(float _x) {
 			x += _x;
 		}
-		void addY(double _y) {
+		void addY(float _y) {
 			y += _y;
 		}
-		void addZ(double _z) {
+		void addZ(float _z) {
 			z += _z;
 		}
 		float fx() {
@@ -62,11 +62,11 @@ namespace UreTechEngine {
 		}
 	};
 	struct vector2 {
-		double x = 0;
-		double y = 0;
+		float x = 0;
+		float y = 0;
 	};
 	struct vector {
-		double x = 0;
+		float x = 0;
 	};
 
 
@@ -79,10 +79,10 @@ namespace UreTechEngine {
 			rotQ2,
 			rotQ3,
 		};
-		double roll = 0;
-		double pitch = 0;
-		double yaw = 0;
-		Rotation(double _roll = 0, double _pitch = 0, double _yaw = 0) {
+		float roll = 0;
+		float pitch = 0;
+		float yaw = 0;
+		Rotation(float _roll = 0, float _pitch = 0, float _yaw = 0) {
 			roll = _roll;
 			pitch = _pitch;
 			yaw = _yaw;

@@ -19,9 +19,9 @@ namespace UreTechEngine {
 		string entClassName = "UNDEFINED ENTITY CLASS";
 		string entCustomSets = "null";
 		entID entityID = NULL_ENT_ID;
-		UreTechEngine::Transform3D transform;
-		mesh* entityMesh;
-		UreTechEngineClass* engineRef=nullptr;
+		UreTechEngine::Transform3D transform = Transform3D();
+		mesh* entityMesh = nullptr;
+		UreTechEngineClass* engineRef = nullptr;
 		void updateVisual();
 		void init(UreTechEngineClass* _ptr);
 		void print(string message);

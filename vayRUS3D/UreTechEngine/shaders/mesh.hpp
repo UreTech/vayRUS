@@ -31,6 +31,7 @@ private:
 	vertexArrayObject* p_Vao;
 	TextureManager* textManager;
 	ShaderProgram* shaderProg;
+	glm::mat4 modelMatrix;
 	UreTechEngine::Player* PlayerRef = nullptr;
 	unsigned int indexCount;
 	texture TextureID;

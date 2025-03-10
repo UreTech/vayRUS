@@ -206,21 +206,9 @@ void RenderColoredText(std::string text) {
 	}
 }
 
-
-dArray<UreTechEngine::string> parseWith(std::string str, char c) {
-	dArray<UreTechEngine::string> res;
-	UreTechEngine::string block;
-	for (uint64_t i = 0; i < str.size(); i++) {
-		if (str[i] != c) {
-			block.push_back(str[i]);
-		}
-		else {
-			res.push_back(block);
-			block = "";
-		}
-	}
-	res.push_back(block);
-	return res;
+void SetFullScreen(HWND hWnd) {
+	SetWindowLong(hWnd, GWL_STYLE, WS_POPUP);
+	ShowWindow(hWnd, SW_MAXIMIZE);
 }
 
 std::string getCPUInfo() {
@@ -288,6 +276,7 @@ void con_command_system(conArgs args) {
 	info << "Manufacturer (Vendor): " << glGetString(GL_VENDOR) << "\n";
 	info << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
 	info << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n";
+	info << "Current resolution: " << UreTechEngineClass::displayWidth << "x" << UreTechEngineClass::displayHeight << "\n";
 
 	EngineConsole::log("\n"+getCPUInfo(), EngineConsole::INFO_NORMAL);
 	EngineConsole::log(info.str(), EngineConsole::INFO_NORMAL);
@@ -345,10 +334,25 @@ void con_command_console(conArgs args) {
 	}
 }
 
+void con_command_screen(conArgs args) {
+	if (args.size() == 2) {
+		if (args[1] == "full") {
+			EngineConsole::log("Full screen. (not working for now)", EngineConsole::INFO_NORMAL);
+		}
+		else {
+			EngineConsole::log("Invalid argument!", EngineConsole::ERROR_NORMAL);
+		}
+	}
+	else {
+		EngineConsole::log("Unexpected argument!", EngineConsole::ERROR_NORMAL);
+	}
+}
+
 void initCommands() {
 	conFuncs.push_back(commandStruct("help", con_command_help));
 	conFuncs.push_back(commandStruct("info", con_command_info));
 	conFuncs.push_back(commandStruct("system", con_command_system));
+	conFuncs.push_back(commandStruct("screen", con_command_screen));
 	conFuncs.push_back(commandStruct("quit", con_command_quit));
 	conFuncs.push_back(commandStruct("clear", con_command_clear));
 	conFuncs.push_back(commandStruct("console", con_command_console));
@@ -357,6 +361,8 @@ void initCommands() {
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	// start external console
 	initCommands();// init main commands
+
+	// open external console
 	if (USE_EXTERNAL_CONSOLE) {
 		executeCommand("console alloc");
 	}
@@ -366,11 +372,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (engine == nullptr) {
 		EngineConsole::log("ENGINE ERROR (0x01)", EngineConsole::ERROR_FATAL);
 	}
-	
-	if (UPK_ENABLE_PACKAGE_SYSTEM) {
-		engine->init_upk_system(UPK_PACKAGE_PATH,UPK_PACKAGE_ENC_KEY);
-	}
-
 
 	// get widow and set callback funcs
 	GLFWwindow* window = engine->getWindow();
@@ -615,9 +616,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			ImGui::Begin("Modify", &modifyWindow);
 			if (engine->isValidEntity(entToModify)) {
 				ImGui::Text(std::string("Entity --> " + engine->getEntityWithID(entToModify)->entName).c_str());
-				ImGui::DragScalarN("Location", ImGuiDataType_Double, &engine->getEntityWithID(entToModify)->transform.Location, 3);
-				ImGui::DragScalarN("Rotation", ImGuiDataType_Double, &engine->getEntityWithID(entToModify)->transform.Rotation, 3);
-				ImGui::DragScalarN("Scale", ImGuiDataType_Double, &engine->getEntityWithID(entToModify)->transform.Scale, 3);
+				entity* abasd = engine->getEntityWithID(entToModify);
+				ImGui::DragScalarN("Location", ImGuiDataType_Float, &engine->getEntityWithID(entToModify)->transform.Location, 3);
+				ImGui::DragScalarN("Rotation", ImGuiDataType_Float, &engine->getEntityWithID(entToModify)->transform.Rotation, 3);
+				ImGui::DragScalarN("Scale", ImGuiDataType_Float, &engine->getEntityWithID(entToModify)->transform.Scale, 3);
 				if (ImGui::Button("Rename Entity")){
 					renameEntWindow = true;
 					engInf = "Rename entity";

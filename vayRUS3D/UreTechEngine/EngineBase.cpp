@@ -20,6 +20,9 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
     }
     else {
         c_Instance = new UreTechEngineClass();
+		if (UPK_ENABLE_PACKAGE_SYSTEM) {
+			c_Instance->init_upk_system(UPK_PACKAGE_PATH, UPK_PACKAGE_ENC_KEY);
+		}
 
 		//openGL init
 		if (!glfwInit()) {
@@ -41,17 +44,15 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
 
 		c_Instance->mainShaderProgram = new ShaderProgram();
 
-		c_Instance->mainShaderProgram->attachShader("content/shaders/baseVS.glsl", GL_VERTEX_SHADER);
-		c_Instance->mainShaderProgram->attachShader("content/shaders/baseFS.glsl", GL_FRAGMENT_SHADER);
+		c_Instance->mainShaderProgram->attachShader("/shaders/baseVS.glsl", GL_VERTEX_SHADER);
+		c_Instance->mainShaderProgram->attachShader("/shaders/baseFS.glsl", GL_FRAGMENT_SHADER);
 		c_Instance->mainShaderProgram->link();
 
-		c_Instance->mainShaderProgram->addUniform("uTranslation");
-		c_Instance->mainShaderProgram->addUniform("uRotation");
-		c_Instance->mainShaderProgram->addUniform("uScale");
+
+		c_Instance->mainShaderProgram->addUniform("uMtxModel");
 		c_Instance->mainShaderProgram->addUniform("uMtxProj");
-		c_Instance->mainShaderProgram->addUniform("uMtxCamPos");
-		c_Instance->mainShaderProgram->addUniform("uCamRot");
 		c_Instance->mainShaderProgram->addUniform("uMtxCam");
+		c_Instance->mainShaderProgram->addUniform("uPosCam");
 		c_Instance->mainShaderProgram->addUniform("lightPos");
 		c_Instance->mainShaderProgram->addUniform("uLightColor");
 
@@ -120,6 +121,7 @@ UreTechEngine::entity* UreTechEngine::UreTechEngineClass::spawnEntity(entity* _t
 	string abc(" spawned with id ");
 	UreTechEngine::EngineConsole::log(_toSpawn->entName + abc + intToHex(_toSpawn->entityID), UreTechEngine::EngineConsole::INFO_NORMAL);
 	sceneEntities.push_back(_toSpawn);
+	UreTechEngine::EngineConsole::log("Ent addr: " + intToHex((uint64_t)_toSpawn), UreTechEngine::EngineConsole::DEBUG);
 	return sceneEntities[sceneEntities.size() - 1];
 }
 

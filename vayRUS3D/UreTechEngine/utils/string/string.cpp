@@ -4,6 +4,8 @@ using namespace UreTechEngine;
 
 //local funcs
 
+const char nullStrRet = '\0';
+
 string u_str(std::string _str) {
 	string tmp;
 	tmp.assign(_str.data(), _str.size());
@@ -81,7 +83,12 @@ void* string::operator new(size_t lenght)
 
 char& string::operator[](size_t index)
 {
-	return s_data[index];
+	if (index < s_size) {
+		return s_data[index];
+	}
+	else {
+		return *(char*)nullStrRet;
+	}
 }
 
 bool string::operator==(const string& other)
@@ -229,6 +236,15 @@ string& string::append(string& other)
 	}
 
 	return *this;
+}
+
+string& UreTechEngine::string::substr(size_t len, size_t off)
+{
+	string* tmp = new string();
+	for (uint64_t i = off; i < off + len && i < this->s_size; i++) {
+		tmp->push_back(s_data[i]);
+	}
+	return *tmp;
 }
 
 bool string::remove(size_t index)

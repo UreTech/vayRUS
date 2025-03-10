@@ -91,6 +91,9 @@ namespace UreTechEngine {
 		// += operator
 		string& append(string& other);
 
+		// substr
+		string& substr(size_t len, size_t off = 0);
+
 		// removes index
 		bool remove(size_t index);
 

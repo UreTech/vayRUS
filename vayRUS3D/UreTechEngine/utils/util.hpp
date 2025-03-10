@@ -1,6 +1,8 @@
 #ifndef util_H
 #define util_H
 
+#include<../UreTechEngine/utils/dArray.h>
+
 #include<cinttypes>
 #include <string>
 #include <sstream>
@@ -8,7 +10,8 @@
 namespace UreTechEngine {
 
     int getBiggestDiv(int divided, int dividing);
-    std::string intToHex(int value);
+    std::string intToHex(uint64_t value);
+    UreTechEngine::dArray<UreTechEngine::string> parseWith(std::string str, char c);
     bool isValidPtr(void* ptr);// DONT USE
     void* safePtr(void* ptr);// DONT USE
     struct Buffer {

@@ -5,6 +5,7 @@
 void UreTechEngine::entity::updateVisual()
 {
 	if (entityMesh != nullptr) {
+		//UreTechEngine::EngineConsole::log("Ent addr: " + intToHex((uint64_t)entityMesh), UreTechEngine::EngineConsole::DEBUG);
 		entityMesh->draw(transform);
 	}
 }

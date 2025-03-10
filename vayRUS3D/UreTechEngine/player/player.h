@@ -11,11 +11,11 @@ namespace UreTechEngine {
 	class entity;
 	class Player {
 	public:
-		glm::mat4 mtxCamPos;
-		glm::vec3 CamRot;
-		glm::mat4 mtxCam;
-
-		glm::mat4 mtxProj;
+		vector3 camPos = 0;
+		Rotation camRot = 0;
+		float camFov = 90.0f;
+		glm::mat4 mtxCam = glm::mat4();
+		glm::mat4 mtxProj = glm::mat4();
 
 		ShaderProgram* shaderProg;
 		UreTechEngineClass* engineRef=nullptr;
