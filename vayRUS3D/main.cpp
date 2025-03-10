@@ -25,6 +25,7 @@
 #include "UreTechEngine/utils/string/string.h"
 #include <corecrt_io.h>
 #include <fcntl.h>
+#include <regex>
 
 #define fpslock 60
 int display_w, display_h;
@@ -130,6 +131,82 @@ void enableANSI() {
 	SetConsoleMode(hOut, dwMode);
 }
 
+//UreTech color format print
+void RenderColoredText(std::string text) {
+	std::string tmp;
+	bool crOpen = false;
+	bool isPushed = false;
+	for (uint64_t i = 0; i < text.size(); i++) {
+			if (crOpen) {
+				if (text[i] == '\x1F') {
+					ImGui::Text(tmp.c_str());
+					ImGui::SameLine(0.0f,0.0f);
+					if (isPushed) {
+						ImGui::PopStyleColor();
+						isPushed = false;
+					}
+					tmp.clear();
+					crOpen = false;
+				}
+				else {
+					tmp.push_back(text[i]);
+				}
+			}
+			else {
+				if (text[i] == '\x01') {
+					ImGui::Text(tmp.c_str());
+					ImGui::SameLine(0.0f,0.0f);
+					tmp.clear();
+					crOpen = true;
+					i++;
+
+					switch (text[i])
+					{
+					case 'g':
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));//green
+						isPushed = true;
+						break;
+					case 'r':
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));//red
+						isPushed = true;
+						break;
+					case 'b':
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));//blue
+						isPushed = true;
+						break;
+					case 'y':
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 1.0f));//yellow
+						isPushed = true;
+						break;
+					case 'o':
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.647f, 0.0f, 1.0f));//orange
+						isPushed = true;
+						break;
+					case 'm':
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 1.0f, 1.0f));//magenta
+						isPushed = true;
+						break;
+					default:
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));//white
+						isPushed = true;
+						break;
+					}
+				}
+				else {
+					tmp.push_back(text[i]);
+				}
+			}
+		}
+	if (!tmp.empty()) {
+		ImGui::Text(tmp.c_str());
+		if (isPushed) {
+			ImGui::PopStyleColor();
+			isPushed = false;
+		}
+	}
+}
+
+
 dArray<UreTechEngine::string> parseWith(std::string str, char c) {
 	dArray<UreTechEngine::string> res;
 	UreTechEngine::string block;
@@ -144,6 +221,28 @@ dArray<UreTechEngine::string> parseWith(std::string str, char c) {
 	}
 	res.push_back(block);
 	return res;
+}
+
+std::string getCPUInfo() {
+	int cpuInfo[4] = { 0 };
+	char cpuName[49] = { 0 };
+
+	__cpuid(cpuInfo, 0x80000002);
+	memcpy(cpuName, cpuInfo, sizeof(cpuInfo));
+
+	__cpuid(cpuInfo, 0x80000003);
+	memcpy(cpuName + 16, cpuInfo, sizeof(cpuInfo));
+
+	__cpuid(cpuInfo, 0x80000004);
+	memcpy(cpuName + 32, cpuInfo, sizeof(cpuInfo));
+
+	SYSTEM_INFO sysInfo;
+	GetSystemInfo(&sysInfo);
+	int coreCount = sysInfo.dwNumberOfProcessors;
+
+	std::ostringstream info;
+	info << "CPU: " << cpuName << " x" << coreCount;
+	return info.str();
 }
 
 typedef dArray<UreTechEngine::string> conArgs;
@@ -183,6 +282,17 @@ void con_command_info(conArgs args) {
 	EngineConsole::log(FULL_ENGINE_DESCRIPTION, EngineConsole::INFO_NORMAL);
 }
 
+void con_command_system(conArgs args) {
+	std::ostringstream info;
+	info << "\nGPU (Renderer): " << glGetString(GL_RENDERER) << "\n";
+	info << "Manufacturer (Vendor): " << glGetString(GL_VENDOR) << "\n";
+	info << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
+	info << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n";
+
+	EngineConsole::log("\n"+getCPUInfo(), EngineConsole::INFO_NORMAL);
+	EngineConsole::log(info.str(), EngineConsole::INFO_NORMAL);
+}
+
 void con_command_help(conArgs args) {
 	EngineConsole::log("All main console commands:", EngineConsole::INFO_NORMAL);
 	for (uint64_t i = 0; i < conFuncs.size(); i++) {
@@ -191,8 +301,10 @@ void con_command_help(conArgs args) {
 }
 
 void con_command_clear(conArgs args) {
-	system("cls");
 	EngineConsole::messages.clear();
+	if (externalConsoleState) {
+		system("cls");
+	}
 }
 
 void con_command_console(conArgs args) {
@@ -234,9 +346,9 @@ void con_command_console(conArgs args) {
 }
 
 void initCommands() {
-
 	conFuncs.push_back(commandStruct("help", con_command_help));
 	conFuncs.push_back(commandStruct("info", con_command_info));
+	conFuncs.push_back(commandStruct("system", con_command_system));
 	conFuncs.push_back(commandStruct("quit", con_command_quit));
 	conFuncs.push_back(commandStruct("clear", con_command_clear));
 	conFuncs.push_back(commandStruct("console", con_command_console));
@@ -333,7 +445,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init();
+	ImGui_ImplOpenGL3_Init("#version 330 core");
 	ImGui::StyleColorsDark();
 
 	texture materialThumbTexture = textureManager->loadTextureFromFile("/engine/res/materialThumb.png", false);
@@ -554,11 +666,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 			ImGui::BeginChild("ConsoleOutput", ImVec2(0, windowSize.y - 100), true);
 			for (uint64_t i = 0; i < EngineConsole::messages.size(); i++) {
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(EngineConsole::messages[i].color[0], EngineConsole::messages[i].color[1], EngineConsole::messages[i].color[2], 1.0f));
-				if (ImGui::Selectable(EngineConsole::messages[i].msg.c_str(), false)) {
-					ImGui::SetClipboardText(EngineConsole::messages[i].msg.c_str());
-				}
-				ImGui::PopStyleColor();
+				RenderColoredText(EngineConsole::messages[i].msg.c_str());
 			}
 
 			if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
