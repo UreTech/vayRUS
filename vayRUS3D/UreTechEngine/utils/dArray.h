@@ -132,8 +132,11 @@ namespace UreTechEngine {
 
 		// clears everything
 		void clear() {
+			if (a_data != nullptr && a_size != 0) {
+				free(a_data);
+			}
 			a_size = 0;
-			delete a_data;
+			a_data = nullptr;
 		}
 
 		// swaps two item

@@ -42,6 +42,8 @@ bool rClickL = false;
 
 #define ImGui_Max_InputChars 512
 // editor/game ImGui Vars
+bool externalConsoleState = USE_EXTERNAL_CONSOLE;
+
 bool consoleWindow = false;
 bool autoScroll = true;
 char consoleInputBuffer[ImGui_Max_InputChars];
@@ -157,18 +159,19 @@ struct commandStruct {
 	}
 };
 
-std::vector<commandStruct> conFuncs;
+dArray<commandStruct> conFuncs;
 
 void executeCommand(UreTechEngine::string commandLine) {
 	conArgs args = parseWith(commandLine, ' ');
 	UreTechEngine::string command = args[0];
-	for (uint64_t i = 1; i < conFuncs.size(); i++) {
+	for (uint64_t i = 0; i < conFuncs.size(); i++) {
 		if (command == conFuncs[i].commandName) {
 			conFuncs[i].func(args);
 			return;
 		}
 	}
-	EngineConsole::log("Invalid command", EngineConsole::ERROR_NORMAL);
+	EngineConsole::log("Invalid command '" + command + "'", EngineConsole::ERROR_NORMAL);
+	EngineConsole::log("Type 'help' for commands.", EngineConsole::INFO_NORMAL);
 }
 
 void con_command_quit(conArgs args) {
@@ -178,6 +181,18 @@ void con_command_quit(conArgs args) {
 
 void con_command_info(conArgs args) {
 	EngineConsole::log(FULL_ENGINE_DESCRIPTION, EngineConsole::INFO_NORMAL);
+}
+
+void con_command_help(conArgs args) {
+	EngineConsole::log("All main console commands:", EngineConsole::INFO_NORMAL);
+	for (uint64_t i = 0; i < conFuncs.size(); i++) {
+		EngineConsole::log("Command '" + conFuncs[i].commandName + "'", EngineConsole::INFO_NORMAL);
+	}
+}
+
+void con_command_clear(conArgs args) {
+	system("cls");
+	EngineConsole::messages.clear();
 }
 
 void con_command_console(conArgs args) {
@@ -191,6 +206,7 @@ void con_command_console(conArgs args) {
 			freopen_s(&f, "NUL", "w", stderr);
 			FreeConsole();
 			EngineConsole::log("External console closed.", EngineConsole::INFO_NORMAL);
+			externalConsoleState = false;
 		}
 		else if (args[1] == "alloc") {
 			HWND hwnd = GetConsoleWindow();
@@ -202,6 +218,11 @@ void con_command_console(conArgs args) {
 			freopen_s(&f, "CONOUT$", "w", stderr);
 			enableANSI();
 			EngineConsole::log("External console opened.", EngineConsole::INFO_NORMAL);
+			externalConsoleState = true;
+		}
+		else if (args[1] == "clear") {
+			EngineConsole::log("External console cleared.", EngineConsole::INFO_NORMAL);// prints before for not print again
+			system("cls");
 		}
 		else {
 			EngineConsole::log("Invalid argument!", EngineConsole::ERROR_NORMAL);
@@ -213,19 +234,19 @@ void con_command_console(conArgs args) {
 }
 
 void initCommands() {
-	conFuncs.push_back(commandStruct("quit", con_command_quit));
+
+	conFuncs.push_back(commandStruct("help", con_command_help));
 	conFuncs.push_back(commandStruct("info", con_command_info));
+	conFuncs.push_back(commandStruct("quit", con_command_quit));
+	conFuncs.push_back(commandStruct("clear", con_command_clear));
 	conFuncs.push_back(commandStruct("console", con_command_console));
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	// start external console
+	initCommands();// init main commands
 	if (USE_EXTERNAL_CONSOLE) {
-		AllocConsole();
-		FILE* f;
-		freopen_s(&f, "CONOUT$", "w", stdout);
-		freopen_s(&f, "CONIN$", "r", stdin);
-		enableANSI();
+		executeCommand("console alloc");
 	}
 
 	// init engine
@@ -233,11 +254,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (engine == nullptr) {
 		EngineConsole::log("ENGINE ERROR (0x01)", EngineConsole::ERROR_FATAL);
 	}
+	
 	if (UPK_ENABLE_PACKAGE_SYSTEM) {
 		engine->init_upk_system(UPK_PACKAGE_PATH,UPK_PACKAGE_ENC_KEY);
 	}
 
-	initCommands();// init main commands
 
 	// get widow and set callback funcs
 	GLFWwindow* window = engine->getWindow();
@@ -315,7 +336,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ImGui_ImplOpenGL3_Init();
 	ImGui::StyleColorsDark();
 
-	texture materialThumbTexture = textureManager->loadTextureFromFile("materialThumb.png", false);
+	texture materialThumbTexture = textureManager->loadTextureFromFile("/engine/res/materialThumb.png", false);
 
 	// spawnables
 	engine->entityConstructors.push_back(entConstructStruct("entity"      , []() { return new entity(); }));
@@ -551,7 +572,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 
 			ImGui::BeginGroup();
-			if (ImGui::Button("Clear")) { EngineConsole::messages.clear(); system("cls"); }
+			if (ImGui::Button("Clear")) { executeCommand("clear"); }
 			ImGui::SameLine();
 			ImGui::Checkbox("Auto Scroll", &autoScroll);
 			ImGui::EndGroup();

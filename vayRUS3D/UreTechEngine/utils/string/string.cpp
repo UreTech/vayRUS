@@ -266,7 +266,7 @@ void string::resize(size_t size)
 void string::clear()
 {
 	if (s_data != nullptr) {
-		free(s_data);
+		delete[] s_data;
 	}
 	s_size = 0;
 	s_data = nullptr;
