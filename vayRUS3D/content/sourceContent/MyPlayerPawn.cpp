@@ -15,9 +15,9 @@ MyPlayerPawn::MyPlayerPawn(mesh* _mesh, std::string _entName, UreTechEngine::Tra
 
 void MyPlayerPawn::begin()
 {
-	texture text = TextureManager::getInstance()->loadTextureFromFile("content/Textures/susTM.png");
+	texture text = TextureManager::getInstance()->loadTextureFromFile("/test/tText0.jpg");
 	Material myMat;
 	myMat.colorText = text;
-	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("content/Meshs/defaultCapsule.obj", myMat);
+	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/monke.obj", myMat);
 	UreTechEngine::EngineConsole::log("oldu brom!", UreTechEngine::EngineConsole::INFO_NORMAL);
 }

@@ -21,49 +21,62 @@ MeshManager* MeshManager::getInstance()
 	}
 }
 
-glm::vec3 calculateNormal(const Vertex& v0, const Vertex& v1, const Vertex& v2) {
-	glm::vec3 edge1 = v1.pos - v0.pos;
-	glm::vec3 edge2 = v2.pos - v0.pos;
+glm::vec3 computeFaceNormal(const triangleFace& face) {
+	glm::vec3 edge1 = face.v1.pos - face.v0.pos;
+	glm::vec3 edge2 = face.v2.pos - face.v0.pos;
 	return glm::normalize(glm::cross(edge1, edge2));
 }
 
 void calculateSmoothNormals(std::vector<triangleFace>& faces) {
-	std::unordered_map<int, glm::vec3> vertexNormals;
-	std::unordered_map<int, int> vertexCount;
+	struct SmoothVertex {
+		glm::vec3 position;
+		glm::vec3 normalSum = glm::vec3(0.0f);
+		uint64_t smoothGroup;
+		int count = 0;
+	};
 
-	for (const auto& face : faces) {
-		glm::vec3 normal = calculateNormal(face.v0, face.v1, face.v2);
+	std::vector<SmoothVertex> smoothVertices;
 
-		vertexNormals[face.v0.textureIndex] += normal;
-		vertexNormals[face.v1.textureIndex] += normal;
-		vertexNormals[face.v2.textureIndex] += normal;
+	for (auto& face : faces) {
+		glm::vec3 faceNormal = computeFaceNormal(face);
 
-		vertexCount[face.v0.textureIndex]++;
-		vertexCount[face.v1.textureIndex]++;
-		vertexCount[face.v2.textureIndex]++;
+		for (Vertex* v : { &face.v0, &face.v1, &face.v2 }) {
+			bool found = false;
+
+			for (auto& sv : smoothVertices) {
+				if (sv.smoothGroup == face.smoothGroup && sv.position == v->pos) {
+					sv.normalSum += faceNormal;
+					sv.count++;
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				smoothVertices.push_back({ v->pos, faceNormal, face.smoothGroup, 1 });
+			}
+		}
 	}
 
-	for (auto& entry : vertexNormals) {
-		int vertexIndex = entry.first;
-		glm::vec3 avgNormal = entry.second / float(vertexCount[vertexIndex]);
-		vertexNormals[vertexIndex] = glm::normalize(avgNormal);
+	for (auto& sv : smoothVertices) {
+		sv.normalSum = glm::normalize(sv.normalSum);
+	}
 
-		for (auto& face : faces) {
-			if (face.v0.textureIndex == vertexIndex) {
-				face.v0.norm = vertexNormals[vertexIndex];
-			}
-			if (face.v1.textureIndex == vertexIndex) {
-				face.v1.norm = vertexNormals[vertexIndex];
-			}
-			if (face.v2.textureIndex == vertexIndex) {
-				face.v2.norm = vertexNormals[vertexIndex];
+	for (auto& face : faces) {
+		for (Vertex* v : { &face.v0, &face.v1, &face.v2 }) {
+			for (auto& sv : smoothVertices) {
+				if (sv.smoothGroup == face.smoothGroup && sv.position == v->pos) {
+					v->norm = sv.normalSum;
+					break;
+				}
 			}
 		}
 	}
 }
 
-mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat)
+mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat, bool useSmooth)
 {
+	bool isUsedSmooth = false;
 	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices,finalIndices;
 	std::vector< glm::vec3 > temp_vertices;
 	std::vector< glm::vec2 > temp_uvs;
@@ -131,6 +144,9 @@ mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat)
 			else if (lines[i].substr(2) == "s ") {// smooth group
 				try {
 					smoothGroup = std::stoull(lines[i].substr(INT64_MAX, 2));
+					if (smoothGroup != 0) {
+						isUsedSmooth = true;
+					}
 				}
 				catch (std::exception) {
 					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid smooth group data! " + filePath + "-->" + std::to_string(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
@@ -172,44 +188,37 @@ mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat)
 		face.v0 = Vertex(temp_vertices[vertexIndices[(a)]], temp_uvs[uvIndices[(a)]], temp_normals[normalIndices[(a)]], tmp_face_texture_index[(a)]);
 		face.v1 = Vertex(temp_vertices[vertexIndices[(a)+1]], temp_uvs[uvIndices[(a) + 1]], temp_normals[normalIndices[(a) + 1]], tmp_face_texture_index[(a+1)]);
 		face.v2 = Vertex(temp_vertices[vertexIndices[(a)+2]], temp_uvs[uvIndices[(a) + 2]], temp_normals[normalIndices[(a) + 2]], tmp_face_texture_index[(a+2)]);
-		face.smoothGroup = temp_face_smoothGroups[a / 3];// div by 3 because 3 vertices
+		face.smoothGroup = temp_face_smoothGroups[a];// div by 3 because 3 vertices
 		faces.push_back(face);
 		finalIndices.push_back((a));
 		finalIndices.push_back((a) + 1);
 		finalIndices.push_back((a) + 2);
 	}
-
-	std::vector<std::vector<triangleFace>> smoothTempFaces;
-	for (uint64_t i = 0; i < faces.size(); i++) {
-		if (smoothTempFaces.size() == 0) {
-			smoothTempFaces.push_back(std::vector<triangleFace>());
-			smoothTempFaces[0].push_back(faces[i]);
-		}
-		else {
-			bool found = false;
-			for (uint64_t j = 0; j < smoothTempFaces.size(); j++) {
-				if (faces[i].smoothGroup == smoothTempFaces[j][0].smoothGroup) {
-					smoothTempFaces[j].push_back(faces[i]);
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
+	if (useSmooth && isUsedSmooth) {
+		UreTechEngine::EngineConsole::log("(Mesh Loader): Using smooth! Path:" + filePath, UreTechEngine::EngineConsole::DEBUG);
+		std::vector<std::vector<triangleFace>> smoothTempFaces;
+		uint64_t csf = 0;
+		smoothTempFaces.resize(1, std::vector<triangleFace>());
+		for (uint64_t i = 0; i < faces.size(); i++) {
+			if (csf != faces[i].smoothGroup) {
+				csf = faces[i].smoothGroup;
 				smoothTempFaces.push_back(std::vector<triangleFace>());
-				smoothTempFaces[smoothTempFaces.size() - 1].push_back(faces[i]);
+				smoothTempFaces[csf - 1].push_back(faces[i]);
+			}
+			else {
+				smoothTempFaces[csf].push_back(faces[i]);
+			}
+		}
+		for (uint64_t i = 0; i < smoothTempFaces.size(); i++) {
+			calculateSmoothNormals(smoothTempFaces[i]);
+		}
+		faces.clear();
+		for (uint64_t i = 0; i < smoothTempFaces.size(); i++) {
+			for (uint64_t j = 0; j < smoothTempFaces[i].size(); j++) {
+				faces.push_back(smoothTempFaces[i][j]);
 			}
 		}
 	}
-	for (uint64_t i = 0; i < smoothTempFaces.size(); i++) {
-		calculateSmoothNormals(smoothTempFaces[i]);
-	}
-	faces.clear();
-	for (uint64_t i = 0; i < smoothTempFaces.size(); i++) {
-		for (uint64_t j = 0; j < smoothTempFaces[i].size(); j++) {
-			faces.push_back(smoothTempFaces[i][j]);
-		}
-	}
-
 	std::vector<Vertex>tmpVert;
 
 	vertexArrayObject* _vao = new vertexArrayObject();

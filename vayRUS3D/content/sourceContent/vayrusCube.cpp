@@ -12,7 +12,7 @@ void vayrusCube::begin() {
 	texture tex = TextureManager::getInstance()->loadTextureFromFile("/test/tText0.jpg");
 	Material mymat;
 	mymat.colorText = tex;
-	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/monke.obj",mymat);
+	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/monke_smth.obj",mymat);
 	if (this->entityMesh == nullptr) {
 		UreTechEngine::EngineConsole::log("vayRUS cube can not load mesh!", UreTechEngine::EngineConsole::t_error::ERROR_NORMAL);
 	}

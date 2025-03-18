@@ -108,6 +108,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	
 }
+
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 	if (button == GLFW_MOUSE_BUTTON_RIGHT) {
@@ -206,22 +207,6 @@ void RenderColoredText(std::string text) {
 	}
 }
 
-dArray<UreTechEngine::string> parseWith(std::string str, char c) {
-	dArray<UreTechEngine::string> res;
-	UreTechEngine::string block;
-	for (uint64_t i = 0; i < str.size(); i++) {
-		if (str[i] != c) {
-			block.push_back(str[i]);
-		}
-		else {
-			res.push_back(block);
-			block = "";
-		}
-	}
-	res.push_back(block);
-	return res;
-}
-
 std::string getCPUInfo() {
 	int cpuInfo[4] = { 0 };
 	char cpuName[49] = { 0 };
@@ -247,6 +232,22 @@ std::string getCPUInfo() {
 typedef dArray<UreTechEngine::string> conArgs;
 
 typedef void (*conFunc)(conArgs);
+
+dArray<UreTechEngine::string> parseWith(UreTechEngine::string str, char c) {
+	dArray<UreTechEngine::string> res;
+	UreTechEngine::string block;
+	for (uint64_t i = 0; i < str.lenght(); i++) {
+		if (str[i] != c) {
+			block.push_back(str[i]);
+		}
+		else {
+			res.push_back(block);
+			block = "";
+		}
+	}
+	res.push_back(block);
+	return res;
+}
 
 struct commandStruct {
 	UreTechEngine::string commandName = "";
