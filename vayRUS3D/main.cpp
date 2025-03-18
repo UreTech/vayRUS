@@ -206,9 +206,20 @@ void RenderColoredText(std::string text) {
 	}
 }
 
-void SetFullScreen(HWND hWnd) {
-	SetWindowLong(hWnd, GWL_STYLE, WS_POPUP);
-	ShowWindow(hWnd, SW_MAXIMIZE);
+dArray<UreTechEngine::string> parseWith(std::string str, char c) {
+	dArray<UreTechEngine::string> res;
+	UreTechEngine::string block;
+	for (uint64_t i = 0; i < str.size(); i++) {
+		if (str[i] != c) {
+			block.push_back(str[i]);
+		}
+		else {
+			res.push_back(block);
+			block = "";
+		}
+	}
+	res.push_back(block);
+	return res;
 }
 
 std::string getCPUInfo() {
@@ -270,18 +281,6 @@ void con_command_info(conArgs args) {
 	EngineConsole::log(FULL_ENGINE_DESCRIPTION, EngineConsole::INFO_NORMAL);
 }
 
-void con_command_system(conArgs args) {
-	std::ostringstream info;
-	info << "\nGPU (Renderer): " << glGetString(GL_RENDERER) << "\n";
-	info << "Manufacturer (Vendor): " << glGetString(GL_VENDOR) << "\n";
-	info << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
-	info << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n";
-	info << "Current resolution: " << UreTechEngineClass::displayWidth << "x" << UreTechEngineClass::displayHeight << "\n";
-
-	EngineConsole::log("\n"+getCPUInfo(), EngineConsole::INFO_NORMAL);
-	EngineConsole::log(info.str(), EngineConsole::INFO_NORMAL);
-}
-
 void con_command_help(conArgs args) {
 	EngineConsole::log("All main console commands:", EngineConsole::INFO_NORMAL);
 	for (uint64_t i = 0; i < conFuncs.size(); i++) {
@@ -290,10 +289,8 @@ void con_command_help(conArgs args) {
 }
 
 void con_command_clear(conArgs args) {
+	system("cls");
 	EngineConsole::messages.clear();
-	if (externalConsoleState) {
-		system("cls");
-	}
 }
 
 void con_command_console(conArgs args) {
@@ -351,8 +348,6 @@ void con_command_screen(conArgs args) {
 void initCommands() {
 	conFuncs.push_back(commandStruct("help", con_command_help));
 	conFuncs.push_back(commandStruct("info", con_command_info));
-	conFuncs.push_back(commandStruct("system", con_command_system));
-	conFuncs.push_back(commandStruct("screen", con_command_screen));
 	conFuncs.push_back(commandStruct("quit", con_command_quit));
 	conFuncs.push_back(commandStruct("clear", con_command_clear));
 	conFuncs.push_back(commandStruct("console", con_command_console));
