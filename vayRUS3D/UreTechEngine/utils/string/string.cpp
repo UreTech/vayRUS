@@ -62,6 +62,14 @@ string::string(const string& _str)
 	this->assign(_str.s_data, _str.s_size);
 }
 
+string::string(const std::string& _sstr)
+{
+	s_size = 0;
+	s_data = nullptr;
+	haltWithFatalError = false;
+	this->assign(_sstr.data(), _sstr.size());
+}
+
 UreTechEngine::string::~string()
 {
 	if (this != nullptr) {
@@ -121,59 +129,58 @@ bool string::operator==(const char* other) {
 	}
 }
 
-string& string::operator=(string other) {
+string string::operator=(string other) {
 	this->assign(other.s_data, other.s_size);
 	return *this;
 }
 
-string& string::operator=(const char* _str) {
+string string::operator=(std::string other) {
+	this->assign(other.data(), other.size());
+	return *this;
+}
+
+string string::operator=(const char* _str) {
 	this->assign_cstr_type(_str);
 	return *this;
 }
 
-string& string::operator+=(string other) {
+string string::operator+=(string other) {
 	this->append(other);
 	return *this;
 }
 
-string& string::operator+(string other) {
-	string* tmp = new string(*this);
-	tmp->append(other);
-	return *tmp;
+string string::operator+(string other) {
+	string tmp(*this);
+	tmp.append(other);
+	return tmp;
 }
 
-string& string::operator+(std::string other) {
-	string* tmp = new string(*this);
-	tmp->append(u_str(other));
-	return *tmp;
-}
-
-string& UreTechEngine::operator+(const char* other0, string& other1)
+UreTechEngine::string UreTechEngine::operator+(const char* other0, UreTechEngine::string& other1)
 {
-	string* tmp = new string(other0);
-	tmp->append(other1);
-	return *tmp;
+	string tmp(other0);
+	tmp.append(string(other1));
+	return tmp;
 }
 
-string& UreTechEngine::operator+(string& other0, const char* other1)
+UreTechEngine::string UreTechEngine::operator+(UreTechEngine::string& other0, const char* other1)
 {
-	string* tmp = new string(other0);
-	tmp->append(string(other1));
-	return *tmp;
+	string tmp(other0);
+	tmp.append(string(other1));
+	return tmp;
 }
 
-string& UreTechEngine::operator+(std::string& other0, string& other1)
+UreTechEngine::string UreTechEngine::operator+(std::string& other0, UreTechEngine::string& other1)
 {
-	string* tmp = new string(other0.data(),other0.size());
-	tmp->append(other1);
-	return *tmp;
+	string tmp((char*)other0.c_str(), other0.size());
+	tmp.append(string(other1));
+	return tmp;
 }
-
+/*
 UreTechEngine::string::operator std::string()
 {
 	return std::string(s_data, s_size);
 }
-
+*/
 // public funcs
 bool string::empty()
 {
@@ -359,4 +366,9 @@ void string::rawAssign(char* data, size_t size)
 	this->clear();
 	s_size = size;
 	s_data = data;
+}
+
+string UreTechEngine::string::stdStrToUStr(std::string _str)
+{
+	return string(_str.data(), _str.size());
 }

@@ -2,16 +2,17 @@
 
 #include"nlohmann/json.hpp"
 
+#include<../UreTechEngine/utils/string/string.h>
 typedef unsigned int texture;
 
 class Material {
 public:
 	texture colorText;
-	std::string colorTextPath = "";
+	UreTechEngine::string colorTextPath = "";
 	texture normalMap;
-	std::string normalMapPath = "";
+	UreTechEngine::string normalMapPath = "";
 	bool litRender = true;
 	float specularStrength = 0.0f;
-	void saveMaterial(std::string savePath);
-	void loadMaterial(std::string savePath);
+	void saveMaterial(UreTechEngine::string savePath);
+	void loadMaterial(UreTechEngine::string savePath);
 };

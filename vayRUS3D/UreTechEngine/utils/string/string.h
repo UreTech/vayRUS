@@ -31,6 +31,9 @@ namespace UreTechEngine {
 		// c5 copier
 		string(const string& _str);
 
+		// c6 std::string copier
+		string(const std::string& _sstr);
+
 		// d1
 		~string();
 
@@ -50,31 +53,31 @@ namespace UreTechEngine {
 		bool operator==(const char* other);
 
 		// copies data into it self
-		string& operator=(string other);
+		string operator=(string other);
 
 		// copies data into it self
-		string& operator=(const char* _str);
+		string operator=(std::string other);
+
+		// copies data into it self
+		string operator=(const char* _str);
 
 		// append operator
-		string& operator+=(string other);
+		string operator+=(string other);
 
 		// string + string add operator
-		string& operator+(string other);
-
-		// string + std::string add operator
-		string& operator+(std::string other);
+		string operator+(string other);
 
 		// char + string add operator
-		friend string& operator+(const char* other0, string& other1);
+		friend UreTechEngine::string operator+(const char* other0, UreTechEngine::string& other1);
 
-		// char + string add operator
-		friend string& operator+(string& other0, const char* other1);
+		// string + char add operator
+		friend UreTechEngine::string operator+(UreTechEngine::string& other0, const char* other1);
 
 		// std::string + string add operator
-		friend string& operator+(std::string& other0, string& other1);
+		friend UreTechEngine::string operator+(std::string& other0, UreTechEngine::string& other1);
 
 		// std::string convertion
-		operator std::string();
+		//operator std::string();
 
 		// is empty
 		bool empty();
@@ -124,5 +127,7 @@ namespace UreTechEngine {
 
 		// sets direct pointer to data
 		void rawAssign(char* data, size_t size);
+
+		static string stdStrToUStr(std::string _str);
 	};
 }

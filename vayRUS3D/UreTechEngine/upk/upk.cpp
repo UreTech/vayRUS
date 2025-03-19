@@ -55,7 +55,7 @@ void upk_API::readAndCreateTree(std::string path)
 	//read encrypt or decrypt file
 	UreTechEngine::Buffer hFileBuff = fileSys::readFile(path);
 	if (hFileBuff.pointer == nullptr) {
-		EngineConsole::log(upk_PackagerHeaderTitle + upk_error + "Can not read header file!", EngineConsole::t_error::ERROR_NORMAL);
+		EngineConsole::log(upk_PackagerHeaderTitle  upk_error  "Can not read header file!", EngineConsole::t_error::ERROR_NORMAL);
 		return;
 	}
 	headerLine = std::string((char*)hFileBuff.pointer, hFileBuff.size);
@@ -64,23 +64,23 @@ void upk_API::readAndCreateTree(std::string path)
 	if (headerLine.substr(0, 10) == "-encrypted") {
 		isRootEncrypted = false;
 		isEncrypted = true;
-		EngineConsole::log(upk_PackagerHeaderTitle + upk_info + "File is encrypted!", EngineConsole::t_error::INFO_NORMAL);
+		EngineConsole::log(upk_PackagerHeaderTitle  upk_info  "File is encrypted!", EngineConsole::t_error::INFO_NORMAL);
 		deletingArea = 11;
 	}
 	else if (headerLine.substr(0, 10) == "-decrypted") {
 		isRootEncrypted = false;
 		isEncrypted = false;
 		deletingArea = 11;
-		EngineConsole::log(upk_PackagerHeaderTitle + upk_info + "File is not encrypted!", EngineConsole::t_error::INFO_NORMAL);
+		EngineConsole::log(upk_PackagerHeaderTitle  upk_info  "File is not encrypted!", EngineConsole::t_error::INFO_NORMAL);
 	}
 	else if (headerLine.substr(0, 15) == "-root-encrypted") {
 		isRootEncrypted = true;
 		isEncrypted = true;
 		deletingArea = 16;
-		EngineConsole::log(upk_PackagerHeaderTitle + upk_info + "File is root-encrypted!", EngineConsole::t_error::INFO_NORMAL);
+		EngineConsole::log(upk_PackagerHeaderTitle  upk_info  "File is root-encrypted!", EngineConsole::t_error::INFO_NORMAL);
 	}
 	else {
-		EngineConsole::log(upk_PackagerHeaderTitle + upk_error + "unknown encryption header!", EngineConsole::t_error::ERROR_NORMAL);
+		EngineConsole::log(upk_PackagerHeaderTitle  upk_error  "unknown encryption header!", EngineConsole::t_error::ERROR_NORMAL);
 	}
 	headerLine.~basic_string();
 
@@ -98,7 +98,7 @@ void upk_API::readAndCreateTree(std::string path)
 		UreTechEngine::Buffer tempRawBuf;
 		tempRawBuf.pointer = rawBuffer.data();
 		tempRawBuf.size = rawBuffer.size();
-		EngineConsole::log(upk_PackagerHeaderTitle + upk_info + " decrypting header...", EngineConsole::t_error::INFO_NORMAL);
+		EngineConsole::log(upk_PackagerHeaderTitle  upk_info  " decrypting header...", EngineConsole::t_error::INFO_NORMAL);
 		decryptedBufferOut = encryptor::xorEncryptDecrypt(tempRawBuf, encryptionKey);
 		lines.clear();
 
@@ -141,13 +141,13 @@ void upk_API::readAndCreateTree(std::string path)
 	}
 	allFilesInPackage.push_back(dummy);
 
-	EngineConsole::log(upk_PackagerHeaderTitle + upk_info + "Package tree read! Total: " + std::to_string(allFilesInPackage.size()) + " files found.", EngineConsole::t_error::INFO_NORMAL);
+	EngineConsole::log(upk_PackagerHeaderTitle upk_info "Package tree read! Total: " + string::stdStrToUStr(std::to_string(allFilesInPackage.size())) + " files found.", EngineConsole::t_error::INFO_NORMAL);
 	for (uint64_t i = 0; i < allFilesInPackage.size(); i++) {
 		if (allFilesInPackage.at(i).directory.size() > rootPath.size()) {
-			EngineConsole::log(upk_PackagerHeaderTitle + upk_info + "FileDirectory: " + allFilesInPackage.at(i).directory.substr(rootPath.size()), EngineConsole::t_error::INFO_NORMAL);
+			EngineConsole::log(upk_PackagerHeaderTitle  upk_info  "FileDirectory: " + string::stdStrToUStr(allFilesInPackage.at(i).directory.substr(rootPath.size())), EngineConsole::t_error::INFO_NORMAL);
 		}
 		else {
-			EngineConsole::log(upk_PackagerHeaderTitle + upk_info + "FileDirectory: " + allFilesInPackage.at(i).directory, EngineConsole::t_error::INFO_NORMAL);
+			EngineConsole::log(upk_PackagerHeaderTitle  upk_info  "FileDirectory: " + string::stdStrToUStr(allFilesInPackage.at(i).directory), EngineConsole::t_error::INFO_NORMAL);
 		}
 	}
 }
@@ -170,9 +170,9 @@ std::string findAndReplace(std::string str, char toRemove, char toReplace) {
 	return str;
 }
 
-Buffer upk_API::get(std::string path)
+Buffer upk_API::get(UreTechEngine::string path)
 {
-	path = findAndReplace(path, '/', '\\');
+	path = findAndReplace(path.std_str(), '/', '\\');
 	std::string removingPart = rootPath + "";
 	bool notFound = true;
 	inPackageFile item;
@@ -193,7 +193,7 @@ Buffer upk_API::get(std::string path)
 		while (1) {
 			if (inputFile.is_open()) {
 				if (!inputFile) {
-					EngineConsole::log(upk_PackagerHeaderTitle + "invalid partition file!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
+					EngineConsole::log(upk_PackagerHeaderTitle "invalid partition file!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
 					notFound = true;
 					break;
 				}
@@ -205,7 +205,7 @@ Buffer upk_API::get(std::string path)
 			}
 			else {
 				notFound = true;
-				EngineConsole::log(upk_PackagerHeaderTitle + "invalid partition file!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
+				EngineConsole::log(upk_PackagerHeaderTitle "invalid partition file!", EngineConsole::t_error::WARN_CAN_CAUSE_ERROR);
 				break;
 			}
 			break;
@@ -222,7 +222,7 @@ Buffer upk_API::get(std::string path)
 
 		}
 		else {
-			EngineConsole::log(upk_PackagerHeaderTitle + "0 byte file ignoring.", EngineConsole::t_error::ERROR_NORMAL);
+			EngineConsole::log(upk_PackagerHeaderTitle "0 byte file ignoring.", EngineConsole::t_error::ERROR_NORMAL);
 			notFound = true;
 		}
 	}
@@ -230,10 +230,10 @@ Buffer upk_API::get(std::string path)
 		passFileData.pointer = nullptr;
 	}*/
 	if (passFileData.pointer != nullptr) {
-		EngineConsole::log(upk_PackagerHeaderTitle + " File loaded: " + path, EngineConsole::t_error::INFO_NORMAL);
+		EngineConsole::log(upk_PackagerHeaderTitle " File loaded: " + path, EngineConsole::t_error::INFO_NORMAL);
 	}
 	else {
-		EngineConsole::log(upk_PackagerHeaderTitle + upk_error + " Can not open file: " + path, EngineConsole::t_error::ERROR_NORMAL);
+		EngineConsole::log(upk_PackagerHeaderTitle upk_error " Can not open file: " + path, EngineConsole::t_error::ERROR_NORMAL);
 	}
 	return passFileData;
 }
@@ -243,9 +243,9 @@ void upk_API::extractTo(std::string toExtractPath)
 	EngineConsole::log("extractTo function is undefined on vayRUS Engine build!", EngineConsole::t_error::ERROR_NORMAL);
 }
 
-void upk_API::setEncryptionKey(std::string key)
+void upk_API::setEncryptionKey(UreTechEngine::string key)
 {
-	this->encryptionKey = key;
+	this->encryptionKey = key.std_str();
 }
 
 std::string upk_API::packageInfo()

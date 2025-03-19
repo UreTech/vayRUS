@@ -34,10 +34,10 @@ void ShaderProgram::addUniform(const std::string& varName)
 {
 	m_UniformVars[varName] = glGetUniformLocation(programID, varName.c_str());
 	if ((int)m_UniformVars[varName] == -1) {
-		UreTechEngine::EngineConsole::log(string(varName) + string(" ") + string(std::to_string(m_UniformVars[varName])) + string(" is missing!"), UreTechEngine::EngineConsole::WARN_CAN_CAUSE_ERROR);
+		UreTechEngine::EngineConsole::log(string::stdStrToUStr(varName) + " " + string::stdStrToUStr(std::to_string(m_UniformVars[varName])) + " is missing!", UreTechEngine::EngineConsole::WARN_CAN_CAUSE_ERROR);
 	}
 	else {
-		UreTechEngine::EngineConsole::log(varName + " " + std::to_string(m_UniformVars[varName]), UreTechEngine::EngineConsole::INFO_NORMAL);
+		UreTechEngine::EngineConsole::log(string::stdStrToUStr(varName) + " " + string::stdStrToUStr(std::to_string(m_UniformVars[varName])), UreTechEngine::EngineConsole::INFO_NORMAL);
 	}
 }
 
@@ -85,8 +85,8 @@ void ShaderProgram::setTexture(const std::string& varName, int _textureLvl)
  void ShaderProgram::attachShader(const char* fileName, unsigned int shaderType)
 {
 	 unsigned int shaderID = glCreateShader(shaderType);
-	 std::string data = getShaderFromFile(fileName);
-	 const char* sourceCode = &data[0];
+	 UreTechEngine::string data = getShaderFromFile(fileName);
+	 const char* sourceCode = data.c_str();
 
 	 glShaderSource(shaderID, 1, &sourceCode, 0);
 
@@ -97,7 +97,7 @@ void ShaderProgram::setTexture(const std::string& varName, int _textureLvl)
 	 glGetShaderiv(shaderID, GL_COMPILE_STATUS, &isCompl);
 	 if (!isCompl) {
 		 glGetShaderInfoLog(shaderID, 512, 0, log);
-		 UreTechEngine::EngineConsole::log("ShaderType:" + std::to_string(shaderType) + "\n" + log, UreTechEngine::EngineConsole::ERROR_FATAL);
+		 UreTechEngine::EngineConsole::log("ShaderType:" + string::stdStrToUStr(std::to_string(shaderType)) + "\n" + log, UreTechEngine::EngineConsole::ERROR_FATAL);
 	 }
 
 	 glAttachShader(programID, shaderID);
@@ -105,9 +105,9 @@ void ShaderProgram::setTexture(const std::string& varName, int _textureLvl)
 	 glDeleteShader(shaderID);
 }
 
- std::string ShaderProgram::getShaderFromFile(const char* fileName)
+ UreTechEngine::string ShaderProgram::getShaderFromFile(const char* fileName)
  {
-	 std::string data;
+	 UreTechEngine::string data;
 	 if (UPK_ENABLE_PACKAGE_SYSTEM) {
 		 Buffer shaderBuf = UreTechEngine::UreTechEngineClass::getEngine()->package->get(fileName);
 		 data = string((char*)shaderBuf.pointer, shaderBuf.size);
@@ -118,7 +118,7 @@ void ShaderProgram::setTexture(const std::string& varName, int _textureLvl)
 		 if (file.is_open()) {
 			 char readingChar;
 			 while ((readingChar = file.get()) != EOF) {
-				 data += readingChar;
+				 data.push_back(readingChar);
 			 }
 			 file.close();
 		 }

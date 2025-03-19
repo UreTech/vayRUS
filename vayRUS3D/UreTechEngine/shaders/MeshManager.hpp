@@ -6,7 +6,7 @@ class Material;
 class MeshManager {
 public:
 	static MeshManager* getInstance();
-	mesh* imp_mesh_obj_type(std::string filePath, Material _mat, bool useSmooth = true);
+	mesh* imp_mesh_obj_type(UreTechEngine::string filePath, Material _mat, bool useSmooth = true);
 private:
 	static MeshManager* c_Instance;
 	MeshManager();

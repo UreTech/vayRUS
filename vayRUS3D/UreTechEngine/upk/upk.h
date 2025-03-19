@@ -25,9 +25,9 @@ struct inPackageFile {
 class upk_API {
 public:
 	void readAndCreateTree(std::string path);
-	Buffer get(std::string path);
+	Buffer get(UreTechEngine::string path);
 	void extractTo(std::string toExtractPath);
-	void setEncryptionKey(std::string key);
+	void setEncryptionKey(UreTechEngine::string key);
 	std::string packageInfo();
 private:
 	std::vector<inPackageFile> allFilesInPackage;

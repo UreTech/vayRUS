@@ -17,18 +17,28 @@ int UreTechEngine::getBiggestDiv(int divided, int dividing)
     return result;
 }
 
-std::string UreTechEngine::intToHex(uint64_t value)
+UreTechEngine::string UreTechEngine::u64ToHexStr(uint64_t value)
 {
     std::stringstream ss;
     ss << "0x" << std::hex << std::uppercase << value;
-    return ss.str();
+    return string(ss.str().data(), ss.str().size());
 }
 
-UreTechEngine::dArray<UreTechEngine::string> UreTechEngine::parseWith(std::string str, char c)
+UreTechEngine::string UreTechEngine::u64ToDecStr(uint64_t value)
+{
+    return string::stdStrToUStr(std::to_string(value));
+}
+
+uint64_t UreTechEngine::strToU64(UreTechEngine::string str)
+{
+    return std::stoull(str.std_str());
+}
+
+UreTechEngine::dArray<UreTechEngine::string> UreTechEngine::parseWith(UreTechEngine::string str, char c)
 {
     UreTechEngine::dArray<UreTechEngine::string> res;
     UreTechEngine::string block;
-    for (uint64_t i = 0; i < str.size(); i++) {
+    for (uint64_t i = 0; i < str.lenght(); i++) {
         if (str[i] != c) {
             block.push_back(str[i]);
         }

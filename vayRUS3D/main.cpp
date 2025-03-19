@@ -233,22 +233,6 @@ typedef dArray<UreTechEngine::string> conArgs;
 
 typedef void (*conFunc)(conArgs);
 
-dArray<UreTechEngine::string> parseWith(UreTechEngine::string str, char c) {
-	dArray<UreTechEngine::string> res;
-	UreTechEngine::string block;
-	for (uint64_t i = 0; i < str.lenght(); i++) {
-		if (str[i] != c) {
-			block.push_back(str[i]);
-		}
-		else {
-			res.push_back(block);
-			block = "";
-		}
-	}
-	res.push_back(block);
-	return res;
-}
-
 struct commandStruct {
 	UreTechEngine::string commandName = "";
 	conFunc func = nullptr;
@@ -565,7 +549,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			ImGui::BeginChild("ENTITIES", ImVec2(0, windowSize.y - 100), true);
 			for (uint64_t i = 0; i < engine->getCountOfEntity(); i++) {
 				ImGui::PushID(i);
-				ImGui::Text(std::string(engine->getEntityWithIndex(i)->entClassName + ": " + engine->getEntityWithIndex(i)->entName).c_str());
+				ImGui::Text((engine->getEntityWithIndex(i)->entClassName + ": " + engine->getEntityWithIndex(i)->entName).c_str());
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(windowSize.x - 180);
 				if (ImGui::Button("Delete",ImVec2(70,20))) {
@@ -611,7 +595,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		if (modifyWindow) {
 			ImGui::Begin("Modify", &modifyWindow);
 			if (engine->isValidEntity(entToModify)) {
-				ImGui::Text(std::string("Entity --> " + engine->getEntityWithID(entToModify)->entName).c_str());
+				ImGui::Text(("Entity --> " + engine->getEntityWithID(entToModify)->entName).c_str());
 				entity* abasd = engine->getEntityWithID(entToModify);
 				ImGui::DragScalarN("Location", ImGuiDataType_Float, &engine->getEntityWithID(entToModify)->transform.Location, 3);
 				ImGui::DragScalarN("Rotation", ImGuiDataType_Float, &engine->getEntityWithID(entToModify)->transform.Rotation, 3);
@@ -632,7 +616,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		if (renameEntWindow) {
 			ImGui::Begin("Rename Entity", &modifyWindow);
 			if (engine->isValidEntity(entToModify)) {
-				ImGui::Text(std::string("Entity --> " + engine->getEntityWithID(entToModify)->entName).c_str());
+				ImGui::Text(("Entity --> " + engine->getEntityWithID(entToModify)->entName).c_str());
 				ImGui::InputText("New Name", renameEntInputBuffer, ImGui_Max_InputChars);
 				ImGui::SameLine();
 				if (ImGui::Button("Apply")) {
@@ -672,7 +656,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			ImGui::EndChild();
 
 			if (ImGui::InputText("Command", consoleInputBuffer, ImGui_Max_InputChars, ImGuiInputTextFlags_EnterReturnsTrue)) {
-				std::string conInputStr(consoleInputBuffer); // string saved
+				UreTechEngine::string conInputStr(consoleInputBuffer); // string saved
 				executeCommand(conInputStr);
 				consoleInputBuffer[0] = '\0'; // Cleared after bruh
 			}
@@ -704,7 +688,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			UreTechEngine::UreTechEngineClass::windowMinmized = true;
 		}
 
-		glfwSwapInterval(1);
+		//glfwSwapInterval(1);
 		glfwSwapBuffers(window);
 	}
 

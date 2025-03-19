@@ -74,7 +74,7 @@ void calculateSmoothNormals(std::vector<triangleFace>& faces) {
 	}
 }
 
-mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat, bool useSmooth)
+mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath,Material _mat, bool useSmooth)
 {
 	bool isUsedSmooth = false;
 	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices,finalIndices;
@@ -87,7 +87,7 @@ mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat, bool us
 
 	if (UPK_ENABLE_PACKAGE_SYSTEM) {
 		Buffer objImpBuf = UreTechEngineClass::getEngine()->package->get(filePath);
-		file = string((char*)objImpBuf.pointer, objImpBuf.size);
+		file = string((char*)objImpBuf.pointer, objImpBuf.size).std_str();
 		if (objImpBuf.pointer == nullptr) {
 			UreTechEngine::EngineConsole::log("(Mesh Loader): Can not open source file! (UPK) Path:" + filePath, UreTechEngine::EngineConsole::ERROR_NORMAL);
 			return nullptr;
@@ -102,7 +102,7 @@ mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat, bool us
 	int textureCount = -1;
 	uint64_t smoothGroup = 0;
 
-	dArray <string> lines = parseWith(file, '\n');
+	dArray <string> lines = parseWith(string::stdStrToUStr(file), '\n');
 
 	for (uint64_t i = 0; i < lines.size(); i++) {
 		if (!lines[i].empty()) {
@@ -115,7 +115,7 @@ mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat, bool us
 					temp_vertices.push_back(glm::vec3(x, y, z));
 				}
 				else {
-					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex data! " + filePath + "-->" + std::to_string(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
 				}
 			}
 			else if (lines[i].substr(3) == "vn ") {// vertex normal
@@ -127,7 +127,7 @@ mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat, bool us
 					temp_normals.push_back(glm::vec3(x, y, z));
 				}
 				else {
-					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex normal data! " + filePath + "-->" + std::to_string(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex normal data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
 				}
 			}
 			else if (lines[i].substr(3) == "vt ") {// texture cord
@@ -138,18 +138,18 @@ mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat, bool us
 					temp_uvs.push_back(glm::vec2(x, y));
 				}
 				else {
-					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex uv data! " + filePath + "-->" + std::to_string(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex uv data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
 				}
 			}
 			else if (lines[i].substr(2) == "s ") {// smooth group
 				try {
-					smoothGroup = std::stoull(lines[i].substr(INT64_MAX, 2));
+					smoothGroup = strToU64(lines[i].substr(INT64_MAX, 2));
 					if (smoothGroup != 0) {
 						isUsedSmooth = true;
 					}
 				}
 				catch (std::exception) {
-					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid smooth group data! " + filePath + "-->" + std::to_string(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid smooth group data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
 				}
 			}
 			else if (lines[i].substr(2) == "f ") {// face (must be 3 at each line)
@@ -162,19 +162,19 @@ mesh* MeshManager::imp_mesh_obj_type(std::string filePath,Material _mat, bool us
 					for (uint64_t j = 1; j < 4; j++) {
 						dArray <string> f1ReadStr = parseWith(f0ReadStr[j], '/');
 						if (f1ReadStr.size() == 3) {
-							vertexIndices.push_back(std::stoull(f1ReadStr[0])-1);
-							uvIndices.push_back(std::stoull(f1ReadStr[1])-1);
-							normalIndices.push_back(std::stoull(f1ReadStr[2])-1);
+							vertexIndices.push_back(strToU64(f1ReadStr[0])-1);
+							uvIndices.push_back(strToU64(f1ReadStr[1])-1);
+							normalIndices.push_back(strToU64(f1ReadStr[2])-1);
 							temp_face_smoothGroups.push_back(smoothGroup);
 							tmp_face_texture_index.push_back(textureCount);
 						}
 						else {
-							UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid f1 data! " + filePath + "-i>" + std::to_string(i) + "-j>" + std::to_string(j), UreTechEngine::EngineConsole::ERROR_NORMAL);
+							UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid f1 data! " + filePath + "-i>" + UreTechEngine::u64ToDecStr(i) + "-j>" + UreTechEngine::u64ToDecStr(j), UreTechEngine::EngineConsole::ERROR_NORMAL);
 						}
 					}
 				}
 				else {
-					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid f0 data! " + filePath + "-->" + std::to_string(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid f0 data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
 				}
 			}
 			else if (lines[i].substr(6) == "usemtl") {

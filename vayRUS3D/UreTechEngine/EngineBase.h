@@ -30,7 +30,7 @@ namespace UreTechEngine {
 			entClassName = "ERROR CLASS TYPE";
 			constructor = nullptr;
 		}
-		entConstructStruct(std::string _entClassName , entConstructFunc _constructor ) {
+		entConstructStruct(UreTechEngine::string _entClassName , entConstructFunc _constructor ) {
 			entClassName = _entClassName;
 			constructor = _constructor;
 		}
@@ -63,9 +63,9 @@ namespace UreTechEngine {
 		GLFWwindow* getWindow();
 		entity* spawnEntity(entity* _toSpawn);
 		entity* getEntityWithIndex(unsigned int _index);
-		entity* getEntityWithName(std::string _entName);
+		entity* getEntityWithName(UreTechEngine::string _entName);
 		entity* getEntityWithID(uint64_t id);
-		bool isThisEntNameAvilable(std::string _entName);
+		bool isThisEntNameAvilable(UreTechEngine::string _entName);
 		bool isValidEntity(uint64_t id);
 		unsigned int getCountOfEntity();
 

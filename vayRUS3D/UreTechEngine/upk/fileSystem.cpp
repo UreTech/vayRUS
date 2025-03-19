@@ -18,7 +18,7 @@ UreTechEngine::Buffer fileSys::readFile(const std::string& filePath) {
     std::ifstream file(filePath, std::ios::binary | std::ios::ate);
 
     if (!file.is_open()) {
-        EngineConsole::log(upk_PackagerFileSysHeaderTitle + upk_error + " Error at opening file(0x0):" + filePath, EngineConsole::t_error::ERROR_NORMAL);
+        EngineConsole::log(upk_PackagerFileSysHeaderTitle upk_error " Error at opening file(0x0):" + string::stdStrToUStr(filePath), EngineConsole::t_error::ERROR_NORMAL);
         EngineConsole::log("bruh", EngineConsole::t_error::ERROR_NORMAL);
         return result;
     }
@@ -31,17 +31,17 @@ UreTechEngine::Buffer fileSys::readFile(const std::string& filePath) {
     result.size = size;
 
     if (buffer == nullptr) {
-        EngineConsole::log(upk_PackagerFileSysHeaderTitle + upk_error + " Bad allocation!", EngineConsole::t_error::ERROR_NORMAL);
+        EngineConsole::log(upk_PackagerFileSysHeaderTitle upk_error " Bad allocation!", EngineConsole::t_error::ERROR_NORMAL);
         return result;
     }
 
     if (!file.read((char*)buffer, size)) {
-        EngineConsole::log(upk_PackagerFileSysHeaderTitle + upk_error + " Error at reading file(0x1):" + filePath, EngineConsole::t_error::ERROR_NORMAL);
+        EngineConsole::log(upk_PackagerFileSysHeaderTitle upk_error " Error at reading file(0x1):" + string::stdStrToUStr(filePath), EngineConsole::t_error::ERROR_NORMAL);
         return result;
     }
 
 #ifdef debugFileReaderOutput
-    EngineConsole::log(upk_PackagerDebugFileSysHeaderTitle + upk_info + "File read successfully:" + filePath, EngineConsole::t_error::INFO_NORMAL);
+    EngineConsole::log(upk_PackagerDebugFileSysHeaderTitle upk_info "File read successfully:" + string::stdStrToUStr(filePath), EngineConsole::t_error::INFO_NORMAL);
 #endif // debugFileReaderOutput
 
     return result;
@@ -58,7 +58,7 @@ size_t fileSys::getFileSize(const std::string& filePath)
         return fileSize;
     }
     else {
-        EngineConsole::log(upk_PackagerFileSysHeaderTitle + upk_error + "An error occured while reading file size!", EngineConsole::t_error::ERROR_NORMAL);
+        EngineConsole::log(upk_PackagerFileSysHeaderTitle upk_error "An error occured while reading file size!", EngineConsole::t_error::ERROR_NORMAL);
         return -1;
     }
 }
@@ -105,7 +105,7 @@ bool fileSys::createFile(std::string path, UreTechEngine::Buffer toWrite) {
     std::ofstream file(path, std::ios::binary);
 
     if (!file) {
-        EngineConsole::log(upk_PackagerFileSysHeaderTitle + upk_error + "An error occurred while creating file! " + path, EngineConsole::t_error::ERROR_NORMAL);
+        EngineConsole::log(upk_PackagerFileSysHeaderTitle upk_error "An error occurred while creating file! " + string::stdStrToUStr(path), EngineConsole::t_error::ERROR_NORMAL);
         return false;
     }
 

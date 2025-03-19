@@ -7,6 +7,7 @@
 #include<fstream>
 #include<iostream>
 #include<map>
+#include<../UreTechEngine/utils/string/string.h>
 class ShaderProgram {
 public:
 	ShaderProgram();
@@ -38,7 +39,7 @@ public:
 private:
 	unsigned int programID;
 	std::map<std::string, unsigned int> m_UniformVars;
-	std::string getShaderFromFile(const char* fileName);
+	UreTechEngine::string getShaderFromFile(const char* fileName);
 
 };
 #endif

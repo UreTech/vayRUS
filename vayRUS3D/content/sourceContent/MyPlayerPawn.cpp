@@ -6,7 +6,7 @@ MyPlayerPawn::MyPlayerPawn(void)
 	entClassName = "MyPlayerPawn";
 }
 
-MyPlayerPawn::MyPlayerPawn(mesh* _mesh, std::string _entName, UreTechEngine::Transform3D trnsfrm)
+MyPlayerPawn::MyPlayerPawn(mesh* _mesh, UreTechEngine::string _entName, UreTechEngine::Transform3D trnsfrm)
 {
 	transform = trnsfrm;
 	entityMesh = _mesh;

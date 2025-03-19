@@ -17,7 +17,7 @@ void UreTechEngine::entity::init(UreTechEngineClass* _ptr)
 
 void UreTechEngine::entity::print(string message)
 {
-	EngineConsole::log(this->entClassName + ":" + this->entName + "(" +intToHex(this->entityID) + ")-->" + message, EngineConsole::DEBUG);
+	EngineConsole::log(this->entClassName + ":" + this->entName + "(" +u64ToHexStr(this->entityID) + ")-->" + message, EngineConsole::DEBUG);
 }
 
 void UreTechEngine::entity::begin()
@@ -34,7 +34,7 @@ UreTechEngine::entity::entity()
 	entityMesh = nullptr;
 }
 
-UreTechEngine::entity::entity(UreTechEngine::vector3& location,UreTechEngine::Rotation& rot,UreTechEngine::vector3& scale, mesh* _mesh, std::string _entName)
+UreTechEngine::entity::entity(UreTechEngine::vector3& location,UreTechEngine::Rotation& rot,UreTechEngine::vector3& scale, mesh* _mesh, UreTechEngine::string _entName)
 	{
 		transform.Location = location;
 		transform.Rotation = rot;
@@ -43,14 +43,14 @@ UreTechEngine::entity::entity(UreTechEngine::vector3& location,UreTechEngine::Ro
 		entName = _entName;
 	}
 
-UreTechEngine::entity::entity(UreTechEngine::vector3& location, mesh* _mesh, std::string _entName)
+UreTechEngine::entity::entity(UreTechEngine::vector3& location, mesh* _mesh, UreTechEngine::string _entName)
 {
 	transform.Location = location;
 	entityMesh = _mesh;
 	entName = _entName;
 }
 
-UreTechEngine::entity::entity(mesh* _mesh, std::string _entName, UreTechEngine::Transform3D trnsfrm)
+UreTechEngine::entity::entity(mesh* _mesh, UreTechEngine::string _entName, UreTechEngine::Transform3D trnsfrm)
 {
 	transform = trnsfrm;
 	entityMesh = _mesh;

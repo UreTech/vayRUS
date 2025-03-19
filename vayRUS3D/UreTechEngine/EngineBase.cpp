@@ -119,9 +119,9 @@ UreTechEngine::entity* UreTechEngine::UreTechEngineClass::spawnEntity(entity* _t
 	_toSpawn->init(this);
 	_toSpawn->begin();
 	string abc(" spawned with id ");
-	UreTechEngine::EngineConsole::log(_toSpawn->entName + abc + intToHex(_toSpawn->entityID), UreTechEngine::EngineConsole::INFO_NORMAL);
+	UreTechEngine::EngineConsole::log(_toSpawn->entName + abc + u64ToHexStr(_toSpawn->entityID), UreTechEngine::EngineConsole::INFO_NORMAL);
 	sceneEntities.push_back(_toSpawn);
-	UreTechEngine::EngineConsole::log("Ent addr: " + intToHex((uint64_t)_toSpawn), UreTechEngine::EngineConsole::DEBUG);
+	UreTechEngine::EngineConsole::log("Ent addr: " + u64ToHexStr((uint64_t)_toSpawn), UreTechEngine::EngineConsole::DEBUG);
 	return sceneEntities[sceneEntities.size() - 1];
 }
 
@@ -130,7 +130,7 @@ UreTechEngine::entity* UreTechEngine::UreTechEngineClass::getEntityWithIndex(uns
 	return sceneEntities[_index];
 }
 
-UreTechEngine::entity* UreTechEngine::UreTechEngineClass::getEntityWithName(std::string _entName)
+UreTechEngine::entity* UreTechEngine::UreTechEngineClass::getEntityWithName(UreTechEngine::string _entName)
 {
 	for (int i = 0; i < sceneEntities.size(); i++) {
 		if (sceneEntities[i]->entName == _entName) {
@@ -150,7 +150,7 @@ entity* UreTechEngine::UreTechEngineClass::getEntityWithID(uint64_t id)
 	return nullptr;
 }
 
-bool UreTechEngine::UreTechEngineClass::isThisEntNameAvilable(std::string _entName)
+bool UreTechEngine::UreTechEngineClass::isThisEntNameAvilable(UreTechEngine::string _entName)
 {
 	for (int i = 0; i < sceneEntities.size(); i++) {
 		if (sceneEntities[i]->entName == _entName) {
@@ -218,19 +218,19 @@ bool UreTechEngine::UreTechEngineClass::killEntity(string _entName)
 void UreTechEngine::UreTechEngineClass::init_upk_system(string path, string encKey)
 {
 	this->package = new upk_API();
-	this->package->setEncryptionKey(encKey);
-	this->package->readAndCreateTree(path);
+	this->package->setEncryptionKey(encKey.c_str());
+	this->package->readAndCreateTree(path.c_str());
 	loadedPackages.push_back(this->package);
-	EngineConsole::log("Imported main package:\n" + this->package->packageInfo(), EngineConsole::t_error::INFO_NORMAL);
+	EngineConsole::log("Imported main package:\n" + string::stdStrToUStr(this->package->packageInfo()), EngineConsole::t_error::INFO_NORMAL);
 }
 
 upk_API* UreTechEngine::UreTechEngineClass::imp_upk_package(string path, string encKey)
 {
 	upk_API* res = new upk_API();
-	this->package->setEncryptionKey(encKey);
-	this->package->readAndCreateTree(path);
+	this->package->setEncryptionKey(encKey.c_str());
+	this->package->readAndCreateTree(path.c_str());
 	loadedPackages.push_back(res);
-	EngineConsole::log("Imported new package:\n" + res->packageInfo(), EngineConsole::t_error::INFO_NORMAL);
+	EngineConsole::log("Imported new package:\n" + string::stdStrToUStr(res->packageInfo()), EngineConsole::t_error::INFO_NORMAL);
 	return res;
 }
 
@@ -260,7 +260,7 @@ void UreTechEngine::UreTechEngineClass::saveCurrentMap(std::string mapPath)
 	if (file.is_open()) {
 		file << std::setw(4) << map << std::endl;
 		file.close();
-		EngineConsole::log(string("map saved as ") + mapPath + string(".UMAP"), EngineConsole::INFO_NORMAL);
+		EngineConsole::log(string("map saved as ") + string::stdStrToUStr(mapPath) + string(".UMAP"), EngineConsole::INFO_NORMAL);
 	}
 	else {
 		EngineConsole::log("can not save the map!", EngineConsole::WARN_NORMAL);
@@ -283,7 +283,7 @@ void UreTechEngine::UreTechEngineClass::saveGame(std::string gamePath)
 	if (file.is_open()) {
 		file << std::setw(4) << game << std::endl;
 		file.close();
-		EngineConsole::log(string("map saved as ") + gamePath + string(".UGAME"), EngineConsole::INFO_NORMAL);
+		EngineConsole::log(string("map saved as ") + string::stdStrToUStr(gamePath) + string(".UGAME"), EngineConsole::INFO_NORMAL);
 	}
 	else {
 		EngineConsole::log("can not save the GAME!", EngineConsole::WARN_NORMAL);
@@ -296,12 +296,12 @@ void UreTechEngine::UreTechEngineClass::loadGame(std::string gamePath)
 
 
 	if (!file.is_open()) {
-		EngineConsole::log(string("game loading error: ") + gamePath + string(".UGAME"), EngineConsole::ERROR_ERROR);
+		EngineConsole::log(string("game loading error: ") + string::stdStrToUStr(gamePath) + string(".UGAME"), EngineConsole::ERROR_ERROR);
 		return;
 	}
 
 	if (!file.good()) {
-		EngineConsole::log(string("game loading error(buffer error): ") + gamePath + string(".UGAME"), EngineConsole::ERROR_ERROR);
+		EngineConsole::log(string("game loading error(buffer error): ") + string::stdStrToUStr(gamePath) + string(".UGAME"), EngineConsole::ERROR_ERROR);
 		return;
 	}
 
@@ -319,10 +319,10 @@ void UreTechEngine::UreTechEngineClass::loadGame(std::string gamePath)
 		if (jsonData.find("GAME") != jsonData.end()) {
 			auto& inner_json = jsonData["GAME"];
 			if (inner_json.find(finding) != inner_json.end()) {
-				std::string laodingMat = jsonData["GAME"][finding]["path"];
+				UreTechEngine::string loadingMat = string::stdStrToUStr(jsonData["GAME"][finding]["path"]);
 				Material lodMat;
-				lodMat.loadMaterial(laodingMat);
-				loadedMaterials[laodingMat] = lodMat;
+				lodMat.loadMaterial(loadingMat);
+				loadedMaterials[loadingMat.c_str()] = lodMat;
 				i++;
 			}
 			else {
@@ -330,11 +330,11 @@ void UreTechEngine::UreTechEngineClass::loadGame(std::string gamePath)
 			}
 		}
 		else {
-			EngineConsole::log(string("game loading error(file is not valid): ") + gamePath + string(".UGAME"), EngineConsole::ERROR_ERROR);
+			EngineConsole::log(string("game loading error(file is not valid): ") + string::stdStrToUStr(gamePath) + string(".UGAME"), EngineConsole::ERROR_ERROR);
 			break;
 		}
 	}
-	EngineConsole::log(string("game loaded: ") + gamePath + string(".UGAME") + std::to_string(i), EngineConsole::INFO_NORMAL);
+	EngineConsole::log(string("game loaded: ") + string::stdStrToUStr(gamePath) + string(".UGAME") + string::stdStrToUStr(std::to_string(i)), EngineConsole::INFO_NORMAL);
 }
 
 UreTechEngine::UreTechEngineClass::UreTechEngineClass()

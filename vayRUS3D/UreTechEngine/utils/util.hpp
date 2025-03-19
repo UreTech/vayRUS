@@ -10,8 +10,10 @@
 namespace UreTechEngine {
 
     int getBiggestDiv(int divided, int dividing);
-    std::string intToHex(uint64_t value);
-    UreTechEngine::dArray<UreTechEngine::string> parseWith(std::string str, char c);
+    UreTechEngine::string u64ToHexStr(uint64_t value);
+    UreTechEngine::string u64ToDecStr(uint64_t value);
+    uint64_t strToU64(UreTechEngine::string str);
+    UreTechEngine::dArray<UreTechEngine::string> parseWith(UreTechEngine::string str, char c);
     bool isValidPtr(void* ptr);// DONT USE
     void* safePtr(void* ptr);// DONT USE
     struct Buffer {

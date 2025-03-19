@@ -22,7 +22,7 @@ class TextureManager{
 public:
 	static TextureManager* getInstance();
 
-	unsigned int loadTextureFromFile(std::string fileName, bool texAntiAlising = true);
+	unsigned int loadTextureFromFile(UreTechEngine::string fileName, bool texAntiAlising = true);
 	void applyTexture( int levelInd, unsigned int textureId);
 	void applyMultipleTexture(std::vector<texture> a);
 

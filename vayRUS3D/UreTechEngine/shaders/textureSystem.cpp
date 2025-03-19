@@ -27,7 +27,7 @@ TextureManager* TextureManager::getInstance()
 	return c_Instance;
 }
 
-unsigned int TextureManager::loadTextureFromFile(std::string fileName, bool texAntiAlising)
+unsigned int TextureManager::loadTextureFromFile(UreTechEngine::string fileName, bool texAntiAlising)
 {
 	unsigned int texID = -1;
 	bool isFound = false;
