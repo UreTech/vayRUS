@@ -1,5 +1,6 @@
 #include "EngineBase.h"
 #include<iostream>
+#include <windows.h>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include<glm/mat4x4.hpp>
@@ -9,9 +10,22 @@
 using namespace UreTechEngine;
 
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::c_Instance = nullptr;
+UreTechEngine::UreTechEngineClass* engRef = nullptr;
 unsigned int UreTechEngine::UreTechEngineClass::displayWidth = 1000;
 unsigned int UreTechEngine::UreTechEngineClass::displayHeight = 1000;
 bool UreTechEngine::UreTechEngineClass::windowMinmized = false;
+
+void SetThreadAffinity(std::thread& t, DWORD_PTR affinityMask) {
+	HANDLE threadHandle = t.native_handle();
+	SetThreadAffinityMask(threadHandle, affinityMask);
+}
+
+void SetThreadPriority(std::thread& t, int priority) {
+	HANDLE threadHandle = t.native_handle();
+	SetThreadPriority(threadHandle, priority);
+}
+
+
 
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine()
 {
@@ -20,62 +34,67 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
     }
     else {
         c_Instance = new UreTechEngineClass();
+		engRef = c_Instance;
 		if (UPK_ENABLE_PACKAGE_SYSTEM) {
 			c_Instance->init_upk_system(UPK_PACKAGE_PATH, UPK_PACKAGE_ENC_KEY);
 		}
 
 		//openGL init
 		if (!glfwInit()) {
-			std::cout << "GL ERROR!";
-			while(1){}
+			EngineConsole::log("GLFW ERROR!", EngineConsole::ERROR_FATAL);
 		}
 
 		c_Instance->window = glfwCreateWindow(displayWidth, displayHeight, ENGINE_WINDOW_TITLE, NULL, NULL);
 		if (c_Instance->window == NULL) {
-			std::cout << "WINDOW ERROR!";
 			glfwTerminate();
+			EngineConsole::log("WINDOW ERROR!", EngineConsole::ERROR_FATAL);
 			while (1) {}
 		}
+		
+		
 		glfwMakeContextCurrent(c_Instance->window);
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-			std::cout << "GLAD ERROR!";
-			while (1) {}
+			EngineConsole::log("GLAD ERROR!", EngineConsole::ERROR_FATAL);
 		}
+		
+		c_Instance->mainRenderer = new Renderer();
+		c_Instance->mainRenderer->window = c_Instance->window;
 
-		c_Instance->mainShaderProgram = new ShaderProgram();
+		c_Instance->mainRenderer->InitVulkan();
+		c_Instance->mainRenderer->InitImGuiVulkan();
 
-		c_Instance->mainShaderProgram->attachShader("/shaders/baseVS.glsl", GL_VERTEX_SHADER);
-		c_Instance->mainShaderProgram->attachShader("/shaders/baseFS.glsl", GL_FRAGMENT_SHADER);
-		c_Instance->mainShaderProgram->link();
+		c_Instance->mainRenderer->attachShader("/shaders/baseVS.glsl", GL_VERTEX_SHADER);
+		c_Instance->mainRenderer->attachShader("/shaders/baseFS.glsl", GL_FRAGMENT_SHADER);
+		c_Instance->mainRenderer->link();
 
 
-		c_Instance->mainShaderProgram->addUniform("uMtxModel");
-		c_Instance->mainShaderProgram->addUniform("uMtxProj");
-		c_Instance->mainShaderProgram->addUniform("uMtxCam");
-		c_Instance->mainShaderProgram->addUniform("uPosCam");
-		c_Instance->mainShaderProgram->addUniform("lightPos");
-		c_Instance->mainShaderProgram->addUniform("uLightColor");
+		c_Instance->mainRenderer->addUniform("uMtxModel");
+		c_Instance->mainRenderer->addUniform("uMtxProj");
+		c_Instance->mainRenderer->addUniform("uMtxCam");
+		c_Instance->mainRenderer->addUniform("uPosCam");
+		c_Instance->mainRenderer->addUniform("lightPos");
+		c_Instance->mainRenderer->addUniform("uLightColor");
 
-		c_Instance->mainShaderProgram->addUniform("texture0");
-		c_Instance->mainShaderProgram->addUniform("texture1");
-		c_Instance->mainShaderProgram->addUniform("texture2");
-		c_Instance->mainShaderProgram->addUniform("texture3");
-		c_Instance->mainShaderProgram->addUniform("texture4");
-		c_Instance->mainShaderProgram->addUniform("texture5");
+		c_Instance->mainRenderer->addUniform("texture0");
+		c_Instance->mainRenderer->addUniform("texture1");
+		c_Instance->mainRenderer->addUniform("texture2");
+		c_Instance->mainRenderer->addUniform("texture3");
+		c_Instance->mainRenderer->addUniform("texture4");
+		c_Instance->mainRenderer->addUniform("texture5");
 
-		c_Instance->mainShaderProgram->addUniform("specularStrength0");
-		c_Instance->mainShaderProgram->addUniform("specularStrength1");
-		c_Instance->mainShaderProgram->addUniform("specularStrength2");
-		c_Instance->mainShaderProgram->addUniform("specularStrength3");
-		c_Instance->mainShaderProgram->addUniform("specularStrength4");
-		c_Instance->mainShaderProgram->addUniform("specularStrength5");
+		c_Instance->mainRenderer->addUniform("specularStrength0");
+		c_Instance->mainRenderer->addUniform("specularStrength1");
+		c_Instance->mainRenderer->addUniform("specularStrength2");
+		c_Instance->mainRenderer->addUniform("specularStrength3");
+		c_Instance->mainRenderer->addUniform("specularStrength4");
+		c_Instance->mainRenderer->addUniform("specularStrength5");
 
-		c_Instance->mainShaderProgram->addUniform("litRender0");
-		c_Instance->mainShaderProgram->addUniform("litRender1");
-		c_Instance->mainShaderProgram->addUniform("litRender2");
-		c_Instance->mainShaderProgram->addUniform("litRender3");
-		c_Instance->mainShaderProgram->addUniform("litRender4");
-		c_Instance->mainShaderProgram->addUniform("litRender5");
+		c_Instance->mainRenderer->addUniform("litRender0");
+		c_Instance->mainRenderer->addUniform("litRender1");
+		c_Instance->mainRenderer->addUniform("litRender2");
+		c_Instance->mainRenderer->addUniform("litRender3");
+		c_Instance->mainRenderer->addUniform("litRender4");
+		c_Instance->mainRenderer->addUniform("litRender5");
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -87,6 +106,8 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
 		//******
 
         c_Instance->defPlayer = new Player;
+
+		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
         return c_Instance;
     }
 }
@@ -102,9 +123,9 @@ UreTechEngine::Player* UreTechEngine::UreTechEngineClass::getPlayer()
     return defPlayer;
 }
 
-ShaderProgram* UreTechEngine::UreTechEngineClass::getShaderProgram()
+Renderer* UreTechEngine::UreTechEngineClass::getShaderProgram()
 {
-	return mainShaderProgram;
+	return mainRenderer;
 }
 
 GLFWwindow* UreTechEngine::UreTechEngineClass::getWindow()
@@ -177,15 +198,10 @@ unsigned int UreTechEngine::UreTechEngineClass::getCountOfEntity()
 
 void UreTechEngine::UreTechEngineClass::engineTick()
 {
-	for (int i = 0; i < sceneEntities.size(); i++) {
-		if (sceneEntities[i] != nullptr) {
-			glm::vec4 a(1.0f, 1.0f, 1.0f, 1.0f);
-			mainShaderProgram->setVec4("uLightColor", a);
-			sceneEntities[i]->updateVisual();
-		}
-		else {
-			EngineConsole::log("Invalid entity update!", EngineConsole::ERROR_NORMAL);
-		}
+	glm::vec4 a(1.0f, 1.0f, 1.0f, 1.0f);
+	mainRenderer->setVec4("uLightColor", a);
+	for (uint64_t i = 0; i < engRef->getCountOfEntity(); i++) {
+		engRef->getEntityWithIndex(i)->updateVisual();
 	}
 }
 

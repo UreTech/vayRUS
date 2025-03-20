@@ -8,10 +8,19 @@
 #include<iostream>
 #include<map>
 #include<../UreTechEngine/utils/string/string.h>
-class ShaderProgram {
+#include<vulkan/vulkan.h>
+#include<imgui.h>
+#include<imgui_impl_glfw.h>
+#include<imgui_impl_vulkan.h>
+
+class Renderer {
 public:
-	ShaderProgram();
-	~ShaderProgram();
+	GLFWwindow* window;
+
+	Renderer();
+	~Renderer();
+
+	// OpenGL (OGL)
 	void attachShader(const char* fileName,unsigned int shaderType);
 
 	void link();
@@ -36,7 +45,20 @@ public:
 
 	//texture
 	void setTexture(const std::string& varName, int _textureLvl);
+
+	// Vulkan
+	void InitVulkan();
+
+	void InitImGuiVulkan();
 private:
+	VkInstance instance;
+	VkPhysicalDevice physicalDevice;
+	VkDevice device;
+	VkQueue graphicsQueue;
+	VkRenderPass renderPass;
+	VkPipelineCache pipelineCache;
+	VkDescriptorPool descriptorPool;
+
 	unsigned int programID;
 	std::map<std::string, unsigned int> m_UniformVars;
 	UreTechEngine::string getShaderFromFile(const char* fileName);

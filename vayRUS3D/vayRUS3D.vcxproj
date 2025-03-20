@@ -367,14 +367,14 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>ENGINE_BUILD;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)/Include;$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)/Lib;$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Windows</SubSystem>
@@ -384,7 +384,6 @@
       </AddModuleNamesToAssembly>
       <ForceSymbolReferences>
       </ForceSymbolReferences>
-      <AdditionalDependencies>openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <ShowProgress>LinkVerbose</ShowProgress>
       <DelayLoadDLLs>
@@ -405,6 +404,7 @@
       </IgnoreSpecificDefaultLibraries>
       <CLRImageType>
       </CLRImageType>
+      <AdditionalDependencies>vulkan-1.lib;openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -605,12 +605,9 @@
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
-    <ClCompile Include="imgui\imgui_impl_glfw.cpp">
-      <ScanSourceForModuleDependencies Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|Win32'">true</ScanSourceForModuleDependencies>
-      <ScanSourceForModuleDependencies Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|Win32'">true</ScanSourceForModuleDependencies>
-      <ScanSourceForModuleDependencies Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|Win32'">true</ScanSourceForModuleDependencies>
-    </ClCompile>
-    <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="imgui\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
@@ -622,7 +619,7 @@
     <ClCompile Include="UreTechEngine\shaders\Material.cpp" />
     <ClCompile Include="UreTechEngine\shaders\mesh.cpp" />
     <ClCompile Include="UreTechEngine\shaders\MeshManager.cpp" />
-    <ClCompile Include="UreTechEngine\shaders\shaderSystem.cpp" />
+    <ClCompile Include="UreTechEngine\shaders\Renderer.cpp" />
     <ClCompile Include="UreTechEngine\shaders\textureSystem.cpp" />
     <ClCompile Include="UreTechEngine\shaders\vertexArray.cpp" />
     <ClCompile Include="UreTechEngine\shaders\vertexStructs.cpp" />
@@ -631,13 +628,18 @@
     <ClCompile Include="UreTechEngine\upk\misc.cpp" />
     <ClCompile Include="UreTechEngine\upk\upk.cpp" />
     <ClCompile Include="UreTechEngine\utils\EngineConsole.cpp" />
+    <ClCompile Include="UreTechEngine\utils\multiThreadWorker.cpp" />
     <ClCompile Include="UreTechEngine\utils\string\string.cpp" />
     <ClCompile Include="UreTechEngine\utils\util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="testContent\shaders\baseFS.glsl" />
-    <None Include="testContent\shaders\baseVS.glsl" />
+    <FxCompile Include="testContent\shaders\baseFS.frag">
+      <FileType>Document</FileType>
+    </FxCompile>
+    <FxCompile Include="testContent\shaders\baseVS.vert">
+      <FileType>Document</FileType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="content\sourceContent\MyPlayerPawn.h" />
@@ -647,8 +649,8 @@
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
-    <ClInclude Include="imgui\imgui_impl_opengl3.h" />
-    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="imgui\imgui_impl_vulkan.h" />
+    <ClInclude Include="imgui\imgui_impl_win32.h" />
     <ClInclude Include="imgui\imgui_internal.h" />
     <ClInclude Include="imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imstb_textedit.h" />
@@ -665,7 +667,7 @@
     <ClInclude Include="UreTechEngine\shaders\Material.h" />
     <ClInclude Include="UreTechEngine\shaders\mesh.hpp" />
     <ClInclude Include="UreTechEngine\shaders\MeshManager.hpp" />
-    <ClInclude Include="UreTechEngine\shaders\shaderSystem.hpp" />
+    <ClInclude Include="UreTechEngine\shaders\Renderer.hpp" />
     <ClInclude Include="UreTechEngine\shaders\textureSystem.hpp" />
     <ClInclude Include="UreTechEngine\shaders\vertexArray.hpp" />
     <ClInclude Include="UreTechEngine\shaders\vertexStructs.hpp" />
@@ -679,6 +681,7 @@
     <ClInclude Include="UreTechEngine\utils\dArray.h" />
     <ClInclude Include="UreTechEngine\utils\baseVector.h" />
     <ClInclude Include="UreTechEngine\utils\EngineConsole.h" />
+    <ClInclude Include="UreTechEngine\utils\multiThreadWorker.h" />
     <ClInclude Include="UreTechEngine\utils\string\string.h" />
     <ClInclude Include="UreTechEngine\utils\util.hpp" />
   </ItemGroup>

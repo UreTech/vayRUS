@@ -1,8 +1,5 @@
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
 #define GL_SILENCE_DEPRECATION
-
+#define GLFW_INCLUDE_VULKAN
 #include<iostream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
@@ -26,6 +23,8 @@
 #include <corecrt_io.h>
 #include <fcntl.h>
 #include <regex>
+
+UreTechEngine::UreTechEngineClass* engine = nullptr;
 
 #define fpslock 60
 int display_w, display_h;
@@ -330,9 +329,14 @@ void con_command_screen(conArgs args) {
 	}
 }
 
+void con_command_engine(conArgs args) {
+	EngineConsole::log("\nScene entity count: " + u64ToDecStr(engine->getCountOfEntity()) + "\nNet mode: " + u64ToDecStr(engine->isInServer), EngineConsole::INFO_NORMAL);
+}
+
 void initCommands() {
 	conFuncs.push_back(commandStruct("help", con_command_help));
 	conFuncs.push_back(commandStruct("info", con_command_info));
+	conFuncs.push_back(commandStruct("engine", con_command_engine));
 	conFuncs.push_back(commandStruct("quit", con_command_quit));
 	conFuncs.push_back(commandStruct("clear", con_command_clear));
 	conFuncs.push_back(commandStruct("console", con_command_console));
@@ -348,10 +352,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 
 	// init engine
-	UreTechEngine::UreTechEngineClass* engine = UreTechEngine::UreTechEngineClass::getEngine();// init engine
+	engine = UreTechEngine::UreTechEngineClass::getEngine();// init engine
 	if (engine == nullptr) {
 		EngineConsole::log("ENGINE ERROR (0x01)", EngineConsole::ERROR_FATAL);
 	}
+
 
 	// get widow and set callback funcs
 	GLFWwindow* window = engine->getWindow();
@@ -422,11 +427,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	//player->playerPawn = engine->spawnEntity(new MyPlayerPawn(nullptr, "playerPawn",f)); // used for debug
 
-	// prepare ImGui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 330 core");
 	ImGui::StyleColorsDark();
 
 	texture materialThumbTexture = textureManager->loadTextureFromFile("/engine/res/materialThumb.png", false);
@@ -440,6 +440,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	UreTechEngine::string a = "BRUH MESSAGE";//string test bruh
 	UreTechEngine::EngineConsole::log("brub " + a, UreTechEngine::EngineConsole::t_error::DEBUG);
+
+	for (uint64_t i0 = 0; i0 < 1000; i0++) {
+		entity* spwnd = engine->spawnEntity(engine->entityConstructors[1].constructor());
+		spwnd->transform.Location.x = -(rand()%40);
+		//spwnd->transform.Location.y = rand()%40;
+		spwnd->transform.Location.z = -(rand()%40);
+	}
 
 	// main loop
 	while (!glfwWindowShouldClose(window)) {
@@ -481,7 +488,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		engine->engineTick();
 
 		//ui
-		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
@@ -674,7 +681,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// ImGui render
 		ImGui::EndFrame();
 		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// render end stuff
 		glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -690,7 +696,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		//glfwSwapInterval(1);
 		glfwSwapBuffers(window);
-	}
 
+		GLenum err;
+		while ((err = glGetError()) != GL_NO_ERROR) {
+			UreTechEngine::string errorMsg = "OpenGL error: " + UreTechEngine::string::stdStrToUStr(std::to_string(err));
+			EngineConsole::log(errorMsg, EngineConsole::ERROR_NORMAL);
+		}
+	}
+	glfwTerminate();
 	return 0;
 }

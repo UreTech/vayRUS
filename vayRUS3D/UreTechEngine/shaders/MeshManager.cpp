@@ -76,6 +76,12 @@ void calculateSmoothNormals(std::vector<triangleFace>& faces) {
 
 mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath,Material _mat, bool useSmooth)
 {
+	for (uint64_t i = 0; i < loadedVaos.size(); i++) {
+		if (loadedVaos[i].vaoName == filePath) {
+			UreTechEngine::EngineConsole::log("(Mesh Loader): Mesh already loaded! Path:" + filePath, UreTechEngine::EngineConsole::INFO_NORMAL);
+			return new mesh(loadedVaos[i].vao, _mat);
+		}
+	}
 	bool isUsedSmooth = false;
 	std::vector< unsigned int > vertexIndices, uvIndices, normalIndices,finalIndices;
 	std::vector< glm::vec3 > temp_vertices;
@@ -234,6 +240,8 @@ mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath,Material _ma
 	unsigned int vertCount = temp_vertices.size();
 	_vao->createObject(tmpVert[0], tmpVert.size(), finalIndices[0], finalIndices.size());
 	mesh* result = new mesh(_vao, _mat);
+	
 	UreTechEngine::EngineConsole::log("(Mesh Loader): Obj loaded! Path:" + filePath, UreTechEngine::EngineConsole::INFO_NORMAL);
+	loadedVaos.push_back({ filePath,_vao });
 	return result;
 }

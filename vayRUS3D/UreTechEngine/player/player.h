@@ -2,10 +2,10 @@
 #define player_h
 
 #include"../UreTechEngine/utils/baseVector.h"
-#include"../UreTechEngine/shaders/shaderSystem.hpp"
+#include"../UreTechEngine/shaders/Renderer.hpp"
 #include"../entity/entity.h"
 
-class ShaderProgram;
+class Renderer;
 namespace UreTechEngine {
 	class UreTechEngineClass;
 	class entity;
@@ -17,7 +17,7 @@ namespace UreTechEngine {
 		glm::mat4 mtxCam = glm::mat4();
 		glm::mat4 mtxProj = glm::mat4();
 
-		ShaderProgram* shaderProg;
+		Renderer* shaderProg;
 		UreTechEngineClass* engineRef=nullptr;
 
 		UreTechEngine::Transform3D CameraTranform;

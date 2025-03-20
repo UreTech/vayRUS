@@ -30,7 +30,7 @@ private:
 	bool litRender = true;
 	vertexArrayObject* p_Vao;
 	TextureManager* textManager;
-	ShaderProgram* shaderProg;
+	Renderer* shaderProg;
 	glm::mat4 modelMatrix;
 	UreTechEngine::Player* PlayerRef = nullptr;
 	unsigned int indexCount;
