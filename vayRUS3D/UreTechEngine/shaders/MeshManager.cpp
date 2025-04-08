@@ -78,7 +78,7 @@ mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath,Material _ma
 {
 	for (uint64_t i = 0; i < loadedVaos.size(); i++) {
 		if (loadedVaos[i].vaoName == filePath) {
-			UreTechEngine::EngineConsole::log("(Mesh Loader): Mesh already loaded! Path:" + filePath, UreTechEngine::EngineConsole::INFO_NORMAL);
+			UreTechEngine::EngineConsole::log("(Mesh Loader): Mesh already loaded! Path:" + filePath, UreTechEngine::EngineConsole::INFO);
 			return new mesh(loadedVaos[i].vao, _mat);
 		}
 	}
@@ -95,12 +95,12 @@ mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath,Material _ma
 		Buffer objImpBuf = UreTechEngineClass::getEngine()->package->get(filePath);
 		file = string((char*)objImpBuf.pointer, objImpBuf.size).std_str();
 		if (objImpBuf.pointer == nullptr) {
-			UreTechEngine::EngineConsole::log("(Mesh Loader): Can not open source file! (UPK) Path:" + filePath, UreTechEngine::EngineConsole::ERROR_NORMAL);
+			UreTechEngine::EngineConsole::log("(Mesh Loader): Can not open source file! (UPK) Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
 			return nullptr;
 		}
 	}
 	else {
-		UreTechEngine::EngineConsole::log("(Mesh Loader): Can not open source file! (NOT UPK) Path:" + filePath, UreTechEngine::EngineConsole::ERROR_NORMAL);
+		UreTechEngine::EngineConsole::log("(Mesh Loader): Can not open source file! (NOT UPK) Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
 		return nullptr;
 	}
 
@@ -121,7 +121,7 @@ mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath,Material _ma
 					temp_vertices.push_back(glm::vec3(x, y, z));
 				}
 				else {
-					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::LOG_ERROR);
 				}
 			}
 			else if (lines[i].substr(3) == "vn ") {// vertex normal
@@ -133,7 +133,7 @@ mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath,Material _ma
 					temp_normals.push_back(glm::vec3(x, y, z));
 				}
 				else {
-					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex normal data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex normal data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::LOG_ERROR);
 				}
 			}
 			else if (lines[i].substr(3) == "vt ") {// texture cord
@@ -144,7 +144,7 @@ mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath,Material _ma
 					temp_uvs.push_back(glm::vec2(x, y));
 				}
 				else {
-					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex uv data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid vertex uv data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::LOG_ERROR);
 				}
 			}
 			else if (lines[i].substr(2) == "s ") {// smooth group
@@ -155,7 +155,7 @@ mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath,Material _ma
 					}
 				}
 				catch (std::exception) {
-					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid smooth group data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid smooth group data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::LOG_ERROR);
 				}
 			}
 			else if (lines[i].substr(2) == "f ") {// face (must be 3 at each line)
@@ -175,12 +175,12 @@ mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath,Material _ma
 							tmp_face_texture_index.push_back(textureCount);
 						}
 						else {
-							UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid f1 data! " + filePath + "-i>" + UreTechEngine::u64ToDecStr(i) + "-j>" + UreTechEngine::u64ToDecStr(j), UreTechEngine::EngineConsole::ERROR_NORMAL);
+							UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid f1 data! " + filePath + "-i>" + UreTechEngine::u64ToDecStr(i) + "-j>" + UreTechEngine::u64ToDecStr(j), UreTechEngine::EngineConsole::LOG_ERROR);
 						}
 					}
 				}
 				else {
-					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid f0 data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::ERROR_NORMAL);
+					UreTechEngine::EngineConsole::log("(Mesh Loader): Invalid f0 data! " + filePath + "-->" + UreTechEngine::u64ToDecStr(i), UreTechEngine::EngineConsole::LOG_ERROR);
 				}
 			}
 			else if (lines[i].substr(6) == "usemtl") {
@@ -241,7 +241,7 @@ mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath,Material _ma
 	_vao->createObject(tmpVert[0], tmpVert.size(), finalIndices[0], finalIndices.size());
 	mesh* result = new mesh(_vao, _mat);
 	
-	UreTechEngine::EngineConsole::log("(Mesh Loader): Obj loaded! Path:" + filePath, UreTechEngine::EngineConsole::INFO_NORMAL);
+	UreTechEngine::EngineConsole::log("(Mesh Loader): Obj loaded! Path:" + filePath, UreTechEngine::EngineConsole::INFO);
 	loadedVaos.push_back({ filePath,_vao });
 	return result;
 }

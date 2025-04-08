@@ -78,9 +78,6 @@
     <ClCompile Include="UreTechEngine\shaders\vertexStructs.cpp">
       <Filter>Source Files\UreTechEngine\shaders</Filter>
     </ClCompile>
-    <ClCompile Include="UreTechEngine\shaders\glad.c">
-      <Filter>Source Files\UreTechEngine\shaders</Filter>
-    </ClCompile>
     <ClCompile Include="UreTechEngine\shaders\mesh.cpp">
       <Filter>Source Files\UreTechEngine\shaders</Filter>
     </ClCompile>
@@ -124,35 +121,41 @@
       <Filter>Source Files\UreTechEngine\utils\string</Filter>
     </ClCompile>
     <ClCompile Include="UreTechEngine\utils\multiThreadWorker.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\UreTechEngine\utils</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_demo.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_draw.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_impl_glfw.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_impl_vulkan.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_impl_win32.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_tables.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="imgui\imgui_widgets.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="testContent\shaders\baseFS.frag">
+      <Filter>Source Files\UreTechEngine\IN PACKAGE SHADERS</Filter>
+    </None>
+    <None Include="testContent\shaders\baseVS.vert">
+      <Filter>Source Files\UreTechEngine\IN PACKAGE SHADERS</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\GLFW\include\GLFW\glfw3.h">
@@ -291,13 +294,5 @@
     <Image Include="icon.ico">
       <Filter>Resource Files</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="testContent\shaders\baseVS.vert">
-      <Filter>Source Files\UreTechEngine\IN PACKAGE SHADERS</Filter>
-    </FxCompile>
-    <FxCompile Include="testContent\shaders\baseFS.frag">
-      <Filter>Source Files\UreTechEngine\IN PACKAGE SHADERS</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>

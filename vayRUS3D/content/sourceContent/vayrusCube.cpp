@@ -14,7 +14,7 @@ void vayrusCube::begin() {
 	mymat.colorText = tex;
 	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/monke_smth.obj",mymat);
 	if (this->entityMesh == nullptr) {
-		UreTechEngine::EngineConsole::log("vayRUS cube can not load mesh!", UreTechEngine::EngineConsole::t_error::ERROR_NORMAL);
+		UreTechEngine::EngineConsole::log("vayRUS cube can not load mesh!", UreTechEngine::EngineConsole::t_error::LOG_ERROR);
 	}
 	entName = "vayrusCube";
 	print("vayRUS cube Spawned!");

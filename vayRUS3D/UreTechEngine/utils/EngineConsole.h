@@ -14,10 +14,10 @@ namespace UreTechEngine {
 		enum t_error {
 			ERROR_ERROR = -1,
 			ERROR_FATAL,
-			ERROR_NORMAL,
-			WARN_NORMAL,
+			LOG_ERROR,
+			WARN,
 			WARN_CAN_CAUSE_ERROR,
-			INFO_NORMAL,
+			INFO,
 			DEBUG,
 		};
 		static void log(UreTechEngine::string logMessage,t_error logType);

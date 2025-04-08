@@ -4,9 +4,6 @@
 #include<../UreTechEngine/shaders/Material.h>
 #include<vector>
 
-
-#include<glad/glad.h>
-#include <gl/GL.h>
 #include<GLFW/glfw3.h>
 
 namespace UreTechEngine {

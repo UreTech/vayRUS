@@ -404,12 +404,17 @@
       </IgnoreSpecificDefaultLibraries>
       <CLRImageType>
       </CLRImageType>
-      <AdditionalDependencies>vulkan-1.lib;openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
+    <PreBuildEvent>
+      <Command>start compileShader.bat
+start packageContent.bat
+</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|x64'">
     <ClCompile>
@@ -615,7 +620,6 @@
     <ClCompile Include="UreTechEngine\entity\entity.cpp" />
     <ClCompile Include="UreTechEngine\network\network.cpp" />
     <ClCompile Include="UreTechEngine\player\player.cpp" />
-    <ClCompile Include="UreTechEngine\shaders\glad.c" />
     <ClCompile Include="UreTechEngine\shaders\Material.cpp" />
     <ClCompile Include="UreTechEngine\shaders\mesh.cpp" />
     <ClCompile Include="UreTechEngine\shaders\MeshManager.cpp" />
@@ -634,12 +638,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <FxCompile Include="testContent\shaders\baseFS.frag">
+    <None Include="testContent\shaders\baseFS.frag">
       <FileType>Document</FileType>
-    </FxCompile>
-    <FxCompile Include="testContent\shaders\baseVS.vert">
+    </None>
+    <None Include="testContent\shaders\baseVS.vert">
       <FileType>Document</FileType>
-    </FxCompile>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="content\sourceContent\MyPlayerPawn.h" />

@@ -1,10 +1,5 @@
-#define GL_SILENCE_DEPRECATION
-#define GLFW_INCLUDE_VULKAN
-#include<iostream>
-#include<glad/glad.h>
-#include<GLFW/glfw3.h>
-#include<glm/mat4x4.hpp>
-#include<glm/gtc/matrix_transform.hpp>
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
 
 //networking
 #include<WinSock2.h>
@@ -27,7 +22,7 @@
 UreTechEngine::UreTechEngineClass* engine = nullptr;
 
 #define fpslock 60
-int display_w, display_h;
+int display_w = 1, display_h = 1;
 
 using namespace std;
 using namespace UreTechEngine;
@@ -44,7 +39,7 @@ bool rClickL = false;
 // editor/game ImGui Vars
 bool externalConsoleState = USE_EXTERNAL_CONSOLE;
 
-bool consoleWindow = false;
+bool consoleWindow = true;
 bool autoScroll = true;
 char consoleInputBuffer[ImGui_Max_InputChars];
 
@@ -65,6 +60,7 @@ UreTechEngine::Player* player = nullptr;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+	ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
 	switch (key)
 	{
 	case(GLFW_KEY_UP):
@@ -110,6 +106,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+	ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 	if (button == GLFW_MOUSE_BUTTON_RIGHT) {
 		if (rClickL) {
 			rClickL = false;
@@ -252,23 +249,23 @@ void executeCommand(UreTechEngine::string commandLine) {
 			return;
 		}
 	}
-	EngineConsole::log("Invalid command '" + command + "'", EngineConsole::ERROR_NORMAL);
-	EngineConsole::log("Type 'help' for commands.", EngineConsole::INFO_NORMAL);
+	EngineConsole::log("Invalid command '" + command + "'", EngineConsole::LOG_ERROR);
+	EngineConsole::log("Type 'help' for commands.", EngineConsole::INFO);
 }
 
 void con_command_quit(conArgs args) {
-	EngineConsole::log("Quiting...", EngineConsole::INFO_NORMAL);
+	EngineConsole::log("Quiting...", EngineConsole::INFO);
 	exit(0);
 }
 
 void con_command_info(conArgs args) {
-	EngineConsole::log(FULL_ENGINE_DESCRIPTION, EngineConsole::INFO_NORMAL);
+	EngineConsole::log(FULL_ENGINE_DESCRIPTION, EngineConsole::INFO);
 }
 
 void con_command_help(conArgs args) {
-	EngineConsole::log("All main console commands:", EngineConsole::INFO_NORMAL);
+	EngineConsole::log("All main console commands:", EngineConsole::INFO);
 	for (uint64_t i = 0; i < conFuncs.size(); i++) {
-		EngineConsole::log("Command '" + conFuncs[i].commandName + "'", EngineConsole::INFO_NORMAL);
+		EngineConsole::log("Command '" + conFuncs[i].commandName + "'", EngineConsole::INFO);
 	}
 }
 
@@ -287,7 +284,7 @@ void con_command_console(conArgs args) {
 			freopen_s(&f, "NUL", "r", stdin);
 			freopen_s(&f, "NUL", "w", stderr);
 			FreeConsole();
-			EngineConsole::log("External console closed.", EngineConsole::INFO_NORMAL);
+			EngineConsole::log("External console closed.", EngineConsole::INFO);
 			externalConsoleState = false;
 		}
 		else if (args[1] == "alloc") {
@@ -299,38 +296,38 @@ void con_command_console(conArgs args) {
 			freopen_s(&f, "CONIN$", "r", stdin);
 			freopen_s(&f, "CONOUT$", "w", stderr);
 			enableANSI();
-			EngineConsole::log("External console opened.", EngineConsole::INFO_NORMAL);
+			EngineConsole::log("External console opened.", EngineConsole::INFO);
 			externalConsoleState = true;
 		}
 		else if (args[1] == "clear") {
-			EngineConsole::log("External console cleared.", EngineConsole::INFO_NORMAL);// prints before for not print again
+			EngineConsole::log("External console cleared.", EngineConsole::INFO);// prints before for not print again
 			system("cls");
 		}
 		else {
-			EngineConsole::log("Invalid argument!", EngineConsole::ERROR_NORMAL);
+			EngineConsole::log("Invalid argument!", EngineConsole::LOG_ERROR);
 		}
 	}
 	else {
-		EngineConsole::log("Unexpected argument!", EngineConsole::ERROR_NORMAL);
+		EngineConsole::log("Unexpected argument!", EngineConsole::LOG_ERROR);
 	}
 }
 
 void con_command_screen(conArgs args) {
 	if (args.size() == 2) {
 		if (args[1] == "full") {
-			EngineConsole::log("Full screen. (not working for now)", EngineConsole::INFO_NORMAL);
+			EngineConsole::log("Full screen. (not working for now)", EngineConsole::INFO);
 		}
 		else {
-			EngineConsole::log("Invalid argument!", EngineConsole::ERROR_NORMAL);
+			EngineConsole::log("Invalid argument!", EngineConsole::LOG_ERROR);
 		}
 	}
 	else {
-		EngineConsole::log("Unexpected argument!", EngineConsole::ERROR_NORMAL);
+		EngineConsole::log("Unexpected argument!", EngineConsole::LOG_ERROR);
 	}
 }
 
 void con_command_engine(conArgs args) {
-	EngineConsole::log("\nScene entity count: " + u64ToDecStr(engine->getCountOfEntity()) + "\nNet mode: " + u64ToDecStr(engine->isInServer), EngineConsole::INFO_NORMAL);
+	EngineConsole::log("\nScene entity count: " + u64ToDecStr(engine->getCountOfEntity()) + "\nNet mode: " + u64ToDecStr(engine->isInServer), EngineConsole::INFO);
 }
 
 void initCommands() {
@@ -344,6 +341,7 @@ void initCommands() {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	// start external console
+	_CrtDumpMemoryLeaks();
 	initCommands();// init main commands
 
 	// open external console
@@ -356,7 +354,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (engine == nullptr) {
 		EngineConsole::log("ENGINE ERROR (0x01)", EngineConsole::ERROR_FATAL);
 	}
-
 
 	// get widow and set callback funcs
 	GLFWwindow* window = engine->getWindow();
@@ -436,24 +433,69 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	engine->entityConstructors.push_back(entConstructStruct("vayrusCube"  , []() { return dynamic_cast<entity*>(new vayrusCube()); }));
 	engine->entityConstructors.push_back(entConstructStruct("MyPlayerPawn", []() { return dynamic_cast<entity*>(new MyPlayerPawn()); }));
 	engInf = "Engine initiated.";
-	UreTechEngine::EngineConsole::log("Engine successfuly initiated!", UreTechEngine::EngineConsole::t_error::INFO_NORMAL);
+	UreTechEngine::EngineConsole::log("Engine successfuly initiated!", UreTechEngine::EngineConsole::t_error::INFO);
 
 	UreTechEngine::string a = "BRUH MESSAGE";//string test bruh
 	UreTechEngine::EngineConsole::log("brub " + a, UreTechEngine::EngineConsole::t_error::DEBUG);
-
+	/*
 	for (uint64_t i0 = 0; i0 < 1000; i0++) {
 		entity* spwnd = engine->spawnEntity(engine->entityConstructors[1].constructor());
 		spwnd->transform.Location.x = -(rand()%40);
 		//spwnd->transform.Location.y = rand()%40;
 		spwnd->transform.Location.z = -(rand()%40);
 	}
+	*/
+
+	//vulkan header
+	VkRenderPassBeginInfo renderPassBeginInfo = {};
+	renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassBeginInfo.renderPass = engine->mainRenderer->renderPass;
+	renderPassBeginInfo.renderArea.offset = { 0, 0 };
+
+	VkClearValue clearValues[2] = {};
+	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+	clearValues[1].depthStencil = { 0.0f, 0 };
+	renderPassBeginInfo.clearValueCount = 2;
+	renderPassBeginInfo.pClearValues = clearValues;
+	renderPassBeginInfo.pClearValues = clearValues;
+
+	VkCommandBufferBeginInfo beginInfo = {};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = 0;
+	beginInfo.pInheritanceInfo = nullptr;
+
+	VkSubmitInfo submitInfo = {};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.waitSemaphoreCount = 1;
+	VkSemaphore waitSemaphores[] = { engine->mainRenderer->imageAvailableSemaphore };
+	submitInfo.pWaitSemaphores = waitSemaphores;
+	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	submitInfo.pWaitDstStageMask = waitStages;
+	submitInfo.commandBufferCount = 1;
+	VkCommandBuffer commandBuffers[] = { engine->mainRenderer->commandBuffer };
+	submitInfo.pCommandBuffers = commandBuffers;
+	submitInfo.signalSemaphoreCount = 1;
+	VkSemaphore signalSemaphores[] = { engine->mainRenderer->renderFinishedSemaphore };
+	submitInfo.pSignalSemaphores = signalSemaphores;
+
+	VkPresentInfoKHR presentInfo{};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = signalSemaphores;
+	presentInfo.swapchainCount = 1;
 
 	// main loop
 	while (!glfwWindowShouldClose(window)) {
 		// render stuff
-		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		engine->getShaderProgram()->use();
+		//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//engine->getShaderProgram()->use();
+
+		//vkWaitForFences(engine->mainRenderer->device, 1, &engine->mainRenderer->fence, VK_TRUE, UINT64_MAX);
+		//vkResetFences(engine->mainRenderer->device, 1, &engine->mainRenderer->fence);
+
+		//uint32_t imageIndex;
+		//vkAcquireNextImageKHR(engine->mainRenderer->device, engine->mainRenderer->swapchain, UINT64_MAX, engine->mainRenderer->imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
 		// mouse input and other stuff
 		double xpos, ypos;
@@ -481,13 +523,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		//player->playerPawn->transform.Location.y = editorCamPos[1];
 		//player->CameraTranform.Location.z = editorCamPos[2];
 
-		player->updateCamera();
+		//player->updateCamera();
 
-		// tick
-		glfwPollEvents();
-		engine->engineTick();
+		// tick	
+		//engine->engineTick();
 
 		//ui
+		glfwPollEvents();
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -669,22 +711,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 
 			ImGui::BeginGroup();
-			if (ImGui::Button("Clear")) { executeCommand("clear"); }
+			if (ImGui::Button("Clear")) {
+				executeCommand("clear");
+			}
 			ImGui::SameLine();
 			ImGui::Checkbox("Auto Scroll", &autoScroll);
 			ImGui::EndGroup();
 			ImGui::End();
 		}
-#endif // (ENGINE_BUILD) or defined(GAME_BUILD)
 
-
-	// ImGui render
-		ImGui::EndFrame();
 		ImGui::Render();
 
-		// render end stuff
+		// render stuff
+
 		glfwGetFramebufferSize(window, &display_w, &display_h);
-		glViewport(0, 0, display_w, display_h);
 		if (display_w != 0 && display_h != 0) {
 			UreTechEngine::UreTechEngineClass::displayWidth = display_w;
 			UreTechEngine::UreTechEngineClass::displayHeight = display_h;
@@ -692,17 +732,51 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		else {
 			UreTechEngine::UreTechEngineClass::windowMinmized = true;
+			display_w = 1;
+			display_h = 1;
 		}
+
+		if (!engine->windowMinmized) {
+
+			vkWaitForFences(engine->mainRenderer->device, 1, &engine->mainRenderer->inFlightFence, VK_TRUE, UINT64_MAX);
+			vkResetFences(engine->mainRenderer->device, 1, &engine->mainRenderer->inFlightFence);
+
+			engine->mainRenderer->recrateSwapChainIfNeeded();
+			VkSurfaceCapabilitiesKHR capabilities;
+			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(engine->mainRenderer->physicalDevice, engine->mainRenderer->surface, &capabilities);
+
+			uint32_t imageIndex;
+			vkAcquireNextImageKHR(engine->mainRenderer->device, engine->mainRenderer->swapChain, UINT64_MAX, engine->mainRenderer->imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+			renderPassBeginInfo.framebuffer = engine->mainRenderer->swapChainFramebuffers[imageIndex];
+			renderPassBeginInfo.renderArea.extent = capabilities.currentExtent;
+
+			// command buffer’ý sýfýrla
+			vkResetCommandBuffer(engine->mainRenderer->commandBuffer, 0);
+
+			vkBeginCommandBuffer(engine->mainRenderer->commandBuffer, &beginInfo);
+
+			vkCmdBeginRenderPass(engine->mainRenderer->commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+
+			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), engine->mainRenderer->commandBuffer);
+
+			vkCmdEndRenderPass(engine->mainRenderer->commandBuffer);
+
+			vkEndCommandBuffer(engine->mainRenderer->commandBuffer);
+
+			vkQueueSubmit(engine->mainRenderer->graphicsQueue, 1, &submitInfo, engine->mainRenderer->inFlightFence);
+
+			presentInfo.pSwapchains = &engine->mainRenderer->swapChain;
+			presentInfo.pImageIndices = &imageIndex;
+
+			vkQueuePresentKHR(engine->mainRenderer->presentQueue, &presentInfo);
+		}
+#endif // (ENGINE_BUILD) or defined(GAME_BUILD)
 
 		//glfwSwapInterval(1);
-		glfwSwapBuffers(window);
-
-		GLenum err;
-		while ((err = glGetError()) != GL_NO_ERROR) {
-			UreTechEngine::string errorMsg = "OpenGL error: " + UreTechEngine::string::stdStrToUStr(std::to_string(err));
-			EngineConsole::log(errorMsg, EngineConsole::ERROR_NORMAL);
-		}
+		//glfwSwapBuffers(window);
 	}
-	glfwTerminate();
+	vkDeviceWaitIdle(engine->mainRenderer->device);
+	engine->mainRenderer->destroyVulkan();
 	return 0;
 }

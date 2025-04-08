@@ -2,7 +2,6 @@
 
 #include<stb/stb_image.h>
 
-#include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include<glm/mat4x4.hpp>
 #include<glm/gtx/matrix_transform_2d.hpp>
@@ -29,6 +28,7 @@ TextureManager* TextureManager::getInstance()
 
 unsigned int TextureManager::loadTextureFromFile(UreTechEngine::string fileName, bool texAntiAlising)
 {
+	/*
 	unsigned int texID = -1;
 	bool isFound = false;
 	loadedTexture foundOne;
@@ -82,20 +82,22 @@ unsigned int TextureManager::loadTextureFromFile(UreTechEngine::string fileName,
 		}
 	}
 	return texID;
+	*/
+	return -1;
 }
 
 void TextureManager::applyTexture(int levelInd, unsigned int textureId)
 {
-	glActiveTexture(levelInd);
-	glBindTexture(GL_TEXTURE_2D, textureId);
+//	glActiveTexture(levelInd);
+//	glBindTexture(GL_TEXTURE_2D, textureId);
 	//shaderProg->setTexture(std::string("texture") + std::to_string(levelInd - GL_TEXTURE0), levelInd - GL_TEXTURE0);
 }
 
 void TextureManager::applyMultipleTexture(std::vector<texture> a)
 {
 	for(int i = 0; i < a.size(); i++) {
-		glActiveTexture(GL_TEXTURE0+i);
-		glBindTexture(GL_TEXTURE_2D, a[i]);
+	//	glActiveTexture(GL_TEXTURE0+i);
+	//	glBindTexture(GL_TEXTURE_2D, a[i]);
 		//UreTechEngine::EngineERROR::consoleError(std::to_string((GLuint)(texArr->getIndex(i))), UreTechEngine::EngineERROR::INFO_NORMAL);
 	}
 }
