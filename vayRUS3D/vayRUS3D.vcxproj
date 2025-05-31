@@ -1,20 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
+    <ProjectConfiguration Include="Debug DedicatedServer Build|ARM">
+      <Configuration>Debug DedicatedServer Build</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug DedicatedServer Build|Win32">
+      <Configuration>Debug DedicatedServer Build</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
+    <ProjectConfiguration Include="Debug DedicatedServer Build|x64">
+      <Configuration>Debug DedicatedServer Build</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
+    <ProjectConfiguration Include="Debug Engine Build|ARM">
+      <Configuration>Debug Engine Build</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Engine Build|Win32">
+      <Configuration>Debug Engine Build</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Engine Build|x64">
+      <Configuration>Debug Engine Build</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Game Build|ARM">
+      <Configuration>Debug Game Build</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Game Build|Win32">
+      <Configuration>Debug Game Build</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Game Build|x64">
+      <Configuration>Debug Game Build</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release DedicatedServer Build|ARM">
+      <Configuration>Release DedicatedServer Build</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release DedicatedServer Build|Win32">
+      <Configuration>Release DedicatedServer Build</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release DedicatedServer Build|x64">
+      <Configuration>Release DedicatedServer Build</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Engine Build|ARM">
+      <Configuration>Release Engine Build</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Engine Build|Win32">
+      <Configuration>Release Engine Build</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Engine Build|x64">
+      <Configuration>Release Engine Build</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Game Build|ARM">
+      <Configuration>Release Game Build</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Game Build|Win32">
+      <Configuration>Release Game Build</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Game Build|x64">
+      <Configuration>Release Game Build</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
@@ -26,72 +82,226 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Game Build|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Game Build|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|ARM'">
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|ARM'" Label="Configuration">
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release Game Build|ARM'">
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|ARM'">
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|ARM'" Label="Configuration">
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|ARM'" Label="Configuration">
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Game Build|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Game Build|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\lib\Release\x64;D:\vayRUS\vayRUS3D\include\glm;$(LibraryPath)</LibraryPath>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|x64'">
+    <LibraryPath>$(ProjectDir)lib\x64\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IncludePath>$(IncludePath);$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</IncludePath>
+    <IgnoreImportLibrary>false</IgnoreImportLibrary>
+    <LinkIncremental />
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|x64'">
+    <LibraryPath>$(ProjectDir)lib\x64\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IncludePath>$(IncludePath);$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</IncludePath>
+    <IgnoreImportLibrary>false</IgnoreImportLibrary>
+    <LinkIncremental />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|x64'">
+    <LibraryPath>$(ProjectDir)lib\x64\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IncludePath>$(IncludePath);$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</IncludePath>
+    <IgnoreImportLibrary>false</IgnoreImportLibrary>
+    <LinkIncremental />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|Win32'">
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Game Build|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Game Build|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\libs\lib-vc2022;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3dll.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)\libs\lib-vc2022;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3dll.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)\libs\lib-vc2022;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3dll.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -99,7 +309,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\vayRUS\vayRUS3D\imgui;D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -107,86 +317,377 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;shell32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glfw3dll.lib;glad.lib;user32.lib;gdi32.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\vayRUS\vayRUS3D\imgui;D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;shell32.lib</AdditionalDependencies>
-      <EntryPointSymbol>main</EntryPointSymbol>
-      <SubSystem>Console</SubSystem>
-    </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-    </ProjectReference>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\vayRUS\vayRUS3D\imgui;D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3dll.lib;glad.lib;user32.lib;gdi32.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\vayRUS\vayRUS3D\imgui;D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Game Build|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\vayRUS\vayRUS3D\imgui;D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opengl32.lib;glfw3dll.lib;glad.lib;user32.lib;gdi32.lib;shell32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\vayRUS\vayRUS3D\imgui;D:\vayRUS\vayRUS3D\include\3\stb;D:\vayRUS\vayRUS3D\include\3;D:\vayRUS\vayRUS3D\include\2;D:\vayRUS\vayRUS3D\include\1;D:\vayRUS\vayRUS3D\include\0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|x64'">
+    <ClCompile>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>ENGINE_BUILD;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>Default</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AddModuleNamesToAssembly>
+      </AddModuleNamesToAssembly>
+      <ForceSymbolReferences>
+      </ForceSymbolReferences>
+      <AdditionalDependencies>openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <ShowProgress>LinkVerbose</ShowProgress>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
+      <AssemblyLinkResource>
+      </AssemblyLinkResource>
+      <ForceFileOutput>
+      </ForceFileOutput>
+      <PreventDllBinding>
+      </PreventDllBinding>
+      <EmbedManagedResourceFile>
+      </EmbedManagedResourceFile>
+      <TreatLinkerWarningAsErrors>
+      </TreatLinkerWarningAsErrors>
+      <LinkStatus>
+      </LinkStatus>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <CLRImageType>
+      </CLRImageType>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>DEDICATED_SERVER_BUILD;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>Default</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AddModuleNamesToAssembly>
+      </AddModuleNamesToAssembly>
+      <ForceSymbolReferences>
+      </ForceSymbolReferences>
+      <AdditionalDependencies>openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <ShowProgress>LinkVerbose</ShowProgress>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
+      <AssemblyLinkResource>
+      </AssemblyLinkResource>
+      <ForceFileOutput>
+      </ForceFileOutput>
+      <PreventDllBinding>
+      </PreventDllBinding>
+      <EmbedManagedResourceFile>
+      </EmbedManagedResourceFile>
+      <TreatLinkerWarningAsErrors>
+      </TreatLinkerWarningAsErrors>
+      <LinkStatus>
+      </LinkStatus>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <CLRImageType>
+      </CLRImageType>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>GAME_BUILD;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>Default</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+      <SubSystem>Windows</SubSystem>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AddModuleNamesToAssembly>
+      </AddModuleNamesToAssembly>
+      <ForceSymbolReferences>
+      </ForceSymbolReferences>
+      <AdditionalDependencies>openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <ShowProgress>LinkVerbose</ShowProgress>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
+      <AssemblyLinkResource>
+      </AssemblyLinkResource>
+      <ForceFileOutput>
+      </ForceFileOutput>
+      <PreventDllBinding>
+      </PreventDllBinding>
+      <EmbedManagedResourceFile>
+      </EmbedManagedResourceFile>
+      <TreatLinkerWarningAsErrors>
+      </TreatLinkerWarningAsErrors>
+      <LinkStatus>
+      </LinkStatus>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <CLRImageType>
+      </CLRImageType>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>ENGINE_BUILD;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AddModuleNamesToAssembly>
+      </AddModuleNamesToAssembly>
+      <ForceSymbolReferences>
+      </ForceSymbolReferences>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>DEDICATED_SERVER_BUILD;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AddModuleNamesToAssembly>
+      </AddModuleNamesToAssembly>
+      <ForceSymbolReferences>
+      </ForceSymbolReferences>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Game Build|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <PreprocessorDefinitions>GAME_BUILD;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AddModuleNamesToAssembly>
+      </AddModuleNamesToAssembly>
+      <ForceSymbolReferences>
+      </ForceSymbolReferences>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="entity.cpp" />
-    <ClCompile Include="mesh.cpp" />
-    <ClCompile Include="shaderSystem.cpp" />
-    <ClCompile Include="Source.cpp" />
-    <ClCompile Include="src\glad.c" />
-    <ClCompile Include="textureSystem.cpp" />
-    <ClCompile Include="vertexArray.cpp" />
+    <ClCompile Include="content\sourceContent\MyPlayerPawn.cpp" />
+    <ClCompile Include="content\sourceContent\networkStructs\defaultNetworkStructs.cpp" />
+    <ClCompile Include="content\sourceContent\vayrusCube.cpp" />
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_demo.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="imgui\imgui_impl_glfw.cpp">
+      <ScanSourceForModuleDependencies Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|Win32'">true</ScanSourceForModuleDependencies>
+      <ScanSourceForModuleDependencies Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|Win32'">true</ScanSourceForModuleDependencies>
+      <ScanSourceForModuleDependencies Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|Win32'">true</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="imgui\imgui_tables.cpp" />
+    <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="UreTechEngine\EngineBase.cpp" />
+    <ClCompile Include="UreTechEngine\entity\entity.cpp" />
+    <ClCompile Include="UreTechEngine\network\network.cpp" />
+    <ClCompile Include="UreTechEngine\player\player.cpp" />
+    <ClCompile Include="UreTechEngine\shaders\glad.c" />
+    <ClCompile Include="UreTechEngine\shaders\Material.cpp" />
+    <ClCompile Include="UreTechEngine\shaders\mesh.cpp" />
+    <ClCompile Include="UreTechEngine\shaders\MeshManager.cpp" />
+    <ClCompile Include="UreTechEngine\shaders\shaderSystem.cpp" />
+    <ClCompile Include="UreTechEngine\shaders\textureSystem.cpp" />
+    <ClCompile Include="UreTechEngine\shaders\vertexArray.cpp" />
+    <ClCompile Include="UreTechEngine\shaders\vertexStructs.cpp" />
+    <ClCompile Include="UreTechEngine\upk\encryptor.cpp" />
+    <ClCompile Include="UreTechEngine\upk\fileSystem.cpp" />
+    <ClCompile Include="UreTechEngine\upk\misc.cpp" />
+    <ClCompile Include="UreTechEngine\upk\upk.cpp" />
+    <ClCompile Include="UreTechEngine\utils\EngineConsole.cpp" />
+    <ClCompile Include="UreTechEngine\utils\string\string.cpp" />
+    <ClCompile Include="UreTechEngine\utils\util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="baseFS.glsl" />
-    <None Include="baseVS.glsl" />
     <None Include="packages.config" />
+    <None Include="testContent\shaders\baseFS.glsl" />
+    <None Include="testContent\shaders\baseVS.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="baseVector.h" />
-    <ClInclude Include="EngineBase.h" />
-    <ClInclude Include="entity.h" />
-    <ClInclude Include="mesh.hpp" />
-    <ClInclude Include="shaderSystem.hpp" />
+    <ClInclude Include="content\sourceContent\MyPlayerPawn.h" />
+    <ClInclude Include="content\sourceContent\networkStructs\defaultNetworkStructs.h" />
+    <ClInclude Include="content\sourceContent\vayrusCube.h" />
+    <ClInclude Include="EngineCore.h" />
+    <ClInclude Include="imgui\imconfig.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="imgui\imstb_rectpack.h" />
+    <ClInclude Include="imgui\imstb_textedit.h" />
+    <ClInclude Include="imgui\imstb_truetype.h" />
+    <ClInclude Include="include\GLFW\include\GLFW\glfw3.h" />
+    <ClInclude Include="include\GLFW\include\GLFW\glfw3native.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\stb_image.h" />
-    <ClInclude Include="textureSystem.hpp" />
-    <ClInclude Include="UreTechCube.h" />
-    <ClInclude Include="vertexArray.hpp" />
-    <ClInclude Include="vertexStructs.hpp" />
+    <ClInclude Include="UreTechEngine\config.h" />
+    <ClInclude Include="UreTechEngine\EngineBase.h" />
+    <ClInclude Include="UreTechEngine\entity\entity.h" />
+    <ClInclude Include="UreTechEngine\network\network.h" />
+    <ClInclude Include="UreTechEngine\player\player.h" />
+    <ClInclude Include="UreTechEngine\shaders\Material.h" />
+    <ClInclude Include="UreTechEngine\shaders\mesh.hpp" />
+    <ClInclude Include="UreTechEngine\shaders\MeshManager.hpp" />
+    <ClInclude Include="UreTechEngine\shaders\shaderSystem.hpp" />
+    <ClInclude Include="UreTechEngine\shaders\textureSystem.hpp" />
+    <ClInclude Include="UreTechEngine\shaders\vertexArray.hpp" />
+    <ClInclude Include="UreTechEngine\shaders\vertexStructs.hpp" />
+    <ClInclude Include="UreTechEngine\upk\encryptor.h" />
+    <ClInclude Include="UreTechEngine\upk\fileSystem.h" />
+    <ClInclude Include="UreTechEngine\upk\includes.h" />
+    <ClInclude Include="UreTechEngine\upk\misc.h" />
+    <ClInclude Include="UreTechEngine\upk\upk.h" />
+    <ClInclude Include="UreTechEngine\upk\upkConfig.h" />
+    <ClInclude Include="UreTechEngine\utils\3DMath.hpp" />
+    <ClInclude Include="UreTechEngine\utils\dArray.h" />
+    <ClInclude Include="UreTechEngine\utils\baseVector.h" />
+    <ClInclude Include="UreTechEngine\utils\EngineConsole.h" />
+    <ClInclude Include="UreTechEngine\utils\string\string.h" />
+    <ClInclude Include="UreTechEngine\utils\util.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="vayRUS3D.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets" Condition="Exists('..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" />
-    <Import Project="..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets" Condition="Exists('..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" />
-  </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets'))" />
-    <Error Condition="!Exists('..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets'))" />
-  </Target>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>
