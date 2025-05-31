@@ -27,7 +27,7 @@ public:
 	void applyMultipleTexture(std::vector<texture> a);
 
 private:
-	ShaderProgram* shaderProg;
+	Renderer* shaderProg;
 	UreTechEngine::UreTechEngineClass* engine;
 	TextureManager();
 	static TextureManager* c_Instance;

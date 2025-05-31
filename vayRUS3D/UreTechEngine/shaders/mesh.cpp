@@ -2,7 +2,6 @@
 
 #include<../EngineCore.h>
 
-#include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include<glm/mat4x4.hpp>
 #include<glm/gtc/matrix_transform.hpp>
@@ -24,7 +23,7 @@ void mesh::draw(UreTechEngine::Transform3D _addTrnsfm)
 		textManager->applyMultipleTexture(textures);
 	}
 	else {
-		textManager->applyTexture(GL_TEXTURE0, Materials[0].colorText);
+		//textManager->applyTexture(GL_TEXTURE0, Materials[0].colorText);
 	}
 	// t*r*s
 	modelMatrix = glm::mat4(1.0f);
@@ -53,7 +52,7 @@ void mesh::draw(UreTechEngine::Transform3D _addTrnsfm)
 	}
 
 	p_Vao->activateBuffer();
-	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+//	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 	p_Vao->deactivateBuffer();
 
 }

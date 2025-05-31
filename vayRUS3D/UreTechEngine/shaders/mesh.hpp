@@ -4,9 +4,6 @@
 #include<../UreTechEngine/shaders/Material.h>
 #include<vector>
 
-
-#include<glad/glad.h>
-#include <gl/GL.h>
 #include<GLFW/glfw3.h>
 
 namespace UreTechEngine {
@@ -30,7 +27,7 @@ private:
 	bool litRender = true;
 	vertexArrayObject* p_Vao;
 	TextureManager* textManager;
-	ShaderProgram* shaderProg;
+	Renderer* shaderProg;
 	glm::mat4 modelMatrix;
 	UreTechEngine::Player* PlayerRef = nullptr;
 	unsigned int indexCount;

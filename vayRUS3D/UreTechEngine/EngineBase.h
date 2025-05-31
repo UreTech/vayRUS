@@ -4,14 +4,22 @@
 
 #include <../EngineCore.h>
 
-#include<glad/glad.h>
-#include<GLFW/glfw3.h>
+#include <mutex>
+#include <thread>
+
+#define VK_USE_PLATFORM_WIN32_KHR
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+
 #include<glm/mat4x4.hpp>
 #include<glm/gtc/matrix_transform.hpp>
 
 #include"nlohmann/json.hpp"
 
 #include<../UreTechEngine/upk/upk.h>
+#include<../UreTechEngine/utils/multiThreadWorker.h>
 
 class mesh;
 class Material;
@@ -54,12 +62,12 @@ namespace UreTechEngine {
 
 		dArray<entConstructStruct> entityConstructors;
 
-		ShaderProgram* mainShaderProgram = nullptr;
+		Renderer* mainRenderer = nullptr;
 		static UreTechEngineClass* c_Instance;
 		static UreTechEngineClass* getEngine();
 		void setKeyCallBackFunc(GLFWkeyfun func, GLFWmousebuttonfun funcM);
 		Player* getPlayer();
-		ShaderProgram* getShaderProgram();
+		Renderer* getShaderProgram();
 		GLFWwindow* getWindow();
 		entity* spawnEntity(entity* _toSpawn);
 		entity* getEntityWithIndex(unsigned int _index);
@@ -83,6 +91,7 @@ namespace UreTechEngine {
 		void loadGame(std::string gamePath);
 
 	private:
+		size_t systemThreadCount = std::thread::hardware_concurrency();
 		nlohmann::json mapJson;
 		Player* defPlayer = nullptr;
 		GLFWwindow* window = nullptr;

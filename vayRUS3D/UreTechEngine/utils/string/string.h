@@ -9,6 +9,7 @@ namespace UreTechEngine {
 	class string {
 	private:
 		char* s_data = nullptr;// data
+		char* s_data_c_str_type = nullptr;// c_str type holder
 		size_t s_size = 0;// data size
 		bool haltWithFatalError = false;
 

@@ -1,5 +1,4 @@
 #include"vertexArray.hpp"
-#include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include<glm/mat4x4.hpp>
 #include<glm/gtc/matrix_transform.hpp>
@@ -16,22 +15,22 @@ vertexArrayObject::vertexArrayObject()
 vertexArrayObject::~vertexArrayObject()
 {
 	if (VaoId) {
-		glDeleteVertexArrays(1,&VaoId);
+		//glDeleteVertexArrays(1,&VaoId);
 	}
 	if (VboId) {
-		glDeleteBuffers(1, &VboId);
+		//glDeleteBuffers(1, &VboId);
 	}
 	if (VibId) {
-		glDeleteBuffers(1, &VibId);
+		//glDeleteBuffers(1, &VibId);
 	}
 }
 
 void vertexArrayObject::createObject(Vertex& vertices, unsigned int verticesCount, indexData& indices, unsigned int indicesCount)
 {
-	glGenVertexArrays(1, &VaoId);
-	glGenBuffers(1, &VboId);
-	glGenBuffers(1, &VibId);
-
+	//glGenVertexArrays(1, &VaoId);
+	//glGenBuffers(1, &VboId);
+	//glGenBuffers(1, &VibId);
+	/*
 	glBindVertexArray(VaoId);
 	glBindBuffer(GL_ARRAY_BUFFER, VboId);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VibId);
@@ -58,22 +57,23 @@ void vertexArrayObject::createObject(Vertex& vertices, unsigned int verticesCoun
 	glEnableVertexAttribArray(3);
 	
 	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, p_bufSize, (void*)(8 * sizeof(float)));
+	*/
 }
 
 void vertexArrayObject::activateBuffer()
 {
-	glBindVertexArray(VaoId);
+	//glBindVertexArray(VaoId);
 	for (auto next : t_Attirbs) {
-		glEnableVertexAttribArray(next);
+		//glEnableVertexAttribArray(next);
 	}
 }
 
 void vertexArrayObject::deactivateBuffer()
 {
 	for (auto next : t_Attirbs) {
-		glDisableVertexAttribArray(next);
+		//glDisableVertexAttribArray(next);
 	}
-	glBindVertexArray(0);
+	//glBindVertexArray(0);
 }
 
 unsigned int vertexArrayObject::getIndexCount()

@@ -1,7 +1,6 @@
 #include "EngineBase.h"
 #include<iostream>
-#include<glad/glad.h>
-#include<GLFW/glfw3.h>
+#include <windows.h>
 #include<glm/mat4x4.hpp>
 #include<glm/gtc/matrix_transform.hpp>
 #include<../EngineCore.h>
@@ -9,9 +8,22 @@
 using namespace UreTechEngine;
 
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::c_Instance = nullptr;
-unsigned int UreTechEngine::UreTechEngineClass::displayWidth = 1000;
+UreTechEngine::UreTechEngineClass* engRef = nullptr;
+unsigned int UreTechEngine::UreTechEngineClass::displayWidth = 1400;
 unsigned int UreTechEngine::UreTechEngineClass::displayHeight = 1000;
 bool UreTechEngine::UreTechEngineClass::windowMinmized = false;
+
+void SetThreadAffinity(std::thread& t, DWORD_PTR affinityMask) {
+	HANDLE threadHandle = t.native_handle();
+	SetThreadAffinityMask(threadHandle, affinityMask);
+}
+
+void SetThreadPriority(std::thread& t, int priority) {
+	HANDLE threadHandle = t.native_handle();
+	SetThreadPriority(threadHandle, priority);
+}
+
+
 
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine()
 {
@@ -20,62 +32,72 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
     }
     else {
         c_Instance = new UreTechEngineClass();
+		engRef = c_Instance;
 		if (UPK_ENABLE_PACKAGE_SYSTEM) {
 			c_Instance->init_upk_system(UPK_PACKAGE_PATH, UPK_PACKAGE_ENC_KEY);
 		}
 
 		//openGL init
 		if (!glfwInit()) {
-			std::cout << "GL ERROR!";
-			while(1){}
+			EngineConsole::log("GLFW ERROR!", EngineConsole::ERROR_FATAL);
 		}
+
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	//	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		c_Instance->window = glfwCreateWindow(displayWidth, displayHeight, ENGINE_WINDOW_TITLE, NULL, NULL);
 		if (c_Instance->window == NULL) {
-			std::cout << "WINDOW ERROR!";
 			glfwTerminate();
+			EngineConsole::log("WINDOW ERROR!", EngineConsole::ERROR_FATAL);
 			while (1) {}
 		}
+		
+		
 		glfwMakeContextCurrent(c_Instance->window);
+		/*
 		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-			std::cout << "GLAD ERROR!";
-			while (1) {}
+			EngineConsole::log("GLAD ERROR!", EngineConsole::ERROR_FATAL);
 		}
+		*/
 
-		c_Instance->mainShaderProgram = new ShaderProgram();
+		c_Instance->mainRenderer = new Renderer();
+		c_Instance->mainRenderer->window = c_Instance->window;
 
-		c_Instance->mainShaderProgram->attachShader("/shaders/baseVS.glsl", GL_VERTEX_SHADER);
-		c_Instance->mainShaderProgram->attachShader("/shaders/baseFS.glsl", GL_FRAGMENT_SHADER);
-		c_Instance->mainShaderProgram->link();
+		c_Instance->mainRenderer->InitVulkan();
+		c_Instance->mainRenderer->InitImGuiVulkan();
+		//EngineConsole::log("HELL YEAH VULKAN!", EngineConsole::ERROR_FATAL);
+		//c_Instance->mainRenderer->attachShader("/shaders/baseVS.glsl", GL_VERTEX_SHADER);
+		//c_Instance->mainRenderer->attachShader("/shaders/baseFS.glsl", GL_FRAGMENT_SHADER);
+		//c_Instance->mainRenderer->link();
 
+		/*
+		c_Instance->mainRenderer->addUniform("uMtxModel");
+		c_Instance->mainRenderer->addUniform("uMtxProj");
+		c_Instance->mainRenderer->addUniform("uMtxCam");
+		c_Instance->mainRenderer->addUniform("uPosCam");
+		c_Instance->mainRenderer->addUniform("lightPos");
+		c_Instance->mainRenderer->addUniform("uLightColor");
 
-		c_Instance->mainShaderProgram->addUniform("uMtxModel");
-		c_Instance->mainShaderProgram->addUniform("uMtxProj");
-		c_Instance->mainShaderProgram->addUniform("uMtxCam");
-		c_Instance->mainShaderProgram->addUniform("uPosCam");
-		c_Instance->mainShaderProgram->addUniform("lightPos");
-		c_Instance->mainShaderProgram->addUniform("uLightColor");
+		c_Instance->mainRenderer->addUniform("texture0");
+		c_Instance->mainRenderer->addUniform("texture1");
+		c_Instance->mainRenderer->addUniform("texture2");
+		c_Instance->mainRenderer->addUniform("texture3");
+		c_Instance->mainRenderer->addUniform("texture4");
+		c_Instance->mainRenderer->addUniform("texture5");
 
-		c_Instance->mainShaderProgram->addUniform("texture0");
-		c_Instance->mainShaderProgram->addUniform("texture1");
-		c_Instance->mainShaderProgram->addUniform("texture2");
-		c_Instance->mainShaderProgram->addUniform("texture3");
-		c_Instance->mainShaderProgram->addUniform("texture4");
-		c_Instance->mainShaderProgram->addUniform("texture5");
+		c_Instance->mainRenderer->addUniform("specularStrength0");
+		c_Instance->mainRenderer->addUniform("specularStrength1");
+		c_Instance->mainRenderer->addUniform("specularStrength2");
+		c_Instance->mainRenderer->addUniform("specularStrength3");
+		c_Instance->mainRenderer->addUniform("specularStrength4");
+		c_Instance->mainRenderer->addUniform("specularStrength5");
 
-		c_Instance->mainShaderProgram->addUniform("specularStrength0");
-		c_Instance->mainShaderProgram->addUniform("specularStrength1");
-		c_Instance->mainShaderProgram->addUniform("specularStrength2");
-		c_Instance->mainShaderProgram->addUniform("specularStrength3");
-		c_Instance->mainShaderProgram->addUniform("specularStrength4");
-		c_Instance->mainShaderProgram->addUniform("specularStrength5");
-
-		c_Instance->mainShaderProgram->addUniform("litRender0");
-		c_Instance->mainShaderProgram->addUniform("litRender1");
-		c_Instance->mainShaderProgram->addUniform("litRender2");
-		c_Instance->mainShaderProgram->addUniform("litRender3");
-		c_Instance->mainShaderProgram->addUniform("litRender4");
-		c_Instance->mainShaderProgram->addUniform("litRender5");
+		c_Instance->mainRenderer->addUniform("litRender0");
+		c_Instance->mainRenderer->addUniform("litRender1");
+		c_Instance->mainRenderer->addUniform("litRender2");
+		c_Instance->mainRenderer->addUniform("litRender3");
+		c_Instance->mainRenderer->addUniform("litRender4");
+		c_Instance->mainRenderer->addUniform("litRender5");
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
@@ -85,8 +107,10 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
 		//glfwWindowHint(GLFW_SAMPLES, 4);
 		//glEnable(GL_MULTISAMPLE);
 		//******
-
+		*/
         c_Instance->defPlayer = new Player;
+
+		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
         return c_Instance;
     }
 }
@@ -102,9 +126,9 @@ UreTechEngine::Player* UreTechEngine::UreTechEngineClass::getPlayer()
     return defPlayer;
 }
 
-ShaderProgram* UreTechEngine::UreTechEngineClass::getShaderProgram()
+Renderer* UreTechEngine::UreTechEngineClass::getShaderProgram()
 {
-	return mainShaderProgram;
+	return mainRenderer;
 }
 
 GLFWwindow* UreTechEngine::UreTechEngineClass::getWindow()
@@ -119,7 +143,7 @@ UreTechEngine::entity* UreTechEngine::UreTechEngineClass::spawnEntity(entity* _t
 	_toSpawn->init(this);
 	_toSpawn->begin();
 	string abc(" spawned with id ");
-	UreTechEngine::EngineConsole::log(_toSpawn->entName + abc + u64ToHexStr(_toSpawn->entityID), UreTechEngine::EngineConsole::INFO_NORMAL);
+	UreTechEngine::EngineConsole::log(_toSpawn->entName + abc + u64ToHexStr(_toSpawn->entityID), UreTechEngine::EngineConsole::INFO);
 	sceneEntities.push_back(_toSpawn);
 	UreTechEngine::EngineConsole::log("Ent addr: " + u64ToHexStr((uint64_t)_toSpawn), UreTechEngine::EngineConsole::DEBUG);
 	return sceneEntities[sceneEntities.size() - 1];
@@ -177,15 +201,10 @@ unsigned int UreTechEngine::UreTechEngineClass::getCountOfEntity()
 
 void UreTechEngine::UreTechEngineClass::engineTick()
 {
-	for (int i = 0; i < sceneEntities.size(); i++) {
-		if (sceneEntities[i] != nullptr) {
-			glm::vec4 a(1.0f, 1.0f, 1.0f, 1.0f);
-			mainShaderProgram->setVec4("uLightColor", a);
-			sceneEntities[i]->updateVisual();
-		}
-		else {
-			EngineConsole::log("Invalid entity update!", EngineConsole::ERROR_NORMAL);
-		}
+	glm::vec4 a(1.0f, 1.0f, 1.0f, 1.0f);
+	mainRenderer->setVec4("uLightColor", a);
+	for (uint64_t i = 0; i < engRef->getCountOfEntity(); i++) {
+		engRef->getEntityWithIndex(i)->updateVisual();
 	}
 }
 
@@ -221,7 +240,7 @@ void UreTechEngine::UreTechEngineClass::init_upk_system(string path, string encK
 	this->package->setEncryptionKey(encKey.c_str());
 	this->package->readAndCreateTree(path.c_str());
 	loadedPackages.push_back(this->package);
-	EngineConsole::log("Imported main package:\n" + string::stdStrToUStr(this->package->packageInfo()), EngineConsole::t_error::INFO_NORMAL);
+	EngineConsole::log("Imported main package:\n" + string::stdStrToUStr(this->package->packageInfo()), EngineConsole::t_error::INFO);
 }
 
 upk_API* UreTechEngine::UreTechEngineClass::imp_upk_package(string path, string encKey)
@@ -230,7 +249,7 @@ upk_API* UreTechEngine::UreTechEngineClass::imp_upk_package(string path, string 
 	this->package->setEncryptionKey(encKey.c_str());
 	this->package->readAndCreateTree(path.c_str());
 	loadedPackages.push_back(res);
-	EngineConsole::log("Imported new package:\n" + string::stdStrToUStr(res->packageInfo()), EngineConsole::t_error::INFO_NORMAL);
+	EngineConsole::log("Imported new package:\n" + string::stdStrToUStr(res->packageInfo()), EngineConsole::t_error::INFO);
 	return res;
 }
 
@@ -260,10 +279,10 @@ void UreTechEngine::UreTechEngineClass::saveCurrentMap(std::string mapPath)
 	if (file.is_open()) {
 		file << std::setw(4) << map << std::endl;
 		file.close();
-		EngineConsole::log(string("map saved as ") + string::stdStrToUStr(mapPath) + string(".UMAP"), EngineConsole::INFO_NORMAL);
+		EngineConsole::log(string("map saved as ") + string::stdStrToUStr(mapPath) + string(".UMAP"), EngineConsole::INFO);
 	}
 	else {
-		EngineConsole::log("can not save the map!", EngineConsole::WARN_NORMAL);
+		EngineConsole::log("can not save the map!", EngineConsole::INFO);
 	}
 
 }
@@ -273,7 +292,7 @@ void UreTechEngine::UreTechEngineClass::saveGame(std::string gamePath)
 	nlohmann::json game;
 	int mi = 0;
 	for (auto it = loadedMaterials.begin(); it != loadedMaterials.end(); ++it) {
-		// Ýteratörün first ve second üyeleri, anahtar-deðer çiftini temsil eder
+		//  terat r n first ve second  yeleri, anahtar-de er  iftini temsil eder
 		Material mat = it->second;
 		game["GAME"]["MATERIAL" + std::to_string(mi)]["path"] = it->first+".UMAT";
 		mi++;
@@ -283,10 +302,10 @@ void UreTechEngine::UreTechEngineClass::saveGame(std::string gamePath)
 	if (file.is_open()) {
 		file << std::setw(4) << game << std::endl;
 		file.close();
-		EngineConsole::log(string("map saved as ") + string::stdStrToUStr(gamePath) + string(".UGAME"), EngineConsole::INFO_NORMAL);
+		EngineConsole::log(string("map saved as ") + string::stdStrToUStr(gamePath) + string(".UGAME"), EngineConsole::INFO);
 	}
 	else {
-		EngineConsole::log("can not save the GAME!", EngineConsole::WARN_NORMAL);
+		EngineConsole::log("can not save the GAME!", EngineConsole::WARN);
 	}
 }
 
@@ -296,12 +315,12 @@ void UreTechEngine::UreTechEngineClass::loadGame(std::string gamePath)
 
 
 	if (!file.is_open()) {
-		EngineConsole::log(string("game loading error: ") + string::stdStrToUStr(gamePath) + string(".UGAME"), EngineConsole::ERROR_ERROR);
+		EngineConsole::log(string("game loading error: ") + string::stdStrToUStr(gamePath) + string(".UGAME"), EngineConsole::INFO);
 		return;
 	}
 
 	if (!file.good()) {
-		EngineConsole::log(string("game loading error(buffer error): ") + string::stdStrToUStr(gamePath) + string(".UGAME"), EngineConsole::ERROR_ERROR);
+		EngineConsole::log(string("game loading error(buffer error): ") + string::stdStrToUStr(gamePath) + string(".UGAME"), EngineConsole::INFO);
 		return;
 	}
 
@@ -334,7 +353,7 @@ void UreTechEngine::UreTechEngineClass::loadGame(std::string gamePath)
 			break;
 		}
 	}
-	EngineConsole::log(string("game loaded: ") + string::stdStrToUStr(gamePath) + string(".UGAME") + string::stdStrToUStr(std::to_string(i)), EngineConsole::INFO_NORMAL);
+	EngineConsole::log(string("game loaded: ") + string::stdStrToUStr(gamePath) + string(".UGAME") + string::stdStrToUStr(std::to_string(i)), EngineConsole::INFO);
 }
 
 UreTechEngine::UreTechEngineClass::UreTechEngineClass()
@@ -344,5 +363,4 @@ UreTechEngine::UreTechEngineClass::UreTechEngineClass()
 UreTechEngine::UreTechEngineClass::~UreTechEngineClass()
 {
 }
-
 

@@ -289,10 +289,14 @@ void string::resize(size_t size)
 void string::clear()
 {
 	if (s_data != nullptr) {
-		delete[] s_data;
+		free(s_data);
+	}
+	if (s_data_c_str_type != nullptr) {
+		free(s_data_c_str_type);
 	}
 	s_size = 0;
 	s_data = nullptr;
+	s_data_c_str_type = nullptr;
 }
 
 void string::swap(size_t i1, size_t i2)
@@ -319,10 +323,16 @@ size_t string::lenght()
 
 const char* string::c_str()
 {
-	char* buf = (char*)malloc(s_size + 1);
-	buf[s_size] = '\0';
-	memcpy(buf, s_data, s_size);
-	return buf;
+	if (s_data_c_str_type != nullptr) {
+		free(s_data_c_str_type);
+		s_data_c_str_type = (char*)malloc(s_size + 1);
+	}
+	else {
+		s_data_c_str_type = (char*)realloc(s_data_c_str_type, s_size + 1);
+	}
+	memcpy(s_data_c_str_type, s_data, s_size);
+	s_data_c_str_type[s_size] = '\0';
+	return s_data_c_str_type;
 }
 
 std::string string::std_str()

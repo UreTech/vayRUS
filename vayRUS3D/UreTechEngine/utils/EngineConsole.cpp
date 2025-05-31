@@ -57,9 +57,9 @@ void UreTechEngine::EngineConsole::log(UreTechEngine::string logMessage, t_error
 		EngineConsole::messages.push_back(msg);
 		a = L"(!)FATAL ERROR:" + std::wstring(logMessage.data(), logMessage.data() + logMessage.lenght());
 		MessageBox(NULL, a.c_str(), L"Internal Engine ERROR!", MB_ICONERROR);
-		forceToExit();
+		exit(-1);
 		break;
-	case UreTechEngine::EngineConsole::ERROR_NORMAL:
+	case UreTechEngine::EngineConsole::LOG_ERROR:
 		cout << "(" << RED << "i" << RESET << ")[" << RED << "ERROR" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(\x01ri\x1F)[\x01rERROR\x1F] " + logMessage;// UreTech color format
 		msg.color[0] = 1.0f;
@@ -67,7 +67,7 @@ void UreTechEngine::EngineConsole::log(UreTechEngine::string logMessage, t_error
 		msg.color[2] = 0;
 		EngineConsole::messages.push_back(msg);
 		break;
-	case UreTechEngine::EngineConsole::WARN_NORMAL:
+	case UreTechEngine::EngineConsole::WARN:
 		cout << "(" << BRIGHT_YELLOW << "i" << RESET << ")[" << BRIGHT_YELLOW << "WARN" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(\x01yi\x1F)[\x01yWARN\x1F] " + logMessage;// UreTech color format
 		msg.color[0] = 1.0f;
@@ -83,7 +83,7 @@ void UreTechEngine::EngineConsole::log(UreTechEngine::string logMessage, t_error
 		msg.color[2] = 0;
 		EngineConsole::messages.push_back(msg);
 		break;
-	case UreTechEngine::EngineConsole::INFO_NORMAL:
+	case UreTechEngine::EngineConsole::INFO:
 		cout << "(" << GREEN << "i" << RESET << ")[" << GREEN << "INFO" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(\x01gi\x1F)[\x01gINFO\x1F] " + logMessage;// UreTech color format
 		msg.color[0] = 0;

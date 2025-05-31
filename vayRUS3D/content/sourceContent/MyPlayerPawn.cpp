@@ -19,5 +19,5 @@ void MyPlayerPawn::begin()
 	Material myMat;
 	myMat.colorText = text;
 	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/monke.obj", myMat);
-	UreTechEngine::EngineConsole::log("oldu brom!", UreTechEngine::EngineConsole::INFO_NORMAL);
+	UreTechEngine::EngineConsole::log("oldu brom!", UreTechEngine::EngineConsole::INFO);
 }
