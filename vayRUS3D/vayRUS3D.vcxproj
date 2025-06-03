@@ -222,7 +222,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|x64'">
     <LibraryPath>$(ProjectDir)lib\x64\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
-    <IncludePath>$(IncludePath);$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</IncludePath>
+    <IncludePath>$(VULKAN_SDK)\Include;$(IncludePath);$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</IncludePath>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
     <LinkIncremental />
   </PropertyGroup>
@@ -248,7 +248,8 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(VULKAN_SDK)\Include;$(IncludePath);$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\x64\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
@@ -367,14 +368,15 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>ENGINE_BUILD;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)/Include;$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;$(VULKAN_SDK)\Include;$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)/Lib;$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Windows</SubSystem>
@@ -524,17 +526,17 @@ start packageContent.bat
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>ENGINE_BUILD;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\src;$(VULKAN_SDK)\Include;$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <AddModuleNamesToAssembly>
@@ -615,26 +617,26 @@ start packageContent.bat
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="UreTechEngine\EngineBase.cpp" />
-    <ClCompile Include="UreTechEngine\entity\entity.cpp" />
-    <ClCompile Include="UreTechEngine\network\network.cpp" />
-    <ClCompile Include="UreTechEngine\player\player.cpp" />
-    <ClCompile Include="UreTechEngine\shaders\Material.cpp" />
-    <ClCompile Include="UreTechEngine\shaders\mesh.cpp" />
-    <ClCompile Include="UreTechEngine\shaders\MeshManager.cpp" />
-    <ClCompile Include="UreTechEngine\shaders\Renderer.cpp" />
-    <ClCompile Include="UreTechEngine\shaders\textureSystem.cpp" />
-    <ClCompile Include="UreTechEngine\shaders\vertexArray.cpp" />
-    <ClCompile Include="UreTechEngine\shaders\vertexStructs.cpp" />
-    <ClCompile Include="UreTechEngine\upk\encryptor.cpp" />
-    <ClCompile Include="UreTechEngine\upk\fileSystem.cpp" />
-    <ClCompile Include="UreTechEngine\upk\misc.cpp" />
-    <ClCompile Include="UreTechEngine\upk\upk.cpp" />
-    <ClCompile Include="UreTechEngine\utils\EngineConsole.cpp" />
-    <ClCompile Include="UreTechEngine\utils\multiThreadWorker.cpp" />
-    <ClCompile Include="UreTechEngine\utils\string\string.cpp" />
-    <ClCompile Include="UreTechEngine\utils\util.cpp" />
+    <ClCompile Include="src\UreTechEngine\EngineBase.cpp" />
+    <ClCompile Include="src\UreTechEngine\entity\entity.cpp" />
+    <ClCompile Include="src\UreTechEngine\main.cpp" />
+    <ClCompile Include="src\UreTechEngine\network\network.cpp" />
+    <ClCompile Include="src\UreTechEngine\player\player.cpp" />
+    <ClCompile Include="src\UreTechEngine\shaders\Material.cpp" />
+    <ClCompile Include="src\UreTechEngine\shaders\mesh.cpp" />
+    <ClCompile Include="src\UreTechEngine\shaders\MeshManager.cpp" />
+    <ClCompile Include="src\UreTechEngine\shaders\Renderer.cpp" />
+    <ClCompile Include="src\UreTechEngine\shaders\textureSystem.cpp" />
+    <ClCompile Include="src\UreTechEngine\shaders\vertexArray.cpp" />
+    <ClCompile Include="src\UreTechEngine\shaders\vertexStructs.cpp" />
+    <ClCompile Include="src\UreTechEngine\upk\encryptor.cpp" />
+    <ClCompile Include="src\UreTechEngine\upk\fileSystem.cpp" />
+    <ClCompile Include="src\UreTechEngine\upk\misc.cpp" />
+    <ClCompile Include="src\UreTechEngine\upk\upk.cpp" />
+    <ClCompile Include="src\UreTechEngine\utils\EngineConsole.cpp" />
+    <ClCompile Include="src\UreTechEngine\utils\multiThreadWorker.cpp" />
+    <ClCompile Include="src\UreTechEngine\utils\string\string.cpp" />
+    <ClCompile Include="src\UreTechEngine\utils\util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -649,7 +651,6 @@ start packageContent.bat
     <ClInclude Include="content\sourceContent\MyPlayerPawn.h" />
     <ClInclude Include="content\sourceContent\networkStructs\defaultNetworkStructs.h" />
     <ClInclude Include="content\sourceContent\vayrusCube.h" />
-    <ClInclude Include="EngineCore.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
@@ -663,31 +664,32 @@ start packageContent.bat
     <ClInclude Include="include\GLFW\include\GLFW\glfw3native.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\stb_image.h" />
-    <ClInclude Include="UreTechEngine\config.h" />
-    <ClInclude Include="UreTechEngine\EngineBase.h" />
-    <ClInclude Include="UreTechEngine\entity\entity.h" />
-    <ClInclude Include="UreTechEngine\network\network.h" />
-    <ClInclude Include="UreTechEngine\player\player.h" />
-    <ClInclude Include="UreTechEngine\shaders\Material.h" />
-    <ClInclude Include="UreTechEngine\shaders\mesh.hpp" />
-    <ClInclude Include="UreTechEngine\shaders\MeshManager.hpp" />
-    <ClInclude Include="UreTechEngine\shaders\Renderer.hpp" />
-    <ClInclude Include="UreTechEngine\shaders\textureSystem.hpp" />
-    <ClInclude Include="UreTechEngine\shaders\vertexArray.hpp" />
-    <ClInclude Include="UreTechEngine\shaders\vertexStructs.hpp" />
-    <ClInclude Include="UreTechEngine\upk\encryptor.h" />
-    <ClInclude Include="UreTechEngine\upk\fileSystem.h" />
-    <ClInclude Include="UreTechEngine\upk\includes.h" />
-    <ClInclude Include="UreTechEngine\upk\misc.h" />
-    <ClInclude Include="UreTechEngine\upk\upk.h" />
-    <ClInclude Include="UreTechEngine\upk\upkConfig.h" />
-    <ClInclude Include="UreTechEngine\utils\3DMath.hpp" />
-    <ClInclude Include="UreTechEngine\utils\dArray.h" />
-    <ClInclude Include="UreTechEngine\utils\baseVector.h" />
-    <ClInclude Include="UreTechEngine\utils\EngineConsole.h" />
-    <ClInclude Include="UreTechEngine\utils\multiThreadWorker.h" />
-    <ClInclude Include="UreTechEngine\utils\string\string.h" />
-    <ClInclude Include="UreTechEngine\utils\util.hpp" />
+    <ClInclude Include="src\UreTechEngine\config.h" />
+    <ClInclude Include="src\UreTechEngine\EngineBase.h" />
+    <ClInclude Include="src\UreTechEngine\EngineCore.h" />
+    <ClInclude Include="src\UreTechEngine\entity\entity.h" />
+    <ClInclude Include="src\UreTechEngine\network\network.h" />
+    <ClInclude Include="src\UreTechEngine\player\player.h" />
+    <ClInclude Include="src\UreTechEngine\shaders\Material.h" />
+    <ClInclude Include="src\UreTechEngine\shaders\mesh.hpp" />
+    <ClInclude Include="src\UreTechEngine\shaders\MeshManager.hpp" />
+    <ClInclude Include="src\UreTechEngine\shaders\Renderer.hpp" />
+    <ClInclude Include="src\UreTechEngine\shaders\textureSystem.hpp" />
+    <ClInclude Include="src\UreTechEngine\shaders\vertexArray.hpp" />
+    <ClInclude Include="src\UreTechEngine\shaders\vertexStructs.hpp" />
+    <ClInclude Include="src\UreTechEngine\upk\encryptor.h" />
+    <ClInclude Include="src\UreTechEngine\upk\fileSystem.h" />
+    <ClInclude Include="src\UreTechEngine\upk\includes.h" />
+    <ClInclude Include="src\UreTechEngine\upk\misc.h" />
+    <ClInclude Include="src\UreTechEngine\upk\upk.h" />
+    <ClInclude Include="src\UreTechEngine\upk\upkConfig.h" />
+    <ClInclude Include="src\UreTechEngine\utils\3DMath.hpp" />
+    <ClInclude Include="src\UreTechEngine\utils\baseVector.h" />
+    <ClInclude Include="src\UreTechEngine\utils\dArray.h" />
+    <ClInclude Include="src\UreTechEngine\utils\EngineConsole.h" />
+    <ClInclude Include="src\UreTechEngine\utils\multiThreadWorker.h" />
+    <ClInclude Include="src\UreTechEngine\utils\string\string.h" />
+    <ClInclude Include="src\UreTechEngine\utils\util.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="vayRUS3D.rc" />

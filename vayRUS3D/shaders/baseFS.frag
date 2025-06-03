@@ -1,4 +1,6 @@
 #version 450 core
+//#extension GL_EXT_debug_printf : enable
+
 layout(location = 0) out vec4 fragColor;
 
 layout(location = 0) in vec2 texCoord;
@@ -9,7 +11,7 @@ layout(location = 4) in vec3 viewPos;
 
 layout(location = 3) flat in int vertTextureLevel;
 
-layout(set = 0, binding = 0) uniform UBO {
+layout(set = 0, binding = 1) uniform UBO {
 	uniform vec3 lightPos; 
 	uniform vec4 uLightColor;
 	uniform float specularStrength0; 
@@ -26,12 +28,7 @@ layout(set = 0, binding = 0) uniform UBO {
 	uniform bool litRender5;  
 };
 
-layout(set = 1, binding = 0) uniform sampler2D texture0;
-layout(set = 1, binding = 1) uniform sampler2D texture1;
-layout(set = 1, binding = 2) uniform sampler2D texture2;
-layout(set = 1, binding = 3) uniform sampler2D texture3;
-layout(set = 1, binding = 4) uniform sampler2D texture4;
-layout(set = 1, binding = 5) uniform sampler2D texture5;
+layout(set = 1, binding = 0) uniform sampler2D textures[16];
 
 void main()
 {
@@ -40,57 +37,8 @@ void main()
 
         float diff = max(dot(norm, lightDir), 0.0);
 
-        float brightness = 0.2;
-        vec4 brightnessLvl = (brightness+diff) * uLightColor;
-
-        switch (vertTextureLevel) {
-            case 0:
-                if(litRender0){
-                    fragColor = texture(texture0,texCoord)*brightnessLvl;
-                    break;
-                }else{
-                    fragColor = texture(texture0,texCoord);
-                    break;
-                }
-            case 1:
-                if(litRender1){
-                    fragColor = texture(texture1,texCoord)*brightnessLvl;
-                    break;
-                }else{
-                    fragColor = texture(texture1,texCoord);
-                    break;
-                }
-            case 2:
-                if(litRender2){
-                    fragColor = texture(texture2,texCoord)*brightnessLvl;
-                    break;
-                }else{
-                    fragColor = texture(texture2,texCoord);
-                    break;
-                }
-            case 3:
-                if(litRender3){
-                    fragColor = texture(texture3,texCoord)*brightnessLvl;
-                    break;
-                }else{
-                    fragColor = texture(texture3,texCoord);
-                    break;
-                }
-            case 4:
-                if(litRender4){
-                    fragColor = texture(texture4,texCoord)*brightnessLvl;
-                    break;
-                }else{
-                    fragColor = texture(texture4,texCoord);
-                    break;
-                }
-            case 5:
-                if(litRender5){
-                    fragColor = texture(texture5,texCoord)*brightnessLvl;
-                    break;
-                }else{
-                    fragColor = texture(texture5,texCoord);
-                    break;
-                }
-        }
+        float brightness = 3.0;
+		vec3 lightColorRGB = diff * uLightColor.rgb;
+		vec4 brightnessLvl = vec4(lightColorRGB, uLightColor.a) * brightness;
+		fragColor = texture(textures[vertTextureLevel], texCoord) * brightnessLvl;
 }

@@ -1,5 +1,5 @@
 #include "MyPlayerPawn.h"
-#include<../EngineCore.h>
+#include<UreTechEngine/EngineCore.h>
 
 MyPlayerPawn::MyPlayerPawn(void)
 {
@@ -15,9 +15,14 @@ MyPlayerPawn::MyPlayerPawn(mesh* _mesh, UreTechEngine::string _entName, UreTechE
 
 void MyPlayerPawn::begin()
 {
-	texture text = TextureManager::getInstance()->loadTextureFromFile("/test/tText0.jpg");
+	texture text = TextureManager::getInstance()->loadTextureFromFile("/test/tText1.jpg");
 	Material myMat;
 	myMat.colorText = text;
-	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/monke.obj", myMat);
+	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/cube.obj", myMat);
 	UreTechEngine::EngineConsole::log("oldu brom!", UreTechEngine::EngineConsole::INFO);
+}
+
+void MyPlayerPawn::tick()
+{
+	engineRef->getPlayer()->camPos = this->transform.Location;
 }

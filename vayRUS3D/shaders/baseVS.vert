@@ -1,4 +1,5 @@
 #version 450 core
+//#extension GL_EXT_debug_printf : enable
 
  layout (location = 0) in vec3 inPosition;
  layout (location = 1) in vec2 inTexCoord;
@@ -21,10 +22,11 @@ layout(location = 4) out vec3 viewPos;
 
 void main()
 {
-    gl_Position = uMtxProj * (uMtxCam * (uMtxModel * vec4(inPosition, 1.0)));
+	vec4 modelAndPosMatrix = uMtxModel * vec4(inPosition, 1.0);
+    gl_Position = uMtxProj * (uMtxCam * (modelAndPosMatrix));
     texCoord = inTexCoord;
 	Normal = mat3(transpose(inverse(uMtxModel))) * inNormDat;
 	vertTextureLevel = inTexLvl;
-	FragPos = inPosition;
+	FragPos = vec3(modelAndPosMatrix);
 	viewPos = uPosCam;
 }

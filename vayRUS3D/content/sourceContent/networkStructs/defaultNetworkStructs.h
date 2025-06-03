@@ -1,6 +1,6 @@
 #pragma once
 
-#include<../EngineCore.h>
+#include<UreTechEngine/EngineCore.h>
 #include<string>
 
 using namespace UreTechEngine;
