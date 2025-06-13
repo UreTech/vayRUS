@@ -1,6 +1,6 @@
-#include<../UreTechEngine/utils/string/string.h>
 #include "EngineConsole.h"
-#include <../EngineCore.h>
+#include<UreTechEngine/utils/string/string.h>
+#include<UreTechEngine/EngineCore.h>
 
 #include <string>
 #include <iostream>
@@ -33,9 +33,15 @@ namespace UreTechEngine {
 #define BRIGHT_WHITE   "\033[97m"
 
 UreTechEngine::dArray<conMessage> UreTechEngine::EngineConsole::messages = {};
+UreTechEngine::dArray<conMessage> UreTechEngine::EngineConsole::initialMessages = {};
+UreTechEngine::dArray<commandStruct> UreTechEngine::EngineConsole::conFuncs = {};
+
+bool isPrintBusy = false;
 
 void UreTechEngine::EngineConsole::log(UreTechEngine::string logMessage, t_error logType)
 {
+	while (isPrintBusy);
+	isPrintBusy = true; // prevent multiple threads from printing at the same time
 	conMessage msg;
 	std::wstring a;
 	switch (logType)
@@ -43,17 +49,11 @@ void UreTechEngine::EngineConsole::log(UreTechEngine::string logMessage, t_error
 	case UreTechEngine::EngineConsole::ERROR_ERROR:
 		cout << "(" << BLUE << "?" << RESET << ")[" << BLUE << "UNKNOWN ERROR" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(?)[UNKNOWN ERROR] " + logMessage;
-		msg.color[0] = 0;
-		msg.color[1] = 0;
-		msg.color[2] = 1.0f;
 		EngineConsole::messages.push_back(msg);
 		break;
 	case UreTechEngine::EngineConsole::ERROR_FATAL:
 		cout << "("<< RED << "!" << RESET <<")[" << RED << "FATAL ERROR" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(\x01r!\x1F)[\x01rFATAL ERROR\x1F] " + logMessage;// UreTech color format
-		msg.color[0] = 1.0f;
-		msg.color[1] = 0;
-		msg.color[2] = 0;
 		EngineConsole::messages.push_back(msg);
 		a = L"(!)FATAL ERROR:" + std::wstring(logMessage.data(), logMessage.data() + logMessage.lenght());
 		MessageBox(NULL, a.c_str(), L"Internal Engine ERROR!", MB_ICONERROR);
@@ -62,50 +62,77 @@ void UreTechEngine::EngineConsole::log(UreTechEngine::string logMessage, t_error
 	case UreTechEngine::EngineConsole::LOG_ERROR:
 		cout << "(" << RED << "i" << RESET << ")[" << RED << "ERROR" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(\x01ri\x1F)[\x01rERROR\x1F] " + logMessage;// UreTech color format
-		msg.color[0] = 1.0f;
-		msg.color[1] = 0;
-		msg.color[2] = 0;
 		EngineConsole::messages.push_back(msg);
 		break;
 	case UreTechEngine::EngineConsole::WARN:
 		cout << "(" << BRIGHT_YELLOW << "i" << RESET << ")[" << BRIGHT_YELLOW << "WARN" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(\x01yi\x1F)[\x01yWARN\x1F] " + logMessage;// UreTech color format
-		msg.color[0] = 1.0f;
-		msg.color[1] = 1.0f;
-		msg.color[2] = 0;
 		EngineConsole::messages.push_back(msg);
 		break;
 	case UreTechEngine::EngineConsole::WARN_CAN_CAUSE_ERROR:
 		cout << "(" << YELLOW << "!" << RESET << ")[" << YELLOW << "WARN" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(\x01y!\x1F)[\x01yWARN\x1F] " + logMessage;// UreTech color format
-		msg.color[0] = 1.0f;
-		msg.color[1] = 0.5f;
-		msg.color[2] = 0;
 		EngineConsole::messages.push_back(msg);
 		break;
 	case UreTechEngine::EngineConsole::INFO:
 		cout << "(" << GREEN << "i" << RESET << ")[" << GREEN << "INFO" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(\x01gi\x1F)[\x01gINFO\x1F] " + logMessage;// UreTech color format
-		msg.color[0] = 0;
-		msg.color[1] = 1.0f;
-		msg.color[2] = 0;
 		EngineConsole::messages.push_back(msg);
 		break;
 	case UreTechEngine::EngineConsole::DEBUG:
 		cout << "(" << MAGENTA << "D" << RESET << ")[" << MAGENTA << "DEBUG" << RESET << "] " << logMessage.std_str() << endl;
 		msg.msg = "(\x01mD\x1F)[\x01mDEBUG\x1F] " + logMessage;// UreTech color format
-		msg.color[0] = 1.0f;
-		msg.color[1] = 0;
-		msg.color[2] = 0.56f;
 		EngineConsole::messages.push_back(msg);
 		break;
 	default:
 		cout << BRIGHT_BLUE << "UNKNOWN: an unknown error reported! check your code." << RESET << endl;
 		msg.msg = "\x01oUNKNOWN: an unknown error reported! check your code.\x1F";
-		msg.color[0] = 0;
-		msg.color[1] = 0;
-		msg.color[2] = 1.0f;
 		EngineConsole::messages.push_back(msg);
+		break;
+	}
+	isPrintBusy = false; // allow other threads to print
+}
+
+void UreTechEngine::EngineConsole::initial_log(UreTechEngine::string logMessage, t_error logType)
+{
+	conMessage msg;
+	std::wstring a;
+	switch (logType)
+	{
+	case UreTechEngine::EngineConsole::ERROR_ERROR:
+		msg.msg = "(?)[UNKNOWN ERROR] " + logMessage;
+		EngineConsole::initialMessages.push_back(msg);
+		break;
+	case UreTechEngine::EngineConsole::ERROR_FATAL:
+		msg.msg = "(\x01r!\x1F)[\x01rFATAL ERROR\x1F] " + logMessage;// UreTech color format
+		EngineConsole::initialMessages.push_back(msg);
+		a = L"(!)FATAL ERROR:" + std::wstring(logMessage.data(), logMessage.data() + logMessage.lenght());
+		MessageBox(NULL, a.c_str(), L"Internal Engine ERROR!", MB_ICONERROR);
+		exit(-1);
+		break;
+	case UreTechEngine::EngineConsole::LOG_ERROR:
+		msg.msg = "(\x01ri\x1F)[\x01rERROR\x1F] " + logMessage;// UreTech color format
+		EngineConsole::initialMessages.push_back(msg);
+		break;
+	case UreTechEngine::EngineConsole::WARN:
+		msg.msg = "(\x01yi\x1F)[\x01yWARN\x1F] " + logMessage;// UreTech color format
+		EngineConsole::initialMessages.push_back(msg);
+		break;
+	case UreTechEngine::EngineConsole::WARN_CAN_CAUSE_ERROR:
+		msg.msg = "(\x01y!\x1F)[\x01yWARN\x1F] " + logMessage;// UreTech color format
+		EngineConsole::initialMessages.push_back(msg);
+		break;
+	case UreTechEngine::EngineConsole::INFO:
+		msg.msg = "(\x01gi\x1F)[\x01gINFO\x1F] " + logMessage;// UreTech color format
+		EngineConsole::initialMessages.push_back(msg);
+		break;
+	case UreTechEngine::EngineConsole::DEBUG:
+		msg.msg = "(\x01mD\x1F)[\x01mDEBUG\x1F] " + logMessage;// UreTech color format
+		EngineConsole::initialMessages.push_back(msg);
+		break;
+	default:
+		msg.msg = "\x01oUNKNOWN: an unknown error reported! check your code.\x1F";
+		EngineConsole::initialMessages.push_back(msg);
 		break;
 	}
 }
@@ -113,7 +140,7 @@ void UreTechEngine::EngineConsole::log(UreTechEngine::string logMessage, t_error
 void UreTechEngine::EngineConsole::forceToExit()
 {
 	cout << "press esc to exit..." << endl;
-	while (getch()!= 27) {}
+	while (_getch()!= 27) {}
 	exit(-1);
 }
 

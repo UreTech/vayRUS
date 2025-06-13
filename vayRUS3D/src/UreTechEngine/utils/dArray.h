@@ -3,7 +3,7 @@
 #include <initializer_list>
 #include <UreTechEngine/utils/string/string.h>
 namespace UreTechEngine {
-	extern uStrConsoleLogFuncPtr strLog;
+	extern uStrConsoleLogFuncPtr ENGINE_DEFINE strLog;
 	template<typename arrType>
 	class dArray {
 	private:

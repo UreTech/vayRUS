@@ -4,7 +4,7 @@
 class mesh;
 class Material;
 class vertexArrayObject;
-class MeshManager {
+class ENGINE_DEFINE MeshManager {
 public:
 	static MeshManager* getInstance();
 	mesh* imp_mesh_obj_type(UreTechEngine::string filePath, Material _mat, bool useSmooth = true);

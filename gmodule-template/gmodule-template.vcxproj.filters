@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine">
+      <UniqueIdentifier>{341905a2-18c1-4027-b5bd-72557316c5c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine\UreTechEngine">
+      <UniqueIdentifier>{083aa0cc-a966-429a-87cd-36dbb145a85c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine\UreTechEngine\utils">
+      <UniqueIdentifier>{c4ab276a-4ab2-451c-b01e-9dbede3b0ea6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine\UreTechEngine\utils\string">
+      <UniqueIdentifier>{eb9163af-0294-4026-ab85-4a983df6b2c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine\UreTechEngine\shaders">
+      <UniqueIdentifier>{972c218e-6f94-49bc-9c7a-e30d6e250325}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine\UreTechEngine\entity">
+      <UniqueIdentifier>{01f64dea-4e7e-4c67-bc14-a9148bd049d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine\UreTechEngine\player">
+      <UniqueIdentifier>{4a5cf5bd-ccdd-43b0-9e90-fed9b74101e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine\UreTechEngine\network">
+      <UniqueIdentifier>{b259a5d6-c260-4fc6-bb39-458ae3149b2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine\UreTechEngine\upk">
+      <UniqueIdentifier>{25eb2d02-6a23-4e50-a8af-f76ca4b4a82a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine\UreTechEngine\IN PACKAGE SHADERS">
+      <UniqueIdentifier>{7e768d4e-eab3-4d44-8be6-b604cd6e66bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UreTechEngine\gmodule">
+      <UniqueIdentifier>{5661e8a8-7d24-4ab4-bccc-b8a9e41dc5de}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="UreTechEngine\gmodule-dll.h">
+      <Filter>Source Files\UreTechEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\EngineBase.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\EngineCore.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\utils\3DMath.hpp">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\utils\baseVector.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\utils\dArray.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\utils\EngineConsole.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\utils\multiThreadWorker.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\utils\util.hpp">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\utils\string\string.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\utils\string</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\stb_image.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\shaders\Material.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\shaders\mesh.hpp">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\shaders\MeshManager.hpp">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\shaders\Renderer.hpp">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\shaders\textureSystem.hpp">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\shaders\vertexArray.hpp">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\shaders\vertexStructs.hpp">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\entity\entity.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\player\player.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\network\network.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\upk\encryptor.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\upk\fileSystem.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\upk\includes.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\upk\misc.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\upk\upk.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\upk\upkConfig.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\upk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\gmodule\gmodule.h">
+      <Filter>Source Files\UreTechEngine\gmodule</Filter>
+    </ClInclude>
+    <ClInclude Include="..\vayRUS3D\src\UreTechEngine\utils\EngineRegisters.h">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\vayRUS3D\testContent\shaders\baseFS.frag">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\IN PACKAGE SHADERS</Filter>
+    </None>
+    <None Include="..\vayRUS3D\testContent\shaders\baseVS.vert">
+      <Filter>Source Files\UreTechEngine\UreTechEngine\IN PACKAGE SHADERS</Filter>
+    </None>
+  </ItemGroup>
+</Project>

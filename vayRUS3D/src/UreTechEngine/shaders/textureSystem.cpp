@@ -1,5 +1,8 @@
 #include"textureSystem.hpp"
 
+#ifdef GMODULE_ENGINE_DLL
+#define STB_IMAGE_IMPLEMENTATION   
+#endif
 #include<stb/stb_image.h>
 
 #include<GLFW/glfw3.h>
@@ -118,7 +121,7 @@ void copyBufferToImage(VkCommandBuffer commandBuffer,
 		});
 }
 
-texture TextureManager::loadTextureFromFile(UreTechEngine::string fileName, bool texAntiAlising)
+texture TextureManager::loadTextureFromFile(UreTechEngine::string fileName, VkCommandBuffer cmdBuffer, bool texAntiAlising)
 {
 	texture text;
 	bool isFound = false;
@@ -163,13 +166,13 @@ texture TextureManager::loadTextureFromFile(UreTechEngine::string fileName, bool
 
 		rnd->createImage(t_width, t_height, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, text.image, text.imageMemory);
 
-		transitionImageLayout(rnd->EngineCommandBuffer, text.image, VK_FORMAT_R8G8B8A8_SRGB,
+		transitionImageLayout(cmdBuffer, text.image, VK_FORMAT_R8G8B8A8_SRGB,
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-		copyBufferToImage(rnd->EngineCommandBuffer, stagingBuffer, text.image, t_width, t_height);
+		copyBufferToImage(cmdBuffer, stagingBuffer, text.image, t_width, t_height);
 
-		transitionImageLayout(rnd->EngineCommandBuffer, text.image, VK_FORMAT_R8G8B8A8_SRGB,
+		transitionImageLayout(cmdBuffer, text.image, VK_FORMAT_R8G8B8A8_SRGB,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 

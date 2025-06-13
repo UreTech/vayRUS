@@ -14,7 +14,7 @@ namespace UreTechEngine {
 class TextureManager;
 class Material;
 
-class mesh {
+class ENGINE_DEFINE mesh {
 public:
 	UreTechEngine::Transform3D transform;
 	void draw(UreTechEngine::Transform3D _addTrnsfm);

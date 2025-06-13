@@ -22,7 +22,7 @@ struct inPackageFile {
 	uint64_t fileSize;
 };
 
-class upk_API {
+class ENGINE_DEFINE upk_API {
 public:
 	void readAndCreateTree(std::string path);
 	Buffer get(UreTechEngine::string path);

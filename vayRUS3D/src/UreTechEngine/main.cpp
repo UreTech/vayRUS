@@ -9,9 +9,6 @@
 
 #include<UreTechEngine/EngineCore.h>
 
-#include "../content/sourceContent/vayrusCube.h"
-#include "../content/sourceContent/MyPlayerPawn.h"
-
 #include<UreTechEngine/utils/string/string.h>
 
 UreTechEngine::UreTechEngineClass* engine = nullptr;
@@ -32,7 +29,6 @@ bool rClickL = false;
 
 #define ImGui_Max_InputChars 512
 // editor/game ImGui Vars
-bool externalConsoleState = USE_EXTERNAL_CONSOLE;
 
 bool consoleWindow = false;
 bool autoScroll = true;
@@ -128,11 +124,13 @@ void RenderColoredText(std::string text) {
 	std::string tmp;
 	bool crOpen = false;
 	bool isPushed = false;
+	bool isSameLineCalled = false;
 	for (uint64_t i = 0; i < text.size(); i++) {
 			if (crOpen) {
-				if (text[i] == '\x1F') {
+				if (text[i] == '\037') {
 					ImGui::Text(tmp.c_str());
-					ImGui::SameLine(0.0f,0.0f);
+					ImGui::SameLine(0.0f, 0.0f);
+					isSameLineCalled = true;
 					if (isPushed) {
 						ImGui::PopStyleColor();
 						isPushed = false;
@@ -145,9 +143,10 @@ void RenderColoredText(std::string text) {
 				}
 			}
 			else {
-				if (text[i] == '\x01') {
+				if (text[i] == '\001') {
 					ImGui::Text(tmp.c_str());
-					ImGui::SameLine(0.0f,0.0f);
+					ImGui::SameLine(0.0f, 0.0f);
+					isSameLineCalled = true;
 					tmp.clear();
 					crOpen = true;
 					i++;
@@ -178,6 +177,10 @@ void RenderColoredText(std::string text) {
 						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 1.0f, 1.0f));//magenta
 						isPushed = true;
 						break;
+					case 'w':
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));//white
+						isPushed = true;
+						break;
 					default:
 						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));//white
 						isPushed = true;
@@ -191,10 +194,15 @@ void RenderColoredText(std::string text) {
 		}
 	if (!tmp.empty()) {
 		ImGui::Text(tmp.c_str());
+		//ImGui::SameLine(0.0f, 0.0f);
+		isSameLineCalled = false;
 		if (isPushed) {
 			ImGui::PopStyleColor();
 			isPushed = false;
 		}
+	}
+	if (isSameLineCalled) {
+		ImGui::NewLine();
 	}
 }
 
@@ -220,27 +228,12 @@ std::string getCPUInfo() {
 	return info.str();
 }
 
-typedef dArray<UreTechEngine::string> conArgs;
-
-typedef void (*conFunc)(conArgs);
-
-struct commandStruct {
-	UreTechEngine::string commandName = "";
-	conFunc func = nullptr;
-	commandStruct(UreTechEngine::string _commandName, conFunc _func) {
-		commandName = _commandName;
-		func = _func;
-	}
-};
-
-dArray<commandStruct> conFuncs;
-
 void executeCommand(UreTechEngine::string commandLine) {
 	conArgs args = parseWith(commandLine, ' ');
 	UreTechEngine::string command = args[0];
-	for (uint64_t i = 0; i < conFuncs.size(); i++) {
-		if (command == conFuncs[i].commandName) {
-			conFuncs[i].func(args);
+	for (uint64_t i = 0; i < EngineConsole::conFuncs.size(); i++) {
+		if (command == EngineConsole::conFuncs[i].commandName) {
+			EngineConsole::conFuncs[i].func(args);
 			return;
 		}
 	}
@@ -252,48 +245,53 @@ void con_command_quit(conArgs args) {
 	EngineConsole::log("Quiting...", EngineConsole::INFO);
 	exit(0);
 }
+ENGINE_CONSOLE_COMMAND_REGISTER("quit", con_command_quit, UreTechEngineCommand_quit_index);
 
 void con_command_info(conArgs args) {
 	EngineConsole::log(FULL_ENGINE_DESCRIPTION, EngineConsole::INFO);
 }
+ENGINE_CONSOLE_COMMAND_REGISTER("info", con_command_info, UreTechEngineCommand_info_index);
 
 void con_command_help(conArgs args) {
 	EngineConsole::log("All main console commands:", EngineConsole::INFO);
-	for (uint64_t i = 0; i < conFuncs.size(); i++) {
-		EngineConsole::log("Command '" + conFuncs[i].commandName + "'", EngineConsole::INFO);
+	for (uint64_t i = 0; i < EngineConsole::conFuncs.size(); i++) {
+		EngineConsole::log("Command '" + EngineConsole::conFuncs[i].commandName + "'", EngineConsole::INFO);
 	}
 }
+ENGINE_CONSOLE_COMMAND_REGISTER("help", con_command_help, UreTechEngineCommand_help_index);
 
 void con_command_clear(conArgs args) {
 	system("cls");
 	EngineConsole::messages.clear();
 }
+ENGINE_CONSOLE_COMMAND_REGISTER("clear", con_command_clear, UreTechEngineCommand_clear_index);
+
+void con_command_gmodule(conArgs args) {
+	if (args.size() == 2) {
+		gmodule_loader::load_gmodule(args[1].c_str());
+	}
+	else {
+		EngineConsole::log("Invalid argument!", EngineConsole::LOG_ERROR);
+	}
+}
+ENGINE_CONSOLE_COMMAND_REGISTER("gmodule", con_command_gmodule, UreTechEngineCommand_gmodule_index);
 
 void con_command_console(conArgs args) {
 	if (args.size() == 2) {
 		if (args[1] == "free") {
 			HWND hwnd = GetConsoleWindow();
 			ShowWindow(hwnd, SW_HIDE);
-			FILE* f;
-			freopen_s(&f, "NUL", "w", stdout);
-			freopen_s(&f, "NUL", "r", stdin);
-			freopen_s(&f, "NUL", "w", stderr);
-			FreeConsole();
 			EngineConsole::log("External console closed.", EngineConsole::INFO);
-			externalConsoleState = false;
+			UreTechEngine::UreTechEngineClass::externalConsoleState = false;
 		}
 		else if (args[1] == "alloc") {
 			HWND hwnd = GetConsoleWindow();
 			ShowWindow(hwnd, SW_SHOW);
 			AllocConsole();  
-			SetConsoleTitleA("VayRUS3D Engine vConsole v1.0");
-			FILE* f;
-			freopen_s(&f, "CONOUT$", "w", stdout);
-			freopen_s(&f, "CONIN$", "r", stdin);
-			freopen_s(&f, "CONOUT$", "w", stderr);
+			SetConsoleTitleA(ENGINE_CONSOLE_TITLE);
 			enableANSI();
 			EngineConsole::log("External console opened.", EngineConsole::INFO);
-			externalConsoleState = true;
+			UreTechEngine::UreTechEngineClass::externalConsoleState = true;
 		}
 		else if (args[1] == "clear") {
 			EngineConsole::log("External console cleared.", EngineConsole::INFO);// prints before for not print again
@@ -307,6 +305,7 @@ void con_command_console(conArgs args) {
 		EngineConsole::log("Unexpected argument!", EngineConsole::LOG_ERROR);
 	}
 }
+ENGINE_CONSOLE_COMMAND_REGISTER("console", con_command_console, UreTechEngineCommand_console_index);
 
 void con_command_screen(conArgs args) {
 	if (args.size() == 2) {
@@ -321,32 +320,37 @@ void con_command_screen(conArgs args) {
 		EngineConsole::log("Unexpected argument!", EngineConsole::LOG_ERROR);
 	}
 }
+ENGINE_CONSOLE_COMMAND_REGISTER("screen", con_command_screen, UreTechEngineCommand_screen_index);
 
 void con_command_engine(conArgs args) {
 	EngineConsole::log("\nScene entity count: " + u64ToDecStr(engine->getCountOfEntity()) + "\nNet mode: " + u64ToDecStr(engine->isInServer), EngineConsole::INFO);
 }
-
-void initCommands() {
-	conFuncs.push_back(commandStruct("help", con_command_help));
-	conFuncs.push_back(commandStruct("info", con_command_info));
-	conFuncs.push_back(commandStruct("engine", con_command_engine));
-	conFuncs.push_back(commandStruct("quit", con_command_quit));
-	conFuncs.push_back(commandStruct("clear", con_command_clear));
-	conFuncs.push_back(commandStruct("console", con_command_console));
-}
+ENGINE_CONSOLE_COMMAND_REGISTER("engine", con_command_engine, UreTechEngineCommand_engine_index);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	// start external console
-	//_CrtDumpMemoryLeaks();
-	initCommands();// init main commands
-
-	// open external console
 	if (USE_EXTERNAL_CONSOLE) {
+		AllocConsole();
+
+		FILE* f;
+		freopen_s(&f, "CONOUT$", "w", stdout);
+		freopen_s(&f, "CONIN$", "r", stdin);
+		freopen_s(&f, "CONOUT$", "w", stderr);
+
+		SetConsoleTitleA(ENGINE_CONSOLE_TITLE);
+
+		UreTechEngineClass::externalConsoleState = true;
+		
 		executeCommand("console alloc");
 	}
 
+	// open external console
+
 	// init engine
 	engine = UreTechEngine::UreTechEngineClass::getEngine();// init engine
+	glfwMakeContextCurrent(engine->mainRenderer->window);
+	ImGui::SetCurrentContext(engine->mainRenderer->ImGuiContext);// set ImGui context for engine
+
 	if (engine == nullptr) {
 		EngineConsole::log("ENGINE ERROR (0x01)", EngineConsole::ERROR_FATAL);
 	}
@@ -420,20 +424,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//player->CameraTranform.Location.y = -10.0f;
 	//player->CameraTranform.Location.z = 3.2f;
 
-	player->playerPawn = engine->spawnEntity(new MyPlayerPawn(nullptr, "playerPawn")); // used for debug
+	//player->playerPawn = engine->spawnEntity(ENGINE_GET_REGISTERED_ENTITY("UreTechEngine", "MyPlayerPawn")); // used for debug
 #if defined(ENGINE_BUILD) or defined(GAME_BUILD)
-	ImGui::StyleColorsDark();
-
 	// PRELOAD
-	texture materialThumbTexture = textureManager->loadTextureFromFile("/engine/res/materialThumb.png", false);
+	//texture materialThumbTexture = textureManager->loadTextureFromFile("/engine/res/materialThumb.png", false);
 	// PRELOAD END
 #endif
 
 	// spawnables
-	engine->entityConstructors.push_back(entConstructStruct("entity"      , []() { return new entity(); }));
-	engine->entityConstructors.push_back(entConstructStruct("vayrusCube"  , []() { return dynamic_cast<entity*>(new vayrusCube()); }));
-	engine->entityConstructors.push_back(entConstructStruct("MyPlayerPawn", []() { return dynamic_cast<entity*>(new MyPlayerPawn()); }));
-	engInf = "Engine initiated.";
+	//engine->entityConstructors.push_back(entConstructStruct("entity"      , []() { return new entity(); }));
+	//engine->entityConstructors.push_back(entConstructStruct("vayrusCube"  , []() { return dynamic_cast<entity*>(new vayrusCube()); }));
+	//engine->entityConstructors.push_back(entConstructStruct("MyPlayerPawn", []() { return dynamic_cast<entity*>(new MyPlayerPawn()); }));
+	//engInf = "Engine initiated.";
 	UreTechEngine::EngineConsole::log("Engine successfuly initiated!", UreTechEngine::EngineConsole::t_error::INFO);
 
 	UreTechEngine::string a = "BRUH MESSAGE";//string test bruh
@@ -449,12 +451,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	*/
 	//engine->spawnEntity(engine->entityConstructors[1].constructor());
 
-	entity* spwnd = engine->spawnEntity(engine->entityConstructors[1].constructor());
-	spwnd->transform.Location.x = 0;
+	//entity* spwnd = engine->spawnEntity(ENGINE_GET_REGISTERED_ENTITY("UreTechEngine", "vayrusCube"));
+	//spwnd->transform.Location.x = 0;
 	//spwnd->transform.Location.y = rand()%40;
-	spwnd->transform.Location.z = -2.9;
-	spwnd->transform.Rotation.yaw = -180.0f;
-	spwnd->transform.Rotation.pitch = -180.0f;
+	//spwnd->transform.Location.z = -2.9;
+	//spwnd->transform.Rotation.yaw = -180.0f;
+	//spwnd->transform.Rotation.pitch = -180.0f;
 
 	// main loop
 #if defined(ENGINE_BUILD) or defined(GAME_BUILD)
@@ -665,14 +667,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		// gui build (dedicated server doesn't have ImGui window)
 #if defined(ENGINE_BUILD) or defined(GAME_BUILD)
 		if (consoleWindow) {
-			ImGui::Begin("vConsole", &consoleWindow);
+			ImGui::Begin(ENGINE_CONSOLE_TITLE, &consoleWindow);
 
 			ImVec2 windowSize = ImGui::GetWindowSize();
 
 
-			ImGui::BeginChild("ConsoleOutput", ImVec2(0, windowSize.y - 100), true);
-			for (uint64_t i = 0; i < EngineConsole::messages.size(); i++) {
-				RenderColoredText(EngineConsole::messages[i].msg.c_str());
+			ImGui::BeginChild("ConsoleOutput", ImVec2(0, windowSize.y - 100), true, ImGuiWindowFlags_HorizontalScrollbar);
+
+			if (PRINT_INITIAL_LOGS) {
+
+				RenderColoredText("Initial logs:");
+
+				for (uint64_t i = 0; i < EngineConsole::initialMessages.size(); i++) {
+					RenderColoredText(EngineConsole::initialMessages[i].msg.c_str());
+				}
+
+				RenderColoredText("Runtime logs:");
+			}
+
+			if (EngineConsole::messages.size() < 1000) {
+				for (uint64_t i = 0; i < EngineConsole::messages.size(); i++) {
+					RenderColoredText(EngineConsole::messages[i].msg.c_str());
+				}
+			}
+			else {
+				for (uint64_t i = 1000 - EngineConsole::messages.size(); i < EngineConsole::messages.size(); i++) {
+					RenderColoredText(EngineConsole::messages[i].msg.c_str());
+				}
 			}
 
 			if (autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
@@ -741,9 +762,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 #endif // (ENGINE_BUILD) or defined(GAME_BUILD)
 
-		//glfwSwapInterval(1);
+		//glfwSwapInterval(0);
 		//glfwSwapBuffers(window);
 	}
+	exit(0);
 	//vkDeviceWaitIdle(engine->mainRenderer->device);
 	//engine->mainRenderer->destroyVulkan();
 	return 0;

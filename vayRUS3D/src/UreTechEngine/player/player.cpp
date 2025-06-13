@@ -4,9 +4,9 @@ void UreTechEngine::Player::updateCamera()
 {
 	//cam matrix
 	mtxCam =
-		glm::rotate(glm::mat4(1.0f), glm::radians(camRot.yaw), glm::vec3(0, 0, 1)) *//z
-		glm::rotate(glm::mat4(1.0f), glm::radians(camRot.pitch), glm::vec3(0, 1, 0)) *//y
-		glm::rotate(glm::mat4(1.0f), glm::radians(camRot.roll), glm::vec3(1, 0, 0));//x
+		glm::rotate(glm::mat4(1.0f), glm::radians(camRot.yaw), glm::vec3(0, 0, 1)) *   //z
+		glm::rotate(glm::mat4(1.0f), glm::radians(camRot.pitch), glm::vec3(0, 1, 0)) * //y
+		glm::rotate(glm::mat4(1.0f), glm::radians(camRot.roll), glm::vec3(1, 0, 0));   //x
 	mtxCam = glm::transpose(mtxCam);
 	mtxCam = glm::translate(mtxCam, -glm::vec3(camPos.x, camPos.y, camPos.z));
 

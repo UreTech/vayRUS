@@ -28,13 +28,29 @@
 #include<imstb_textedit.h>
 #include<imstb_truetype.h>
 
+namespace UreTechEngine
+{
+	class UreTechEngineClass;
+}
+
 typedef enum {
 	FILTER_NEAREST,
 	FILTER_LINEAR
 } TextureFilterType;
 
-class Renderer {
+struct ENGINE_DEFINE QueueFamilyIndices {
+	uint32_t graphicsFamily = 0xFABCAF;
+	uint32_t presentFamily = 0xFABCAF;
+
+	bool isComplete();
+};
+
+QueueFamilyIndices ENGINE_DEFINE findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
+
+class ENGINE_DEFINE Renderer {
 public:
+	ImGuiContext* ImGuiContext = nullptr; // ImGui context
+
 	GLFWwindow* window;
 
 	VkInstance instance;
@@ -94,37 +110,10 @@ public:
 	const bool enableValidationLayers = true;
 #endif
 
+	UreTechEngine::UreTechEngineClass* engine = nullptr;
+
 	Renderer();
 	~Renderer();
-
-	// OpenGL (OGL) supported at 1.2.1 and prior to 1.2.1 versions
-	// next versions use Vulkan
-	/*
-	void attachShader(const char* fileName,unsigned int shaderType);
-
-	void link();
-
-	void use();
-	
-	void addUniform(const std::string& varName);
-
-	void setFloat(const std::string& varName, float val);
-
-	void setBool(const std::string& varName, bool val);
-
-	void setInt(const std::string& varName, int val);
-
-	void setVec3(const std::string& varName, glm::vec3 val);
-
-	void setVec4(const std::string& varName, glm::vec4& val);
-
-	void setMat3(const std::string& varName, glm::mat3* val);
-
-	void setMat4(const std::string& varName, glm::mat4* val);
-
-	//texture
-	void setTexture(const std::string& varName, int _textureLvl);
-	*/
 
 	//default texture:
 	texture emptyTx;
@@ -187,6 +176,10 @@ public:
 	void waitFrame();
 
 	void immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& recordCommands);
+
+	VkCommandBuffer createTemporalCmdBuffer();
+
+	void processAndDestroyTemporalCmdBuffer(VkCommandBuffer cmdBuffer);
 
 	// Vulkan
 	void InitVulkan();

@@ -1,12 +1,12 @@
 #pragma once
 #include <string>
-#include <iostream>
+#include <UreTechEngine/gmodule/gmodule.h>
 
 namespace UreTechEngine {
 	class EngineConsole;
 	typedef void (*uStrConsoleLogFuncPtr)(const char*, bool);
-	extern uStrConsoleLogFuncPtr strLog;
-	class string {
+	extern uStrConsoleLogFuncPtr ENGINE_DEFINE strLog;
+	class ENGINE_DEFINE string {
 	private:
 		char* s_data = nullptr;// data
 		char* s_data_c_str_type = nullptr;// c_str type holder
@@ -60,7 +60,7 @@ namespace UreTechEngine {
 		string operator+(const string other);
 
 		// char + string add operator
-		friend UreTechEngine::string operator+(const char* other0, const UreTechEngine::string& other1);
+		friend ENGINE_DEFINE UreTechEngine::string operator+(const char* other0, const UreTechEngine::string& other1);
 
 		// string + char add operator
 		//friend UreTechEngine::string operator+(const UreTechEngine::string& other0, const char* other1);

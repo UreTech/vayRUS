@@ -1,7 +1,5 @@
 #pragma once
-#ifndef enginebase_h
-#define enginebase_h
-
+#include<UreTechEngine/utils/multiThreadWorker.h>
 #include<UreTechEngine/EngineCore.h>
 
 #include <mutex>
@@ -19,7 +17,9 @@
 #include"nlohmann/json.hpp"
 
 #include<UreTechEngine/upk/upk.h>
-#include<UreTechEngine/utils/multiThreadWorker.h>
+
+//class multicoreThreading;
+#include<UreTechEngine/gmodule/gmodule.h>
 
 class mesh;
 class Material;
@@ -31,24 +31,32 @@ namespace UreTechEngine {
 
 	typedef entity* (*entConstructFunc)();
 
-	struct entConstructStruct {
+	struct ENGINE_DEFINE entConstructStruct {
 		string entClassName;
+		string entClassNamespace;
 		entConstructFunc constructor = nullptr;
+		
 		entConstructStruct() {
 			entClassName = "ERROR CLASS TYPE";
+			entClassNamespace = "ERROR NAMESPACE";
 			constructor = nullptr;
 		}
-		entConstructStruct(UreTechEngine::string _entClassName , entConstructFunc _constructor ) {
+
+		entConstructStruct(UreTechEngine::string _entClassName , entConstructFunc _constructor, UreTechEngine::string _entClassNamespace) {
 			entClassName = _entClassName;
+			entClassNamespace = _entClassNamespace;
 			constructor = _constructor;
 		}
 	};
 
-	class UreTechEngineClass {
+
+	class ENGINE_DEFINE UreTechEngineClass {
+	friend class Renderer;
 	public:
 		static unsigned int displayWidth;
 		static unsigned int displayHeight;
-		static bool windowMinmized;
+		static  bool windowMinmized;
+		static bool externalConsoleState;
 		bool isInServer = false;
 		bool isServer = true;
 
@@ -59,7 +67,7 @@ namespace UreTechEngine {
 		//std::map<std::string, Material> loadedMaterials;
 		//std::map<std::string, texture> loadedTextures;
 
-		dArray<entConstructStruct> entityConstructors;
+		static dArray<entConstructStruct> entityConstructors;
 
 		Renderer* mainRenderer = nullptr;
 		static UreTechEngineClass* c_Instance;
@@ -90,6 +98,11 @@ namespace UreTechEngine {
 		void loadGame(std::string gamePath);
 
 	private:
+		// visual update
+		multicoreThreading visualThreading;
+		dArray<VkCommandBuffer> threadCommandBuffers;
+		dArray<VkCommandPool> threadCommandPools;
+
 		size_t systemThreadCount = std::thread::hardware_concurrency();
 		nlohmann::json mapJson;
 		Player* defPlayer = nullptr;
@@ -97,10 +110,10 @@ namespace UreTechEngine {
 		uint64_t lastID = 0x000a0000; // BEGIN_ENT_ID define
 		dArray<entity*> sceneEntities;
 		dArray<upk_API*> loadedPackages;
+		size_t stillLoadingEntities = 0;
 		unsigned int netPlayersCount = 0;
 		Player* netPlayers[5];
 		UreTechEngineClass();
 		~UreTechEngineClass();
 	};
 }
-#endif // !enginebase_h

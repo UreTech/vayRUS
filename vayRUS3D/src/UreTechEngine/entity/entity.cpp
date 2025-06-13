@@ -1,3 +1,4 @@
+#include "entity.h"
 #include<UreTechEngine/EngineCore.h>
 
 #define entity_cpp
@@ -18,6 +19,10 @@ void UreTechEngine::entity::init(UreTechEngineClass* _ptr)
 void UreTechEngine::entity::print(string message)
 {
 	EngineConsole::log(this->entClassName + ":" + this->entName + "(" +u64ToHexStr(this->entityID) + ")-->" + message, EngineConsole::DEBUG);
+}
+
+void UreTechEngine::entity::async_load(VkCommandBuffer cmdBuffer)
+{
 }
 
 void UreTechEngine::entity::begin()

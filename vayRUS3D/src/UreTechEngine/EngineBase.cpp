@@ -8,10 +8,12 @@
 using namespace UreTechEngine;
 
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::c_Instance = nullptr;
+
 UreTechEngine::UreTechEngineClass* engRef = nullptr;
 unsigned int UreTechEngine::UreTechEngineClass::displayWidth = 1400;
 unsigned int UreTechEngine::UreTechEngineClass::displayHeight = 1000;
 bool UreTechEngine::UreTechEngineClass::windowMinmized = false;
+bool UreTechEngineClass::externalConsoleState = false;
 
 void SetThreadAffinity(std::thread& t, DWORD_PTR affinityMask) {
 	HANDLE threadHandle = t.native_handle();
@@ -23,7 +25,19 @@ void SetThreadPriority(std::thread& t, int priority) {
 	SetThreadPriority(threadHandle, priority);
 }
 
+void multiThreadVisualWorker(int workerID, jobPtr job, size_t jobCount) {
+	entity* entJob = (entity*)job;
 
+
+}
+
+void multiThreadVisualPreJob() {
+
+}
+
+void multiThreadVisualPostJob() {
+
+}
 
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine()
 {
@@ -32,6 +46,7 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
     }
     else {
         c_Instance = new UreTechEngineClass();
+
 		engRef = c_Instance;
 		if (UPK_ENABLE_PACKAGE_SYSTEM) {
 			c_Instance->init_upk_system(UPK_PACKAGE_PATH, UPK_PACKAGE_ENC_KEY);
@@ -72,54 +87,38 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
 		c_Instance->mainRenderer->setupShaderUniforms();
 		c_Instance->mainRenderer->createEnginePipeline();
 
-		
-
-		//EngineConsole::log("HELL YEAH VULKAN!", EngineConsole::ERROR_FATAL);
-		//c_Instance->mainRenderer->attachShader("/shaders/baseVS.glsl", GL_VERTEX_SHADER);
-		//c_Instance->mainRenderer->attachShader("/shaders/baseFS.glsl", GL_FRAGMENT_SHADER);
-		//c_Instance->mainRenderer->link();
-
-		/*
-		c_Instance->mainRenderer->addUniform("uMtxModel");
-		c_Instance->mainRenderer->addUniform("uMtxProj");
-		c_Instance->mainRenderer->addUniform("uMtxCam");
-		c_Instance->mainRenderer->addUniform("uPosCam");
-		c_Instance->mainRenderer->addUniform("lightPos");
-		c_Instance->mainRenderer->addUniform("uLightColor");
-
-		c_Instance->mainRenderer->addUniform("texture0");
-		c_Instance->mainRenderer->addUniform("texture1");
-		c_Instance->mainRenderer->addUniform("texture2");
-		c_Instance->mainRenderer->addUniform("texture3");
-		c_Instance->mainRenderer->addUniform("texture4");
-		c_Instance->mainRenderer->addUniform("texture5");
-
-		c_Instance->mainRenderer->addUniform("specularStrength0");
-		c_Instance->mainRenderer->addUniform("specularStrength1");
-		c_Instance->mainRenderer->addUniform("specularStrength2");
-		c_Instance->mainRenderer->addUniform("specularStrength3");
-		c_Instance->mainRenderer->addUniform("specularStrength4");
-		c_Instance->mainRenderer->addUniform("specularStrength5");
-
-		c_Instance->mainRenderer->addUniform("litRender0");
-		c_Instance->mainRenderer->addUniform("litRender1");
-		c_Instance->mainRenderer->addUniform("litRender2");
-		c_Instance->mainRenderer->addUniform("litRender3");
-		c_Instance->mainRenderer->addUniform("litRender4");
-		c_Instance->mainRenderer->addUniform("litRender5");
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
-		glFrontFace(GL_CW);
-		
-		//glfwWindowHint(GLFW_SAMPLES, 4);
-		//glEnable(GL_MULTISAMPLE);
-		//******
-		*/
         c_Instance->defPlayer = new Player;
 
+
+
 		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+
+		c_Instance->threadCommandBuffers.resize(c_Instance->visualThreading.getThreadCount());
+		c_Instance->threadCommandPools.resize(c_Instance->visualThreading.getThreadCount());
+
+		QueueFamilyIndices queueFamilyIndices = findQueueFamilies(c_Instance->mainRenderer->physicalDevice, c_Instance->mainRenderer->surface);
+
+		for (int i = 0; i < c_Instance->visualThreading.getThreadCount(); i++) {
+			VkCommandPoolCreateInfo poolInfo = {};
+			poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+			poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
+			poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+			vkCreateCommandPool(c_Instance->mainRenderer->device, &poolInfo, nullptr, &c_Instance->threadCommandPools[i]);
+
+			VkCommandBufferAllocateInfo allocInfo = {};
+			allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+			allocInfo.commandPool = c_Instance->threadCommandPools[i];
+			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+			allocInfo.commandBufferCount = 1;
+
+			vkAllocateCommandBuffers(c_Instance->mainRenderer->device, &allocInfo, &c_Instance->threadCommandBuffers[i]);
+		}
+
+		c_Instance->visualThreading.setWorkerFunc(multiThreadVisualWorker);
+		c_Instance->visualThreading.setPreJobFunc(multiThreadVisualPreJob);
+		c_Instance->visualThreading.setPostJobFunc(multiThreadVisualPostJob);
+
         return c_Instance;
     }
 }
@@ -145,12 +144,25 @@ GLFWwindow* UreTechEngine::UreTechEngineClass::getWindow()
 	return window;
 }
 
+void entity_load_thread(entity* _ent, UreTechEngine::UreTechEngineClass* engRef)
+{
+	engRef->mainRenderer->immediateSubmit([&](VkCommandBuffer cmdBuf){
+		_ent->async_load(cmdBuf);
+		});
+	_ent->status = SUSPENDED;
+	_ent->begin();
+	_ent->status = READY;
+	//UreTechEngine::EngineConsole::log("Entity " + _ent->entName + " loaded!", UreTechEngine::EngineConsole::INFO);
+}
+
 UreTechEngine::entity* UreTechEngine::UreTechEngineClass::spawnEntity(entity* _toSpawn)
 {
 	_toSpawn->entityID = lastID;
 	lastID++;
 	_toSpawn->init(this);
-	_toSpawn->begin();
+	std::thread loadThread(entity_load_thread, _toSpawn, this);
+	loadThread.detach();
+
 	string abc(" spawned with id ");
 	UreTechEngine::EngineConsole::log(_toSpawn->entName + abc + u64ToHexStr(_toSpawn->entityID), UreTechEngine::EngineConsole::INFO);
 	sceneEntities.push_back(_toSpawn);
@@ -210,11 +222,27 @@ unsigned int UreTechEngine::UreTechEngineClass::getCountOfEntity()
 
 void UreTechEngine::UreTechEngineClass::engineTick()
 {
+	static timer printTimer(1000);
+
 	glm::vec4 a(1.0f, 1.0f, 1.0f, 1.0f);
 	mainRenderer->setVec4("uLightColor", a);
+	stillLoadingEntities = 0;
 	for (uint64_t i = 0; i < engRef->getCountOfEntity(); i++) {
-		engRef->getEntityWithIndex(i)->tick();
-		engRef->getEntityWithIndex(i)->updateVisual();
+		if (engRef->getEntityWithIndex(i)->status == READY) {
+			engRef->getEntityWithIndex(i)->tick();
+			//engRef->getEntityWithIndex(i)->updateVisual();
+		}
+		else {
+			stillLoadingEntities++;
+		}
+	}
+
+	visualThreading.addJobs(engRef->sceneEntities.data(), engRef->sceneEntities.size(), sizeof(entity*));
+	visualThreading.startJobs();
+
+	if (stillLoadingEntities && printTimer.async_wait()) {
+		EngineConsole::log("Still loading " + std::to_string(stillLoadingEntities) + " entities!", EngineConsole::INFO);
+		printTimer.reset();
 	}
 }
 

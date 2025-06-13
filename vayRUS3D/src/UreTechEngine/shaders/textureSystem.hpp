@@ -15,12 +15,12 @@ struct loadedTexture {
 	texture texture;
 };
 
-class TextureManager{
+class ENGINE_DEFINE TextureManager{
 
 public:
 	static TextureManager* getInstance();
 
-	texture loadTextureFromFile(UreTechEngine::string fileName, bool texAntiAlising = true);
+	texture loadTextureFromFile(UreTechEngine::string fileName, VkCommandBuffer cmdBuffer, bool texAntiAlising = true);
 	void applyTexture(int levelInd, texture tex);
 	void applyMultipleTexture(std::vector<texture> a);
 

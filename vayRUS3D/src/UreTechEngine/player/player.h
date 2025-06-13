@@ -9,7 +9,7 @@ class Renderer;
 namespace UreTechEngine {
 	class UreTechEngineClass;
 	class entity;
-	class Player {
+	class ENGINE_DEFINE Player {
 	public:
 		vector3 camPos = 0;
 		Rotation camRot = 0;

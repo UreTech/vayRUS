@@ -13,13 +13,17 @@ MyPlayerPawn::MyPlayerPawn(mesh* _mesh, UreTechEngine::string _entName, UreTechE
 	entName = _entName;
 }
 
-void MyPlayerPawn::begin()
-{
-	texture text = TextureManager::getInstance()->loadTextureFromFile("/test/tText1.jpg");
+void MyPlayerPawn::async_load(VkCommandBuffer cmdBuffer) {
+	texture text = TextureManager::getInstance()->loadTextureFromFile("/test/tText1.jpg", cmdBuffer);
 	Material myMat;
 	myMat.colorText = text;
 	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/cube.obj", myMat);
 	UreTechEngine::EngineConsole::log("oldu brom!", UreTechEngine::EngineConsole::INFO);
+}
+
+void MyPlayerPawn::begin()
+{
+
 }
 
 void MyPlayerPawn::tick()

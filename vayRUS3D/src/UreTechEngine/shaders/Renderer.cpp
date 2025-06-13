@@ -1,6 +1,7 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include"Renderer.hpp"
 #include<glm/mat3x3.hpp>
-#include<../EngineCore.h>
+#include<UreTechEngine/EngineCore.h>
 #include <set>
 
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -13,23 +14,17 @@
 #include<imgui_impl_glfw.h>
 #include<imgui_impl_vulkan.h>
 
-struct QueueFamilyIndices {
-	uint32_t graphicsFamily = 0xFABCAF;
-	uint32_t presentFamily = 0xFABCAF;
-
-	bool isComplete() {
-		return graphicsFamily != 0xFABCAF && presentFamily != 0xFABCAF;
-	}
-};
+bool QueueFamilyIndices::isComplete() {
+	return graphicsFamily != 0xFABCAF && presentFamily != 0xFABCAF;
+}
 
 Renderer::Renderer()
 {
-	//programID = glCreateProgram();
+	engine = UreTechEngine::UreTechEngineClass::getEngine();
 }
 
 Renderer::~Renderer()
 {
-	//glDeleteProgram(programID);
 }
 
 VkShaderModule Renderer::createShaderModule(const char* moduleFileName)
@@ -56,7 +51,7 @@ void Renderer::setupShaderUniforms()
 	VkBuffer vtxUniformBuf;
 	VkBuffer frgUniformBuf;
 
-	emptyTx = TextureManager::getInstance()->loadTextureFromFile("/engine/res/NULL_TEXTURE.png", true);
+	emptyTx = TextureManager::getInstance()->loadTextureFromFile("/engine/res/NULL_TEXTURE.png", EngineCommandBuffer, true);
 
 	VkDescriptorSetLayoutBinding vtxUboLayoutBinding{};
 	vtxUboLayoutBinding.binding = 0;
@@ -423,8 +418,20 @@ void Renderer::processCommandBuffers()
 	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 	submitInfo.pWaitDstStageMask = waitStages;
 
-	submitInfo.pCommandBuffers = &EngineCommandBuffer;
-	submitInfo.commandBufferCount = 1;
+	dArray<VkCommandBuffer> commandBuffers;
+
+	if (engine->visualThreading.waitJobsAsync() != 0) {
+		submitInfo.pCommandBuffers = &EngineCommandBuffer;
+		submitInfo.commandBufferCount = 1;
+	}
+	else {
+		commandBuffers.push_back(EngineCommandBuffer);
+		for(int i = 0; i < engine->threadCommandBuffers.size(); i++) {
+			commandBuffers.push_back(engine->threadCommandBuffers[i]);
+		}
+		submitInfo.pCommandBuffers = commandBuffers.data();
+		submitInfo.commandBufferCount = commandBuffers.size();
+	}
 
 	submitInfo.pSignalSemaphores = &renderFinishedSemaphore;
 	submitInfo.signalSemaphoreCount = 1;
@@ -525,6 +532,50 @@ void Renderer::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& record
 	vkDestroyFence(device, fence, nullptr);
 	vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
 }
+
+VkCommandBuffer Renderer::createTemporalCmdBuffer()
+{
+	VkCommandBufferAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandPool = commandPool;
+	allocInfo.commandBufferCount = 1;
+
+	VkCommandBuffer commandBuffer;
+	vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+	vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+	return commandBuffer;
+}
+
+void Renderer::processAndDestroyTemporalCmdBuffer(VkCommandBuffer cmdBuffer)
+{
+	vkEndCommandBuffer(cmdBuffer);
+
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &cmdBuffer;
+
+	VkFenceCreateInfo fenceInfo{};
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+	VkFence fence;
+	vkCreateFence(device, &fenceInfo, nullptr, &fence);
+
+	vkQueueSubmit(graphicsQueue, 1, &submitInfo, fence);
+
+	vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
+
+	vkDestroyFence(device, fence, nullptr);
+	vkFreeCommandBuffers(device, commandPool, 1, &cmdBuffer);
+}
+
 
 void Renderer::InitVulkan()
 {
@@ -807,9 +858,9 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surfa
 
 void Renderer::InitImGuiVulkan()
 {
-	// ImGui baþlat
+	// ImGui
 	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
+	ImGuiContext = ImGui::CreateContext();
 	//ImGuiIO& io = ImGui::GetIO(); (void)io;
 
 	ImGui_ImplGlfw_InitForVulkan(window, true);
@@ -845,6 +896,10 @@ void Renderer::InitImGuiVulkan()
 	ImGui_ImplVulkan_Init(&init_info);
 	ImGui_ImplVulkan_CreateFontsTexture();
 	ImGui_ImplVulkan_DestroyFontsTexture();
+
+	EngineConsole::log("Im gui initiated!", EngineConsole::INFO);
+
+	ImGui::StyleColorsDark();
 }
 
 void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT messenger, const VkAllocationCallbacks* pAllocator) {
@@ -1139,7 +1194,6 @@ void Renderer::recrateSwapChainIfNeeded()
 
 		 int result = MessageBoxW(nullptr, message.c_str(), L"Using GPU", MB_YESNO | MB_ICONQUESTION);
 		 char c_str[256];
-
 		 std::wcstombs(c_str, deviceNameW.c_str(), sizeof(c_str));
 		 EngineConsole::log("Using GPU: " + string(c_str), UreTechEngine::EngineConsole::DEBUG);
 		 if (result == IDYES) {
@@ -1432,7 +1486,8 @@ void Renderer::recrateSwapChainIfNeeded()
 	 surfaceFormat.format = VK_FORMAT_B8G8R8A8_UNORM;
 	 surfaceFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 
-	 VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+	 //VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+	 VkPresentModeKHR presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 	 VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
 	 uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;

@@ -76,3 +76,39 @@ void* UreTechEngine::safePtr(void* ptr)
 #endif // _DEBUG
 }
 
+UreTechEngine::timer::timer()
+{
+    this->start_time = std::chrono::high_resolution_clock::now();
+    this->timer_ms = 0;
+}
+
+UreTechEngine::timer::timer(size_t ms)
+{
+    this->start_time = std::chrono::high_resolution_clock::now();
+    this->timer_ms = ms;
+}
+
+void UreTechEngine::timer::set_timer_ms(size_t ms)
+{
+	this->timer_ms = ms;
+}
+
+void UreTechEngine::timer::reset()
+{
+	this->start_time = std::chrono::high_resolution_clock::now();
+}
+
+size_t UreTechEngine::timer::get_elapsed_ms()
+{
+	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - this->start_time).count();
+}
+
+void UreTechEngine::timer::start()
+{
+	this->reset();
+}
+
+bool UreTechEngine::timer::async_wait()
+{
+    return this->get_elapsed_ms() >= this->timer_ms;
+}
