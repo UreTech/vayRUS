@@ -9,7 +9,10 @@ void UreTechEngine::threadWorker(int id, multicoreThreading* parent) {
 		WaitForSingleObject(eventHandle, INFINITE);
 
 		if (parent->threadStatus[id] == PROCESSING) {
-			parent->wokerFunc(id, parent->jobs[id].data(), parent->jobs[id].size());
+			// check if there are jobs to process
+			if (!parent->jobs[id].empty()) {
+				parent->wokerFunc(id, parent->jobs[id].data(), parent->jobs[id].size());
+			}
 			parent->threadStatus[id] = IDLE; // job done
 			ResetEvent(eventHandle); // reset event for next job
 		}
@@ -24,6 +27,9 @@ UreTechEngine::multicoreThreading::multicoreThreading()
 	for (int i = 0; i < threadCount; i++) {
 		std::thread t(threadWorker, i, this);
 		threadEventHandle[i] = CreateEvent(NULL, TRUE, FALSE, NULL);
+		HANDLE nativeHandle = t.native_handle();
+		DWORD threadId = GetThreadId(nativeHandle);
+		threadsIDs.push_back(threadId);
 		t.detach();
 	}
 }
@@ -52,6 +58,7 @@ void UreTechEngine::multicoreThreading::startJobs() {
 	else {
 		// call pre function if set
 		if (preJob) preJob();
+		postCalled = false; // reset post called flag
 
 		// fire all threads
 		for (int i = 0; i < threadCount; ++i) {
@@ -67,7 +74,10 @@ void UreTechEngine::multicoreThreading::waitJobsSync() {
 	if (status == PROCESSING) {
 		while (waitJobsAsync() != 0);
 		status = IDLE;
-		if (postJob) postJob();
+		if (postJob && !postCalled) {
+			postCalled = true;
+			postJob();
+		}
 	}
 }
 
@@ -81,7 +91,10 @@ int UreTechEngine::multicoreThreading::waitJobsAsync() {
 
 	if (stillProcessing == 0) {
 		status = IDLE;
-		if (postJob) postJob();
+		if (postJob && !postCalled) {
+			postCalled = true;
+			postJob();
+		}
 	}
 
 	return stillProcessing;
@@ -90,6 +103,11 @@ int UreTechEngine::multicoreThreading::waitJobsAsync() {
 workerStatus UreTechEngine::multicoreThreading::getThreadJobStatus(unsigned int threadID)
 {
 	return threadStatus[threadID];
+}
+
+unsigned int UreTechEngine::multicoreThreading::getThreadID(unsigned int threadIndex)
+{
+	return threadsIDs[threadIndex];
 }
 
 void UreTechEngine::multicoreThreading::splitJobs(jobPtr job, size_t jobCount, size_t jobStructSize)

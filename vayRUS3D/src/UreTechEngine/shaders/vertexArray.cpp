@@ -61,16 +61,16 @@ void vertexArrayObject::createObject(Vertex& vertices, unsigned int verticesCoun
 
 void vertexArrayObject::bindBuffer()
 {
-	Renderer* rnd = UreTechEngineClass::getEngine()->mainRenderer;
-	vkCmdBindPipeline(rnd->EngineCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, rnd->graphicsPipeline);
-
+	UreTechEngineClass* eng = UreTechEngineClass::getEngine();
+	vkCmdBindPipeline(eng->getThreadCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, eng->mainRenderer->graphicsPipeline);
+	
 	VkBuffer vertexBuffers[] = { vertexBuffer };
 	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(rnd->EngineCommandBuffer, 0, 1, vertexBuffers, offsets);
+	vkCmdBindVertexBuffers(eng->getThreadCommandBuffer(), 0, 1, vertexBuffers, offsets);
 
-	vkCmdBindIndexBuffer(rnd->EngineCommandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+	vkCmdBindIndexBuffer(eng->getThreadCommandBuffer(), indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-	vkCmdDrawIndexed(rnd->EngineCommandBuffer, static_cast<uint32_t>(indexCount), 1, 0, 0, 0);
+	vkCmdDrawIndexed(eng->getThreadCommandBuffer(), static_cast<uint32_t>(indexCount), 1, 0, 0, 0);
 }
 
 unsigned int vertexArrayObject::getIndexCount()

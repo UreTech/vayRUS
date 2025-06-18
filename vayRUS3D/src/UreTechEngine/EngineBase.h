@@ -26,6 +26,9 @@ class Material;
 class upk_API;
 
 namespace UreTechEngine {
+
+	class multicoreThreading;
+
 	class entity;
 	class Player;
 
@@ -97,10 +100,11 @@ namespace UreTechEngine {
 		void saveGame(std::string gamePath);
 		void loadGame(std::string gamePath);
 
+		dArray<VkCommandBuffer> threadCommandBuffers;
+		VkCommandBuffer getThreadCommandBuffer();
 	private:
 		// visual update
-		multicoreThreading visualThreading;
-		dArray<VkCommandBuffer> threadCommandBuffers;
+		multicoreThreading* visualThreading;
 		dArray<VkCommandPool> threadCommandPools;
 
 		size_t systemThreadCount = std::thread::hardware_concurrency();

@@ -2,6 +2,7 @@
 #define RENDERER_HPP
 
 #include<string>
+#include<mutex>
 #include<glm/glm.hpp>
 #include<glm/gtx/matrix_transform_2d.hpp>
 #include<fstream>
@@ -58,12 +59,15 @@ public:
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;           // pyhsical device
 	VkDevice device;                                            // actual device
 	VkDebugUtilsMessengerEXT debugMessenger;                    // debug messenger
+	
+	std::mutex queueSubmitMutex;                                // mutex for queue submit
 	VkQueue graphicsQueue;                                      // graphics queue
+
 	VkSurfaceKHR surface = nullptr;                             // main surface
 	VkQueue presentQueue;                                       // present queue
 	VkCommandPool commandPool;                                  // command pool
-	//VkCommandBuffer ImGuiCommandBuffer;                         // command buffer for ImGui
 	VkCommandBuffer EngineCommandBuffer;                        // command buffer for engine
+	VkCommandBuffer multiThreadEngineCommandBuffer;             // command buffer for multi threading
 	VkSwapchainKHR swapChain;                                   // swap chain
 	// color
 	UreTechEngine::dArray<VkFramebuffer> swapChainFramebuffers; // swap chain framebuffers
@@ -78,6 +82,7 @@ public:
 	VkFormat swapChainImageFormat;                              // swap chain image format
 	VkExtent2D swapChainExtent;                                 // swap chain extent
 	VkRenderPass renderPass;                                    // render pass
+	VkRenderPass multiThreadRenderPass;                         // render pass for multi threading
 	VkSemaphore imageAvailableSemaphore;                        // image available semaphore
 	VkSemaphore renderFinishedSemaphore;                        // render finished semaphore
 	VkFence inFlightFence;                                      // fence
@@ -130,23 +135,7 @@ public:
 
 	void setupShaderUniforms();
 
-	//void setSamplerUniform(uint8_t index, texture tex);
-
 	void sendUniforms(VkDescriptorSet* sets = nullptr, size_t setCount = 0);
-
-	void setFloat(const std::string& varName, float val);
-
-	void setBool(const std::string& varName, bool val);
-
-	void setInt(const std::string& varName, int val);
-
-	void setVec3(const std::string& varName, glm::vec3 val);
-
-	void setVec4(const std::string& varName, glm::vec4& val);
-
-	void setMat3(const std::string& varName, glm::mat3* val);
-
-	void setMat4(const std::string& varName, glm::mat4* val);
 
 	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
@@ -160,8 +149,12 @@ public:
 
 	// headers for vulkan stuff
 	VkRenderPassBeginInfo renderPassBeginInfo = {};
+	VkRenderPassBeginInfo multiThreadRenderPassBeginInfo = {};
 	VkClearValue clearValues[2] = {};
-	VkCommandBufferBeginInfo beginInfo = {};
+	VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
+
+	VkCommandBufferInheritanceInfo multiThreadInheritanceInfo = {};
+	VkCommandBufferBeginInfo multiThreadSecondaryCmdBufferBeginInfo = {};
 
 	void BeginVulkanCommandBuffer(bool beginRenderPass = true);
 

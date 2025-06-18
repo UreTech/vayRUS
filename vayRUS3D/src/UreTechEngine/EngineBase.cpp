@@ -26,17 +26,25 @@ void SetThreadPriority(std::thread& t, int priority) {
 }
 
 void multiThreadVisualWorker(int workerID, jobPtr job, size_t jobCount) {
+	vkBeginCommandBuffer(engRef->threadCommandBuffers[workerID], &engRef->mainRenderer->multiThreadSecondaryCmdBufferBeginInfo);
 	entity* entJob = (entity*)job;
-
-
+	for(size_t i = 0; i < jobCount; i++) {
+		if (entJob[i].status == READY) {
+			entJob[i].updateVisual();
+		}
+	}
+	vkEndCommandBuffer(engRef->threadCommandBuffers[workerID]);
 }
 
 void multiThreadVisualPreJob() {
-
+	vkBeginCommandBuffer(engRef->mainRenderer->multiThreadEngineCommandBuffer, &engRef->mainRenderer->cmdBufferBeginInfo);
+	vkCmdBeginRenderPass(engRef->mainRenderer->multiThreadEngineCommandBuffer, &engRef->mainRenderer->multiThreadRenderPassBeginInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 }
 
 void multiThreadVisualPostJob() {
-
+	vkCmdExecuteCommands(engRef->mainRenderer->multiThreadEngineCommandBuffer, engRef->threadCommandBuffers.size(), engRef->threadCommandBuffers.data());
+	vkCmdEndRenderPass(engRef->mainRenderer->multiThreadEngineCommandBuffer);
+	vkEndCommandBuffer(engRef->mainRenderer->multiThreadEngineCommandBuffer);
 }
 
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine()
@@ -93,12 +101,15 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
 
 		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
 
-		c_Instance->threadCommandBuffers.resize(c_Instance->visualThreading.getThreadCount());
-		c_Instance->threadCommandPools.resize(c_Instance->visualThreading.getThreadCount());
+		c_Instance->visualThreading = new multicoreThreading();
+
+		c_Instance->threadCommandBuffers.resize(c_Instance->visualThreading->getThreadCount());
+		c_Instance->threadCommandPools.resize(c_Instance->visualThreading->getThreadCount());
 
 		QueueFamilyIndices queueFamilyIndices = findQueueFamilies(c_Instance->mainRenderer->physicalDevice, c_Instance->mainRenderer->surface);
 
-		for (int i = 0; i < c_Instance->visualThreading.getThreadCount(); i++) {
+		for (int i = 0; i < c_Instance->visualThreading->getThreadCount(); i++) {
+			//c_Instance->threadIDs.push_back(i); not used
 			VkCommandPoolCreateInfo poolInfo = {};
 			poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 			poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
@@ -115,9 +126,9 @@ UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine(
 			vkAllocateCommandBuffers(c_Instance->mainRenderer->device, &allocInfo, &c_Instance->threadCommandBuffers[i]);
 		}
 
-		c_Instance->visualThreading.setWorkerFunc(multiThreadVisualWorker);
-		c_Instance->visualThreading.setPreJobFunc(multiThreadVisualPreJob);
-		c_Instance->visualThreading.setPostJobFunc(multiThreadVisualPostJob);
+		c_Instance->visualThreading->setWorkerFunc(multiThreadVisualWorker);
+		c_Instance->visualThreading->setPreJobFunc(multiThreadVisualPreJob);
+		c_Instance->visualThreading->setPostJobFunc(multiThreadVisualPostJob);
 
         return c_Instance;
     }
@@ -225,7 +236,7 @@ void UreTechEngine::UreTechEngineClass::engineTick()
 	static timer printTimer(1000);
 
 	glm::vec4 a(1.0f, 1.0f, 1.0f, 1.0f);
-	mainRenderer->setVec4("uLightColor", a);
+	//mainRenderer->setVec4("uLightColor", a);
 	stillLoadingEntities = 0;
 	for (uint64_t i = 0; i < engRef->getCountOfEntity(); i++) {
 		if (engRef->getEntityWithIndex(i)->status == READY) {
@@ -237,8 +248,11 @@ void UreTechEngine::UreTechEngineClass::engineTick()
 		}
 	}
 
-	visualThreading.addJobs(engRef->sceneEntities.data(), engRef->sceneEntities.size(), sizeof(entity*));
-	visualThreading.startJobs();
+	// if all jobs done
+	if (visualThreading->waitJobsAsync() == 0) {
+		visualThreading->addJobs(engRef->sceneEntities.data(), engRef->sceneEntities.size(), sizeof(entity*));
+		visualThreading->startJobs();
+	}
 
 	if (stillLoadingEntities && printTimer.async_wait()) {
 		EngineConsole::log("Still loading " + std::to_string(stillLoadingEntities) + " entities!", EngineConsole::INFO);
@@ -393,6 +407,17 @@ void UreTechEngine::UreTechEngineClass::loadGame(std::string gamePath)
 		}
 	}
 	EngineConsole::log(string("game loaded: ") + string::stdStrToUStr(gamePath) + string(".UGAME") + string::stdStrToUStr(std::to_string(i)), EngineConsole::INFO);
+}
+
+VkCommandBuffer UreTechEngine::UreTechEngineClass::getThreadCommandBuffer()
+{
+	unsigned int myThreadId = GetThreadId(GetCurrentThread());
+	for(size_t i = 0; i < visualThreading->getThreadCount(); i++) {
+		if (visualThreading->getThreadID(i) == myThreadId) {
+			return threadCommandBuffers[i];
+		}
+	}
+	return mainRenderer->EngineCommandBuffer; // return main command buffer if not found
 }
 
 UreTechEngine::UreTechEngineClass::UreTechEngineClass()

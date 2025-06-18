@@ -89,7 +89,7 @@ void mesh::changeLitRender(bool val)
 {
 	// deprecated function
 	litRender = val;
-	shaderProg->setBool("litRender", litRender);
+	//shaderProg->setBool("litRender", litRender);
 }
 
 mesh::mesh(vertexArrayObject* _p_Vao, Material _mat)

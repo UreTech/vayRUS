@@ -166,43 +166,8 @@ void Renderer::sendUniforms(VkDescriptorSet* sets, size_t setCount)
 {
 	VkDescriptorSet* totalSets = (VkDescriptorSet*)malloc(sizeof(VkDescriptorSet) * setCount);
 	memcpy(totalSets, sets, sizeof(VkDescriptorSet) * setCount);
-	vkCmdBindDescriptorSets(EngineCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, setCount, totalSets, 0, nullptr);
+	vkCmdBindDescriptorSets(engine->getThreadCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, setCount, totalSets, 0, nullptr);
 	free(totalSets);
-}
-
-void Renderer::setFloat(const std::string& varName, float val)
-{
-	//glUniform1f(m_UniformVars[varName], val);
-}
-
-void Renderer::setBool(const std::string& varName, bool val)
-{
-	//glUniform1i(m_UniformVars[varName], val);
-}
-
-void Renderer::setInt(const std::string& varName, int val)
-{
-	//glUniform1i(m_UniformVars[varName], val);
-}
-
-void Renderer::setVec3(const std::string& varName, glm::vec3 val)
-{
-	//glUniform3f(m_UniformVars[varName], val.x,val.y,val.z);
-}
-
-void Renderer::setVec4(const std::string& varName, glm::vec4& val)
-{
-	//glUniform4f(m_UniformVars[varName], val.x,val.y,val.z,val.w);
-}
-
-void Renderer::setMat3(const std::string& varName, glm::mat3* val)
-{
-	///glUniformMatrix3fv(m_UniformVars[varName],1,false,(GLfloat*)val);
-}
-
-void Renderer::setMat4(const std::string& varName, glm::mat4* val)
-{
-	///glUniformMatrix4fv(m_UniformVars[varName],1,false, (GLfloat*)val);
 }
 
 Renderer* _renderer = nullptr;
@@ -371,12 +336,12 @@ VkSampler Renderer::createSampler(TextureFilterType filterType)
 void Renderer::BeginVulkanCommandBuffer(bool beginRenderPass)
 {
 	vkResetCommandBuffer(EngineCommandBuffer, 0);
-	vkBeginCommandBuffer(EngineCommandBuffer, &beginInfo);
+	vkBeginCommandBuffer(EngineCommandBuffer, &cmdBufferBeginInfo);
 	//EngineConsole::log("command buffer started!", EngineConsole::DEBUG);
 
 	if (beginRenderPass) {
 		vkCmdBeginRenderPass(EngineCommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-		vkCmdBindPipeline(EngineCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+		vkCmdBindPipeline(EngineCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline); // attach shaders etc..
 	}
 
 	int dispW, dispH;
@@ -420,18 +385,8 @@ void Renderer::processCommandBuffers()
 
 	dArray<VkCommandBuffer> commandBuffers;
 
-	if (engine->visualThreading.waitJobsAsync() != 0) {
-		submitInfo.pCommandBuffers = &EngineCommandBuffer;
-		submitInfo.commandBufferCount = 1;
-	}
-	else {
-		commandBuffers.push_back(EngineCommandBuffer);
-		for(int i = 0; i < engine->threadCommandBuffers.size(); i++) {
-			commandBuffers.push_back(engine->threadCommandBuffers[i]);
-		}
-		submitInfo.pCommandBuffers = commandBuffers.data();
-		submitInfo.commandBufferCount = commandBuffers.size();
-	}
+	submitInfo.pCommandBuffers = &EngineCommandBuffer;
+	submitInfo.commandBufferCount = 1;
 
 	submitInfo.pSignalSemaphores = &renderFinishedSemaphore;
 	submitInfo.signalSemaphoreCount = 1;
@@ -442,7 +397,13 @@ void Renderer::processCommandBuffers()
 	presentInfo.pWaitSemaphores = &renderFinishedSemaphore;
 	presentInfo.swapchainCount = 1;
 
-	vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence);
+	// mutex
+	{
+		std::lock_guard<std::mutex> lock(queueSubmitMutex);
+		vkResetFences(device, 1, &inFlightFence);
+		vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence);
+		vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+	}
 }
 
 void Renderer::prepareNewFrame()
@@ -451,8 +412,12 @@ void Renderer::prepareNewFrame()
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &capabilities);
 
 	vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &frameBufferImageIndex);
+
 	renderPassBeginInfo.framebuffer = swapChainFramebuffers[frameBufferImageIndex];
 	renderPassBeginInfo.renderArea.extent = capabilities.currentExtent;
+
+	multiThreadRenderPassBeginInfo.framebuffer = swapChainFramebuffers[frameBufferImageIndex];
+	multiThreadRenderPassBeginInfo.renderArea.extent = capabilities.currentExtent;
 }
 
 void Renderer::endFrame()
@@ -489,16 +454,25 @@ void Renderer::endFrame()
 
 void Renderer::waitFrame()
 {
-	vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-	vkResetFences(device, 1, &inFlightFence);
+	//vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+	//vkResetFences(device, 1, &inFlightFence);
 }
 
 void Renderer::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& recordCommands)
 {
+	QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
+	VkCommandPoolCreateInfo poolInfo{};
+	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	poolInfo.queueFamilyIndex = indices.graphicsFamily;
+
+	VkCommandPool pool;
+	vkCreateCommandPool(device, &poolInfo, nullptr, &pool);
+
 	VkCommandBufferAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandPool = commandPool;
+	allocInfo.commandPool = pool;
 	allocInfo.commandBufferCount = 1;
 
 	VkCommandBuffer commandBuffer;
@@ -509,9 +483,9 @@ void Renderer::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& record
 	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
 	vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
+	
 	recordCommands(commandBuffer);
-
+	
 	vkEndCommandBuffer(commandBuffer);
 
 	VkSubmitInfo submitInfo{};
@@ -525,12 +499,17 @@ void Renderer::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& record
 	VkFence fence;
 	vkCreateFence(device, &fenceInfo, nullptr, &fence);
 
-	vkQueueSubmit(graphicsQueue, 1, &submitInfo, fence);
-
-	vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
+	// mutex
+	{
+		std::lock_guard<std::mutex> lock(queueSubmitMutex);
+		vkResetFences(device, 1, &fence);
+		vkQueueSubmit(graphicsQueue, 1, &submitInfo, fence);
+		vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
+	}
 
 	vkDestroyFence(device, fence, nullptr);
-	vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+	vkFreeCommandBuffers(device, pool, 1, &commandBuffer);
+	vkDestroyCommandPool(device, pool, nullptr);
 }
 
 VkCommandBuffer Renderer::createTemporalCmdBuffer()
@@ -624,7 +603,7 @@ void Renderer::InitVulkan()
 		EngineConsole::log("Failed to create descriptor pool!", UreTechEngine::EngineConsole::ERROR_FATAL);
 	}
 
-	// render pass
+	// render passes
 	renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassBeginInfo.renderPass = renderPass;
 	renderPassBeginInfo.renderArea.offset = { 0, 0 };
@@ -634,11 +613,28 @@ void Renderer::InitVulkan()
 	renderPassBeginInfo.clearValueCount = 2;
 	renderPassBeginInfo.pClearValues = clearValues;
 
-	// command buffer
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	beginInfo.flags = 0;
-	beginInfo.pInheritanceInfo = nullptr;
+	multiThreadRenderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	multiThreadRenderPassBeginInfo.renderPass = multiThreadRenderPass;
+	multiThreadRenderPassBeginInfo.renderArea.offset = { 0, 0 };
 
+	clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+	clearValues[1].depthStencil = { 1.0f, 0 };
+	multiThreadRenderPassBeginInfo.clearValueCount = 2;
+	multiThreadRenderPassBeginInfo.pClearValues = clearValues;
+
+
+	// command buffer
+	cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	cmdBufferBeginInfo.flags = 0;
+	cmdBufferBeginInfo.pInheritanceInfo = nullptr;
+
+	multiThreadInheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
+	multiThreadInheritanceInfo.renderPass = multiThreadRenderPass; 
+	multiThreadInheritanceInfo.subpass = 0;
+
+	multiThreadSecondaryCmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	multiThreadSecondaryCmdBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+	multiThreadSecondaryCmdBufferBeginInfo.pInheritanceInfo = &multiThreadInheritanceInfo;
 
 	//submit
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1236,6 +1232,19 @@ void Renderer::recrateSwapChainIfNeeded()
 	 createInfo.queueCreateInfoCount = 1;
 
 	 createInfo.pEnabledFeatures = &deviceFeatures;
+
+	 VkPhysicalDeviceNestedCommandBufferFeaturesEXT nestedFeatures = {};
+	 nestedFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NESTED_COMMAND_BUFFER_FEATURES_EXT;
+	 nestedFeatures.pNext = nullptr;
+	 nestedFeatures.nestedCommandBuffer = VK_TRUE;
+
+	 VkPhysicalDeviceMaintenance7FeaturesKHR maintenance7Features = {};
+	 maintenance7Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_7_FEATURES_KHR;
+	 maintenance7Features.pNext = nullptr;
+	 maintenance7Features.maintenance7 = VK_TRUE;
+	 maintenance7Features.pNext = &nestedFeatures;
+
+	 createInfo.pNext = &maintenance7Features;
 	 
 	 if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
 		 EngineConsole::log("Failed to create logical device!", UreTechEngine::EngineConsole::ERROR_FATAL);
@@ -1282,13 +1291,13 @@ void Renderer::recrateSwapChainIfNeeded()
 	 allocInfo.commandPool = commandPool;
 	 allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 	 allocInfo.commandBufferCount = 1;
-	 /* unused
-	 if (vkAllocateCommandBuffers(device, &allocInfo, &ImGuiCommandBuffer) != VK_SUCCESS) {
-		 EngineConsole::log("Failed to allocate command buffer for ImGui!", UreTechEngine::EngineConsole::ERROR_FATAL);
-	 }
-	 */
+
 	 if (vkAllocateCommandBuffers(device, &allocInfo, &EngineCommandBuffer) != VK_SUCCESS) {
 		 EngineConsole::log("Failed to allocate command buffer for Engine!", UreTechEngine::EngineConsole::ERROR_FATAL);
+	 }
+
+	 if (vkAllocateCommandBuffers(device, &allocInfo, &multiThreadEngineCommandBuffer) != VK_SUCCESS) {
+		 EngineConsole::log("Failed to allocate command buffer for multiThreadEngine!", UreTechEngine::EngineConsole::ERROR_FATAL);
 	 }
 
 	 PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT =
@@ -1364,6 +1373,10 @@ void Renderer::recrateSwapChainIfNeeded()
 
 	 if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
 		 EngineConsole::log("Failed to create render pass!", UreTechEngine::EngineConsole::ERROR_FATAL);
+	 }
+
+	 if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &multiThreadRenderPass) != VK_SUCCESS) {
+		 EngineConsole::log("Failed to create multi thread render pass!", UreTechEngine::EngineConsole::ERROR_FATAL);
 	 }
  }
 

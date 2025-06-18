@@ -55,10 +55,13 @@ namespace UreTechEngine
 
 		workerStatus getStatus() const { return status; }
 
-		workerStatus getThreadJobStatus(unsigned int threadID);
+		workerStatus getThreadJobStatus(unsigned int threadIndex);
+
+		unsigned int getThreadID(unsigned int threadIndex);
 
 		int getThreadCount() const { return threadCount; }
 	private:
+		bool postCalled = true;
 		void splitJobs(jobPtr job, size_t jobCount, size_t jobStructSize);
 
 		std::vector<std::vector<threadJob>> jobs;
@@ -66,6 +69,7 @@ namespace UreTechEngine
 
 		std::vector<workerStatus> threadStatus;
 		std::vector<HANDLE> threadEventHandle;
+		std::vector<unsigned int> threadsIDs;
 		workerStatus status = IDLE;
 
 		threadWorkFunc wokerFunc = nullptr;
