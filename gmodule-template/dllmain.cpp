@@ -3,11 +3,11 @@
 
 using namespace UreTechEngine;
 
-ENGINE_GMODULE_DEFINE void module_begin() {
+MODULE_EXPORT void module_begin() {
 	EngineConsole::log("Module Begin: gmodule-template",EngineConsole::DEBUG);
 	//EngineConsole::log("Package name from engine ref -->" + engineReference->package->packageInfo(),EngineConsole::DEBUG);
 }
 
-ENGINE_GMODULE_DEFINE void  module_destroy() {
+MODULE_EXPORT void  module_destroy() {
 
 }

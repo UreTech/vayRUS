@@ -7,7 +7,7 @@
 class vayrusCube :public UreTechEngine::entity {
 public:
 	vayrusCube(void);
-	void async_load(VkCommandBuffer cmdBuffer);
+	void async_load();
 	void begin();
 	void tick();
 };

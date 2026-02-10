@@ -13,8 +13,8 @@ MyPlayerPawn::MyPlayerPawn(mesh* _mesh, UreTechEngine::string _entName, UreTechE
 	entName = _entName;
 }
 
-void MyPlayerPawn::async_load(VkCommandBuffer cmdBuffer) {
-	texture text = TextureManager::getInstance()->loadTextureFromFile("/test/tText1.jpg", cmdBuffer);
+void MyPlayerPawn::async_load() {
+	texture text = TextureManager::getInstance()->loadTextureFromFile("/test/tText1.jpg");
 	Material myMat;
 	myMat.colorText = text;
 	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/cube.obj", myMat);

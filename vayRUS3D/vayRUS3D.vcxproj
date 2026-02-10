@@ -85,98 +85,98 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Game Build|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Game Build|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|ARM'">
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|ARM'" Label="Configuration">
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release Game Build|ARM'">
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|ARM'">
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|ARM'" Label="Configuration">
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Game Build|ARM'" Label="Configuration">
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -221,7 +221,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Engine Build|x64'">
-    <LibraryPath>$(ProjectDir)lib\x64\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <LibraryPath>$(ProjectDir)..\x64\vayRUS3DEngine Debug;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <IncludePath>$(VULKAN_SDK)\Include;$(IncludePath);$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</IncludePath>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
     <LinkIncremental />
@@ -368,7 +368,7 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>GMODULE_APP;ENGINE_BUILD;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\src;$(VULKAN_SDK)\Include;$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\\src;$(VULKAN_SDK)\Include;$(ProjectDir)..\\x64\vayRUS3DEngine Debug;$(ProjectDir)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -376,7 +376,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\x64\Debug;$(VULKAN_SDK)\Lib;$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\x64\vayRUS3DEngine Debug;$(VULKAN_SDK)\Lib;$(ProjectDir)..\lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Windows</SubSystem>
@@ -417,6 +417,13 @@
 start packageContent.bat
 </Command>
     </PreBuildEvent>
+    <ResourceCompile>
+      <Culture>0x041f</Culture>
+    </ResourceCompile>
+    <PostBuildEvent>
+      <Command>xcopy /Y /D "D:\vsProjects\vayRUS\x64\vayRUS3DEngine Debug\*.*" "D:\vsProjects\vayRUS\x64\Debug Engine Build"</Command>
+      <Message>delete this later....</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DedicatedServer Build|x64'">
     <ClCompile>
@@ -606,19 +613,10 @@ start packageContent.bat
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\UreTechEngine\main.cpp" />
     <ClCompile Include="content\sourceContent\MyPlayerPawn.cpp" />
     <ClCompile Include="content\sourceContent\networkStructs\defaultNetworkStructs.cpp" />
     <ClCompile Include="content\sourceContent\vayrusCube.cpp" />
-    <ClCompile Include="imgui\imgui.cpp" />
-    <ClCompile Include="imgui\imgui_demo.cpp" />
-    <ClCompile Include="imgui\imgui_draw.cpp" />
-    <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="imgui\imgui_impl_vulkan.cpp" />
-    <ClCompile Include="imgui\imgui_impl_win32.cpp" />
-    <ClCompile Include="imgui\imgui_tables.cpp" />
-    <ClCompile Include="imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\UreTechEngine\gmodule\gmodule.cpp" />
-    <ClCompile Include="src\UreTechEngine\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -630,56 +628,48 @@ start packageContent.bat
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\UreTechEngine\config.h" />
+    <ClInclude Include="..\src\UreTechEngine\EngineBase.h" />
+    <ClInclude Include="..\src\UreTechEngine\EngineCore.h" />
+    <ClInclude Include="..\src\UreTechEngine\entity\entity.h" />
+    <ClInclude Include="..\src\UreTechEngine\gmodule\gmodule.h" />
+    <ClInclude Include="..\src\UreTechEngine\network\network.h" />
+    <ClInclude Include="..\src\UreTechEngine\player\player.h" />
+    <ClInclude Include="..\src\UreTechEngine\upk\encryptor.h" />
+    <ClInclude Include="..\src\UreTechEngine\upk\fileSystem.h" />
+    <ClInclude Include="..\src\UreTechEngine\upk\includes.h" />
+    <ClInclude Include="..\src\UreTechEngine\upk\misc.h" />
+    <ClInclude Include="..\src\UreTechEngine\upk\upk.h" />
+    <ClInclude Include="..\src\UreTechEngine\upk\upkConfig.h" />
+    <ClInclude Include="..\src\UreTechEngine\utils\3DMath.hpp" />
+    <ClInclude Include="..\src\UreTechEngine\utils\baseVector.h" />
+    <ClInclude Include="..\src\UreTechEngine\utils\dArray.h" />
+    <ClInclude Include="..\src\UreTechEngine\utils\EngineConsole.h" />
+    <ClInclude Include="..\src\UreTechEngine\utils\EngineRegisters.h" />
+    <ClInclude Include="..\src\UreTechEngine\utils\multiThreadWorker.h" />
+    <ClInclude Include="..\src\UreTechEngine\utils\string\string.h" />
+    <ClInclude Include="..\src\UreTechEngine\utils\util.hpp" />
+    <ClInclude Include="..\src\UreTechEngine\VisualEngine\Material.h" />
+    <ClInclude Include="..\src\UreTechEngine\VisualEngine\mesh.hpp" />
+    <ClInclude Include="..\src\UreTechEngine\VisualEngine\MeshManager.hpp" />
+    <ClInclude Include="..\src\UreTechEngine\VisualEngine\Renderer.hpp" />
+    <ClInclude Include="..\src\UreTechEngine\VisualEngine\textureSystem.hpp" />
+    <ClInclude Include="..\src\UreTechEngine\VisualEngine\vertexArray.hpp" />
+    <ClInclude Include="..\src\UreTechEngine\VisualEngine\vertexStructs.hpp" />
     <ClInclude Include="content\sourceContent\MyPlayerPawn.h" />
     <ClInclude Include="content\sourceContent\networkStructs\defaultNetworkStructs.h" />
     <ClInclude Include="content\sourceContent\vayrusCube.h" />
-    <ClInclude Include="imgui\imconfig.h" />
-    <ClInclude Include="imgui\imgui.h" />
-    <ClInclude Include="imgui\imgui_impl_glfw.h" />
-    <ClInclude Include="imgui\imgui_impl_vulkan.h" />
-    <ClInclude Include="imgui\imgui_impl_win32.h" />
-    <ClInclude Include="imgui\imgui_internal.h" />
-    <ClInclude Include="imgui\imstb_rectpack.h" />
-    <ClInclude Include="imgui\imstb_textedit.h" />
-    <ClInclude Include="imgui\imstb_truetype.h" />
-    <ClInclude Include="include\GLFW\include\GLFW\glfw3.h" />
-    <ClInclude Include="include\GLFW\include\GLFW\glfw3native.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\stb_image.h" />
-    <ClInclude Include="src\UreTechEngine\config.h" />
-    <ClInclude Include="src\UreTechEngine\EngineBase.h" />
-    <ClInclude Include="src\UreTechEngine\EngineCore.h" />
-    <ClInclude Include="src\UreTechEngine\entity\entity.h" />
-    <ClInclude Include="src\UreTechEngine\gmodule\gmodule.h" />
-    <ClInclude Include="src\UreTechEngine\network\network.h" />
-    <ClInclude Include="src\UreTechEngine\player\player.h" />
-    <ClInclude Include="src\UreTechEngine\shaders\Material.h" />
-    <ClInclude Include="src\UreTechEngine\shaders\mesh.hpp" />
-    <ClInclude Include="src\UreTechEngine\shaders\MeshManager.hpp" />
-    <ClInclude Include="src\UreTechEngine\shaders\Renderer.hpp" />
-    <ClInclude Include="src\UreTechEngine\shaders\textureSystem.hpp" />
-    <ClInclude Include="src\UreTechEngine\shaders\vertexArray.hpp" />
-    <ClInclude Include="src\UreTechEngine\shaders\vertexStructs.hpp" />
-    <ClInclude Include="src\UreTechEngine\upk\encryptor.h" />
-    <ClInclude Include="src\UreTechEngine\upk\fileSystem.h" />
-    <ClInclude Include="src\UreTechEngine\upk\includes.h" />
-    <ClInclude Include="src\UreTechEngine\upk\misc.h" />
-    <ClInclude Include="src\UreTechEngine\upk\upk.h" />
-    <ClInclude Include="src\UreTechEngine\upk\upkConfig.h" />
-    <ClInclude Include="src\UreTechEngine\utils\3DMath.hpp" />
-    <ClInclude Include="src\UreTechEngine\utils\baseVector.h" />
-    <ClInclude Include="src\UreTechEngine\utils\dArray.h" />
-    <ClInclude Include="src\UreTechEngine\utils\EngineConsole.h" />
-    <ClInclude Include="src\UreTechEngine\utils\EngineRegisters.h" />
-    <ClInclude Include="src\UreTechEngine\utils\multiThreadWorker.h" />
-    <ClInclude Include="src\UreTechEngine\utils\string\string.h" />
-    <ClInclude Include="src\UreTechEngine\utils\util.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="vayRUS3D.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="NatvisFile.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
