@@ -43,9 +43,9 @@ void multiThreadVisualPostWorkers() {
 }
 
 void multiThreadVisualPreJob(int id) {
-	vkBeginCommandBuffer(engRef->threadCommandBuffers[id], &engRef->mainRenderer->multiThreadSecondaryCmdBufferBeginInfo);
+	vkBeginCommandBuffer(engRef->threadCommandBuffers[engRef->mainRenderer->currentFrameIndex][id], &engRef->mainRenderer->multiThreadSecondaryCmdBufferBeginInfo);
 
-	vkCmdBindPipeline(engRef->threadCommandBuffers[id], VK_PIPELINE_BIND_POINT_GRAPHICS, engRef->mainRenderer->graphicsPipeline); // attach shaders etc..
+	vkCmdBindPipeline(engRef->threadCommandBuffers[engRef->mainRenderer->currentFrameIndex][id], VK_PIPELINE_BIND_POINT_GRAPHICS, engRef->mainRenderer->graphicsPipeline); // attach shaders etc..
 
 	// set viewport & scissor
 	int dispW, dispH;
@@ -62,111 +62,113 @@ void multiThreadVisualPreJob(int id) {
 	scissor.offset = { 0, 0 };
 	scissor.extent = { (unsigned int)dispW, (unsigned int)dispH };
 
-	vkCmdSetViewport(engRef->threadCommandBuffers[id], 0, 1, &viewport);
-	vkCmdSetScissor(engRef->threadCommandBuffers[id], 0, 1, &scissor);
+	vkCmdSetViewport(engRef->threadCommandBuffers[engRef->mainRenderer->currentFrameIndex][id], 0, 1, &viewport);
+	vkCmdSetScissor(engRef->threadCommandBuffers[engRef->mainRenderer->currentFrameIndex][id], 0, 1, &scissor);
 
 }
 
 void multiThreadVisualPostJob(int id) {
-	vkEndCommandBuffer(engRef->threadCommandBuffers[id]);
+	vkEndCommandBuffer(engRef->threadCommandBuffers[engRef->mainRenderer->currentFrameIndex][id]);
+}
+
+int UreTechEngine::initEngine(){
+	UreTechEngineClass::c_Instance = new UreTechEngineClass();
+
+	engRef = UreTechEngineClass::c_Instance;
+	if (UPK_ENABLE_PACKAGE_SYSTEM) {
+		UreTechEngineClass::c_Instance->init_upk_system(UPK_PACKAGE_PATH, UPK_PACKAGE_ENC_KEY);
+	}
+
+	if (!glfwInit()) {
+		EngineConsole::log("GLFW ERROR!", EngineConsole::ERROR_FATAL);
+	}
+
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
+
+	// displayWidth = 1400
+	// displayHeight = 1000
+	UreTechEngineClass::c_Instance->window = glfwCreateWindow(UreTechEngineClass::displayWidth, UreTechEngineClass::displayHeight, ENGINE_WINDOW_TITLE, NULL, NULL);
+	if (UreTechEngineClass::c_Instance->window == NULL) {
+		glfwTerminate();
+		EngineConsole::log("WINDOW ERROR!", EngineConsole::ERROR_FATAL);
+		while (1) {}
+	}
+
+	UreTechEngineClass::c_Instance->mainRenderer = new Renderer();
+	UreTechEngineClass::c_Instance->mainRenderer->engine = UreTechEngineClass::c_Instance;
+	UreTechEngineClass::c_Instance->mainRenderer->window = UreTechEngineClass::c_Instance->window;
+
+	UreTechEngineClass::c_Instance->mainRenderer->InitVulkan();
+	UreTechEngineClass::c_Instance->mainRenderer->InitImGuiVulkan();
+
+	UreTechEngineClass::c_Instance->mainRenderer->createImageSamplers();
+	UreTechEngineClass::c_Instance->mainRenderer->VertexShaders.push_back(UreTechEngineClass::c_Instance->mainRenderer->createShaderModule("/shaders/vs.spv"));
+	UreTechEngineClass::c_Instance->mainRenderer->FragmentShaders.push_back(UreTechEngineClass::c_Instance->mainRenderer->createShaderModule("/shaders/fs.spv"));
+	UreTechEngineClass::c_Instance->mainRenderer->setupShaderUniforms();
+	UreTechEngineClass::c_Instance->mainRenderer->createEnginePipeline();
+
+	UreTechEngineClass::c_Instance->defPlayer = new Player;
+
+	// SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+
+	UreTechEngineClass::c_Instance->visualThreading = new multicoreThreading();
+
+	for (int i = 0; i < RENDERER_VULKAN_FENCE_COUNT; i++) {
+		UreTechEngineClass::c_Instance->threadCommandBuffers[i].resize(UreTechEngineClass::c_Instance->visualThreading->getThreadCount());
+	}
+
+	UreTechEngineClass::c_Instance->threadCommandPools.resize(UreTechEngineClass::c_Instance->visualThreading->getThreadCount());
+
+	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(UreTechEngineClass::c_Instance->mainRenderer->physicalDevice, UreTechEngineClass::c_Instance->mainRenderer->surface);
+
+	for (int i = 0; i < UreTechEngineClass::c_Instance->visualThreading->getThreadCount(); i++) {
+		//c_Instance->threadIDs.push_back(i); not used
+		VkCommandPoolCreateInfo poolInfo = {};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+		vkCreateCommandPool(UreTechEngineClass::c_Instance->mainRenderer->device, &poolInfo, nullptr, &UreTechEngineClass::c_Instance->threadCommandPools[i]);
+
+		VkCommandBufferAllocateInfo allocInfo = {};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = UreTechEngineClass::c_Instance->threadCommandPools[i];
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+		allocInfo.commandBufferCount = 1;
+
+		for (int j = 0; j < RENDERER_VULKAN_FENCE_COUNT; j++) {
+			vkAllocateCommandBuffers(UreTechEngineClass::c_Instance->mainRenderer->device, &allocInfo, &UreTechEngineClass::c_Instance->threadCommandBuffers[j][i]);
+		}
+	}
+
+	// main loop command buffer
+	VkCommandBufferAllocateInfo allocInfo = {};
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = UreTechEngineClass::c_Instance->mainRenderer->commandPool;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+	allocInfo.commandBufferCount = 1;
+
+	for (int i = 0; i < RENDERER_VULKAN_FENCE_COUNT; i++) {
+		vkAllocateCommandBuffers(UreTechEngineClass::c_Instance->mainRenderer->device, &allocInfo, &UreTechEngineClass::c_Instance->mainCommandBuffer[i]);
+	}
+
+	UreTechEngineClass::c_Instance->visualThreading->setWorkerFunc(multiThreadVisualWorker);
+	UreTechEngineClass::c_Instance->visualThreading->setPreWorkersFunc(multiThreadVisualPreWorkers);
+	UreTechEngineClass::c_Instance->visualThreading->setPostWorkersFunc(multiThreadVisualPostWorkers);
+	UreTechEngineClass::c_Instance->visualThreading->setPreJobFunc(multiThreadVisualPreJob);
+	UreTechEngineClass::c_Instance->visualThreading->setPostJobFunc(multiThreadVisualPostJob);
+
+	return 0;
 }
 
 UreTechEngine::UreTechEngineClass* UreTechEngine::UreTechEngineClass::getEngine()
 {
-    if (c_Instance != nullptr) {
-        return c_Instance;
-    }
-    else {
-        c_Instance = new UreTechEngineClass();
+	if (c_Instance == nullptr) {
+		initEngine();
+	}
 
-		engRef = c_Instance;
-		if (UPK_ENABLE_PACKAGE_SYSTEM) {
-			c_Instance->init_upk_system(UPK_PACKAGE_PATH, UPK_PACKAGE_ENC_KEY);
-		}
-
-		//openGL init
-		if (!glfwInit()) {
-			EngineConsole::log("GLFW ERROR!", EngineConsole::ERROR_FATAL);
-		}
-
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	//	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-		c_Instance->window = glfwCreateWindow(displayWidth, displayHeight, ENGINE_WINDOW_TITLE, NULL, NULL);
-		if (c_Instance->window == NULL) {
-			glfwTerminate();
-			EngineConsole::log("WINDOW ERROR!", EngineConsole::ERROR_FATAL);
-			while (1) {}
-		}
-		
-		
-		glfwMakeContextCurrent(c_Instance->window);
-		/*
-		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-			EngineConsole::log("GLAD ERROR!", EngineConsole::ERROR_FATAL);
-		}
-		*/
-
-		c_Instance->mainRenderer = new Renderer();
-		c_Instance->mainRenderer->window = c_Instance->window;
-
-		c_Instance->mainRenderer->InitVulkan();
-		c_Instance->mainRenderer->InitImGuiVulkan();
-
-		c_Instance->mainRenderer->createImageSamplers();
-		c_Instance->mainRenderer->VertexShaders.push_back(c_Instance->mainRenderer->createShaderModule("/shaders/vs.spv"));
-		c_Instance->mainRenderer->FragmentShaders.push_back(c_Instance->mainRenderer->createShaderModule("/shaders/fs.spv"));
-		c_Instance->mainRenderer->setupShaderUniforms();
-		c_Instance->mainRenderer->createEnginePipeline();
-
-        c_Instance->defPlayer = new Player;
-
-
-
-		SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
-
-		c_Instance->visualThreading = new multicoreThreading();
-
-		c_Instance->threadCommandBuffers.resize(c_Instance->visualThreading->getThreadCount());
-		c_Instance->threadCommandPools.resize(c_Instance->visualThreading->getThreadCount());
-
-		QueueFamilyIndices queueFamilyIndices = findQueueFamilies(c_Instance->mainRenderer->physicalDevice, c_Instance->mainRenderer->surface);
-
-		for (int i = 0; i < c_Instance->visualThreading->getThreadCount(); i++) {
-			//c_Instance->threadIDs.push_back(i); not used
-			VkCommandPoolCreateInfo poolInfo = {};
-			poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
-			poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-
-			vkCreateCommandPool(c_Instance->mainRenderer->device, &poolInfo, nullptr, &c_Instance->threadCommandPools[i]);
-
-			VkCommandBufferAllocateInfo allocInfo = {};
-			allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-			allocInfo.commandPool = c_Instance->threadCommandPools[i];
-			allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-			allocInfo.commandBufferCount = 1;
-
-			vkAllocateCommandBuffers(c_Instance->mainRenderer->device, &allocInfo, &c_Instance->threadCommandBuffers[i]);
-		}
-
-		// main loop command buffer
-		VkCommandBufferAllocateInfo allocInfo = {};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = c_Instance->mainRenderer->commandPool;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
-		allocInfo.commandBufferCount = 1;
-
-		vkAllocateCommandBuffers(c_Instance->mainRenderer->device, &allocInfo, &c_Instance->mainCommandBuffer);
-
-		c_Instance->visualThreading->setWorkerFunc(multiThreadVisualWorker);
-		c_Instance->visualThreading->setPreWorkersFunc(multiThreadVisualPreWorkers);
-		c_Instance->visualThreading->setPostWorkersFunc(multiThreadVisualPostWorkers);
-		c_Instance->visualThreading->setPreJobFunc(multiThreadVisualPreJob);
-		c_Instance->visualThreading->setPostJobFunc(multiThreadVisualPostJob);
-
-        return c_Instance;
-    }
+	return c_Instance;
 }
 
 void UreTechEngine::UreTechEngineClass::setKeyCallBackFunc(GLFWkeyfun func,GLFWmousebuttonfun funcM)
@@ -195,7 +197,7 @@ void entity_load_thread(entity* _ent, UreTechEngine::UreTechEngineClass* engRef)
 	string name = (_ent->entName + " async_load thread");
 	std::wstring wname(name.data(), name.data() + name.lenght());
 	SetThreadDescription(GetCurrentThread(), wname.c_str());
-
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
 	_ent->async_load();
 
 	_ent->status = SUSPENDED;
@@ -271,7 +273,6 @@ unsigned int UreTechEngine::UreTechEngineClass::getCountOfEntity()
 
 void UreTechEngine::UreTechEngineClass::engineTick()
 {
-	static timer printTimer(1000);
 
 	glm::vec4 a(1.0f, 1.0f, 1.0f, 1.0f);
 	//mainRenderer->setVec4("uLightColor", a);
@@ -285,18 +286,36 @@ void UreTechEngine::UreTechEngineClass::engineTick()
 			stillLoadingEntities++;
 		}
 	}
+	
+	static timer printTimer(1000);
 
 	if (stillLoadingEntities && printTimer.async_wait()) {
 		EngineConsole::log("Still loading " + std::to_string(stillLoadingEntities) + " entities!", EngineConsole::INFO);
 		printTimer.reset();
 	}
+
+	// run threads if not minimized
+	if (!UreTechEngine::UreTechEngineClass::windowMinmized) {
+		visualThreading->addJobs(engRef->sceneEntities.data(), engRef->sceneEntities.size(), sizeof(entity*));
+		visualThreading->startJobs();
+	}
 }
 
 void UreTechEngine::UreTechEngineClass::waitEngineTickSync()
 {
-	visualThreading->addJobs(engRef->sceneEntities.data(), engRef->sceneEntities.size(), sizeof(entity*));
-	visualThreading->startJobs();
+	/*
+	static timer printTimer(1000);
+	timer waitTime;
+	*/
+
 	visualThreading->waitJobsSync();
+
+	/*
+	if (printTimer.async_wait()) {
+		EngineConsole::log("Waited " + std::to_string(waitTime.get_elapsed_ms()) + " ms for visual update!", EngineConsole::DEBUG);
+		printTimer.reset();
+	}
+	*/
 }
 
 bool UreTechEngine::UreTechEngineClass::killEntity(entity* _ent)
@@ -453,10 +472,10 @@ VkCommandBuffer UreTechEngine::UreTechEngineClass::getThreadCommandBuffer()
 	unsigned int myThreadId = GetThreadId(GetCurrentThread());
 	for(size_t i = 0; i < visualThreading->getThreadCount(); i++) {
 		if (visualThreading->getThreadID(i) == myThreadId) {
-			return threadCommandBuffers[i];
+			return threadCommandBuffers[mainRenderer->currentFrameIndex][i];
 		}
 	}
-	return mainCommandBuffer; // return main command buffer if not found
+	return mainCommandBuffer[mainRenderer->currentFrameIndex]; // return main command buffer if not found
 }
 
 UreTechEngine::UreTechEngineClass::UreTechEngineClass()
@@ -466,4 +485,3 @@ UreTechEngine::UreTechEngineClass::UreTechEngineClass()
 UreTechEngine::UreTechEngineClass::~UreTechEngineClass()
 {
 }
-

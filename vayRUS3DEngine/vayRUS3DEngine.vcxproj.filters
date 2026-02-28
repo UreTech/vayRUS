@@ -42,6 +42,9 @@
     <Filter Include="Source Files\UreTechEngine\imgui">
       <UniqueIdentifier>{edc0e167-aa50-4da1-8c36-3f1b6ee42503}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{9d2ef5c8-5ebe-4b7d-a513-73de7abce1be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\UreTechEngine\entity\entity.cpp">
@@ -257,6 +260,12 @@
     </None>
     <None Include="..\vayRUS3D\testContent\shaders\baseVS.vert">
       <Filter>Source Files\UreTechEngine\IN PACKAGE SHADERS</Filter>
+    </None>
+    <None Include="..\vayRUS3D\shaders\baseFS.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\vayRUS3D\shaders\baseVS.vert">
+      <Filter>shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

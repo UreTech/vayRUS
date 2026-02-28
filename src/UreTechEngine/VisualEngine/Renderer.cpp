@@ -15,12 +15,11 @@
 #include<imgui/imgui_impl_vulkan.h>
 
 bool QueueFamilyIndices::isComplete() {
-	return graphicsFamily != 0xFABCAF && presentFamily != 0xFABCAF;
+	return graphicsFamily != 0xFABCAF && presentFamily != 0xFABCAF && transferFamily != 0xFABCAF;
 }
 
 Renderer::Renderer()
 {
-	engine = UreTechEngine::UreTechEngineClass::getEngine();
 }
 
 Renderer::~Renderer()
@@ -38,7 +37,7 @@ VkShaderModule Renderer::createShaderModule(const char* moduleFileName)
 	createInfo.codeSize = code.size;
 	createInfo.pCode = reinterpret_cast<const uint32_t*>(code.pointer);
 
-	VkShaderModule shaderModule;
+	VkShaderModule shaderModule = VK_NULL_HANDLE;
 	if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
 		EngineConsole::log("An error occurred while creating shader module!", EngineConsole::WARN_CAN_CAUSE_ERROR);
 	}
@@ -189,6 +188,7 @@ uint32_t findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, Vk
 	EngineConsole::log("Vulkan internal ERROR 0x01", EngineConsole::LOG_ERROR);
 }
 
+/*
 void Renderer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
 {
 
@@ -220,7 +220,7 @@ void Renderer::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemor
 
 	vkBindBufferMemory(device, buffer, bufferMemory, 0);
 }
-
+*/
 void Renderer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
 	VkBufferCopy copyRegion{};
@@ -230,6 +230,15 @@ void Renderer::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize s
 	immediateSubmit([srcBuffer, dstBuffer, copyRegion](VkCommandBuffer cmd) {
 		vkCmdCopyBuffer(cmd, srcBuffer, dstBuffer, 1, &copyRegion);
 		});
+}
+
+DeviceMemoryAllocation Renderer::allocateDeviceMemory(VkDeviceSize size, VkMemoryPropertyFlags properties)
+{
+	DeviceMemoryAllocation result;
+
+
+
+	return result;
 }
 
 void Renderer::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
@@ -334,7 +343,7 @@ VkSampler Renderer::createSampler(TextureFilterType filterType)
 
 void Renderer::BeginVulkanCommandBuffer()
 {
-	vkBeginCommandBuffer(engine->mainCommandBuffer, &multiThreadSecondaryCmdBufferBeginInfo); // this is a secondary cmd buffer
+	vkBeginCommandBuffer(engine->mainCommandBuffer[currentFrameIndex], &multiThreadSecondaryCmdBufferBeginInfo); // this is a secondary cmd buffer
 	// vkCmdBeginRenderPass(multiThreadEngineCommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE_AND_SECONDARY_COMMAND_BUFFERS_KHR);
 	// vkCmdBeginRenderPass(multiThreadEngineCommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	// moved to multi threaded renderer vkCmdBindPipeline(EngineCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline); // attach shaders etc...
@@ -343,7 +352,7 @@ void Renderer::BeginVulkanCommandBuffer()
 void Renderer::EndVulkanCommandBuffer()
 {
 	// vkCmdEndRenderPass(multiThreadEngineCommandBuffer);
-	vkEndCommandBuffer(engine->mainCommandBuffer);
+	vkEndCommandBuffer(engine->mainCommandBuffer[currentFrameIndex]);
 	//EngineConsole::log("command buffer ended!", EngineConsole::DEBUG);
 }
 
@@ -353,8 +362,8 @@ void Renderer::processCommandBuffers()
 	vkBeginCommandBuffer(multiThreadEngineCommandBuffer, &cmdBufferBeginInfo);
 	vkCmdBeginRenderPass(multiThreadEngineCommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
 
-	vkCmdExecuteCommands(multiThreadEngineCommandBuffer, engine->threadCommandBuffers.size(), engine->threadCommandBuffers.data());
-	vkCmdExecuteCommands(multiThreadEngineCommandBuffer, 1, &engine->mainCommandBuffer);
+	vkCmdExecuteCommands(multiThreadEngineCommandBuffer, engine->threadCommandBuffers[currentFrameIndex].size(), engine->threadCommandBuffers[currentFrameIndex].data());
+	vkCmdExecuteCommands(multiThreadEngineCommandBuffer, 1, &engine->mainCommandBuffer[currentFrameIndex]);
 
 	vkCmdEndRenderPass(multiThreadEngineCommandBuffer);
 	vkEndCommandBuffer(multiThreadEngineCommandBuffer);
@@ -371,13 +380,15 @@ void Renderer::processCommandBuffers()
 
 	VkCommandBuffer commandBuffers[2];
 	commandBuffers[0] = multiThreadEngineCommandBuffer;
+
 	submitInfo.commandBufferCount = 1;
 
-	bool resetImmediateSubmit = false;
-	if (immediateSubmitInfoAvailable) {
-		commandBuffers[1] = immediateSubmitCommandBuffer;
+	static bool processingImmediateSubmitGQ = false;
+	// no need atomic here
+	if(immediateSubmitGQInfoAvailable) {
+		commandBuffers[1] = immediateSubmitGQCmdBuffer;
 		submitInfo.commandBufferCount = 2;
-		resetImmediateSubmit = true;
+		processingImmediateSubmitGQ = true; // for being sure buffer is executed
 	}
 
 	submitInfo.pCommandBuffers = commandBuffers;
@@ -391,15 +402,15 @@ void Renderer::processCommandBuffers()
 	presentInfo.pWaitSemaphores = &renderFinishedSemaphore;
 	presentInfo.swapchainCount = 1;
 
-	vkResetFences(device, 1, &inFlightFence);
-	vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFence);
-	vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+	vkResetFences(device, 1, &fences[currentFrameIndex]);
+	vkQueueSubmit(graphicsQueue, 1, &submitInfo, fences[currentFrameIndex]);
+	vkWaitForFences(device, 1, &fences[currentFrameIndex], VK_TRUE, UINT64_MAX);
 
-	if (resetImmediateSubmit) {
-		immediateSubmitInfoAvailable = false;
-		immediateSubmitInfoSubmitted = true;
+	if (processingImmediateSubmitGQ) {
+		immediateSubmitGQInfoAvailable.store(false);
+		immediateSubmitGQInfoSubmitted.store(true);
+		processingImmediateSubmitGQ = false;
 	}
-
 }
 
 void Renderer::prepareNewFrame()
@@ -407,27 +418,22 @@ void Renderer::prepareNewFrame()
 	VkSurfaceCapabilitiesKHR capabilities;
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &capabilities);
 
-	vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &frameBufferImageIndex);
+	vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &currentSwapChainImageIndex);
 
-	renderPassBeginInfo.framebuffer = swapChainFramebuffers[frameBufferImageIndex];
+	renderPassBeginInfo.framebuffer = swapChainFramebuffers[currentSwapChainImageIndex];
 	renderPassBeginInfo.renderArea.extent = capabilities.currentExtent;
-
-	/*
-	vkResetCommandPool(device, commandPool, 0);
-	for (int i = 0; i < engine->threadCommandPools.size(); i++) {
-		vkResetCommandPool(device, engine->threadCommandPools[i], 0);
-	}
-	*/
-
-	//multiThreadRenderPassBeginInfo.framebuffer = swapChainFramebuffers[frameBufferImageIndex];
-	//multiThreadRenderPassBeginInfo.renderArea.extent = capabilities.currentExtent;
 }
 
 void Renderer::endFrame()
 {
 	presentInfo.pSwapchains = &swapChain;
-	presentInfo.pImageIndices = &frameBufferImageIndex;
+	presentInfo.pImageIndices = &currentSwapChainImageIndex;
 
+	// use next frame
+	currentFrameIndex++;
+	if (!(currentFrameIndex < RENDERER_VULKAN_FENCE_COUNT)) {
+		currentFrameIndex = 0;
+	}
 	/*
 	//submit
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -457,8 +463,8 @@ void Renderer::endFrame()
 
 void Renderer::waitFrame()
 {
-	vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
-	vkResetFences(device, 1, &inFlightFence);
+	vkWaitForFences(device, 1, &fences[currentFrameIndex], VK_TRUE, UINT64_MAX);
+	vkResetFences(device, 1, &fences[currentFrameIndex]);
 }
 
 void Renderer::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& recordCommands)
@@ -469,7 +475,7 @@ void Renderer::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& record
 	VkCommandPoolCreateInfo poolInfo{};
 	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	poolInfo.queueFamilyIndex = indices.graphicsFamily;
+	poolInfo.queueFamilyIndex = indices.transferFamily; // use transfer queue
 
 	VkCommandPool pool;
 	vkCreateCommandPool(device, &poolInfo, nullptr, &pool);
@@ -493,14 +499,69 @@ void Renderer::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& record
 	
 	vkEndCommandBuffer(commandBuffer);
 
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &commandBuffer;
+
+	VkFenceCreateInfo fenceCInfo{};
+	fenceCInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+	VkFence fence;
+	vkCreateFence(device, &fenceCInfo, nullptr, &fence);
+
+	vkResetFences(device, 1, &fence);
+	vkQueueSubmit(transferQueue, 1, &submitInfo, fence); // uses separate transfer queue to avoid stalling graphics queue
+	vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
+
+	vkDestroyFence(device, fence, nullptr);
+
+	vkFreeCommandBuffers(device, pool, 1, &commandBuffer);
+	vkDestroyCommandPool(device, pool, nullptr);
+
+	immediateSubmitMutex.unlock();
+}
+
+void Renderer::immediateSubmitGQ(std::function<void(VkCommandBuffer cmd)>&& recordCommands)
+{
+	immediateSubmitGQMutex.lock();
+
+	QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
+	VkCommandPoolCreateInfo poolInfo{};
+	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	poolInfo.queueFamilyIndex = indices.graphicsFamily; // use grahics queue
+
+	VkCommandPool pool;
+	vkCreateCommandPool(device, &poolInfo, nullptr, &pool);
+
+	VkCommandBufferAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandPool = pool;
+	allocInfo.commandBufferCount = 1;
+
+	VkCommandBuffer commandBuffer;
+	vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+	vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+	recordCommands(commandBuffer);
+
+	vkEndCommandBuffer(commandBuffer);
+
 	// use this if main thread started to loop
 	if (engineLoopStarted) {
-		immediateSubmitCommandBuffer = commandBuffer;
+		immediateSubmitGQCmdBuffer = commandBuffer;
 
-		immediateSubmitInfoAvailable = true;
-		immediateSubmitInfoSubmitted = false;
+		immediateSubmitGQInfoAvailable.store(true);
+		immediateSubmitGQInfoSubmitted.store(false);
 
-		while (!immediateSubmitInfoSubmitted); // wait main thread to process
+		while (!immediateSubmitGQInfoSubmitted.load()); // wait main thread to process
 	}
 	else {
 		VkSubmitInfo submitInfo{};
@@ -515,7 +576,7 @@ void Renderer::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& record
 		vkCreateFence(device, &fenceCInfo, nullptr, &fence);
 
 		vkResetFences(device, 1, &fence);
-		vkQueueSubmit(graphicsQueue, 1, &submitInfo, fence);
+		vkQueueSubmit(graphicsQueue, 1, &submitInfo, fence); // uses graphics queue instead of transfer queue
 		vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX);
 
 		vkDestroyFence(device, fence, nullptr);
@@ -524,7 +585,7 @@ void Renderer::immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& record
 	vkFreeCommandBuffers(device, pool, 1, &commandBuffer);
 	vkDestroyCommandPool(device, pool, nullptr);
 
-	immediateSubmitMutex.unlock();
+	immediateSubmitGQMutex.unlock();
 }
 
 VkCommandBuffer Renderer::createTemporalCmdBuffer()
@@ -578,26 +639,37 @@ void Renderer::InitVulkan()
 	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	createVulkanInstance();
 	EngineConsole::log("Vulkan instance created!", EngineConsole::DEBUG);
+
 	setupDebugMessenger();
 	EngineConsole::log("Vulkan debug messenger created!", EngineConsole::DEBUG);
-	selectRenderDevice();
-	EngineConsole::log("Vulkan render device created!", EngineConsole::DEBUG);
-	createLogicalDevice();
-	EngineConsole::log("Vulkan logical device created!", EngineConsole::DEBUG);
+
 	createSurface();
 	EngineConsole::log("Vulkan surface created!", EngineConsole::DEBUG);
+
+	selectRenderDevice();
+	EngineConsole::log("Vulkan render device created!", EngineConsole::DEBUG);
+
+	createLogicalDevice();
+	EngineConsole::log("Vulkan logical device created!", EngineConsole::DEBUG);
+
 	createSwapChain();
 	EngineConsole::log("Vulkan swapChain created!", EngineConsole::DEBUG);
+
 	createImageViews();
 	EngineConsole::log("Vulkan ImageViews created!", EngineConsole::DEBUG);
+
 	createCommandPool();
 	EngineConsole::log("Vulkan command pools created!", EngineConsole::DEBUG);
+
 	createCommandBuffers();
 	EngineConsole::log("Vulkan command buffers created!", EngineConsole::DEBUG);
+
 	createRenderPass();
 	EngineConsole::log("Vulkan render passes created!", EngineConsole::DEBUG);
+
 	createFramebuffers();
 	EngineConsole::log("Vulkan framebuffers created!", EngineConsole::DEBUG);
+
 	createSyncObjects();
 	EngineConsole::log("Vulkan syncObjects created!", EngineConsole::DEBUG);
 
@@ -748,7 +820,7 @@ void Renderer::createEnginePipeline()
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizer.lineWidth = 1.0f;
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizer.depthBiasEnable = VK_FALSE;
 
 	VkPipelineMultisampleStateCreateInfo multisampling{};
@@ -783,7 +855,7 @@ void Renderer::createEnginePipeline()
 	depthStencil.depthBoundsTestEnable = VK_FALSE;
 	depthStencil.stencilTestEnable = VK_FALSE;
 
-	VkGraphicsPipelineCreateInfo pipelineInfo;
+	VkGraphicsPipelineCreateInfo pipelineInfo{};
 	memset(&pipelineInfo, 0, sizeof(VkGraphicsPipelineCreateInfo));
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 	pipelineInfo.stageCount = 2;
@@ -832,24 +904,40 @@ QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surfa
 	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
 	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
+	bool graphicsFamilyFound = false;
+	bool presentFamilyFound = false;
+	bool transferFamilyFound = false;
+	bool betterTransferFamilyFound = false;
+
 	for (int i = 0; i < queueFamilyCount; i++) {
-		if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+		if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT && !graphicsFamilyFound) {
 			indices.graphicsFamily = i;
+			graphicsFamilyFound = true;
 		}
 
-		VkBool32 presentSupport = false;
-		if (surface != VK_NULL_HANDLE) {
+		if (queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT && !transferFamilyFound && !betterTransferFamilyFound) {
+			indices.transferFamily = i;
+			transferFamilyFound = true;
+			betterTransferFamilyFound = false;
+		}
+
+		if (queueFamilies[i].queueFlags & VK_QUEUE_TRANSFER_BIT && !(queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) && !betterTransferFamilyFound) {
+			indices.transferFamily = i;
+			transferFamilyFound = true;
+			betterTransferFamilyFound = true;
+		}
+
+		if (surface != VK_NULL_HANDLE && !presentFamilyFound) {
+			VkBool32 presentSupport = false;
 			vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
-		}
-		else {
-			indices.presentFamily = -1;
+
+			if (presentSupport) {
+				indices.presentFamily = i;
+				presentFamilyFound = true;
+			}
 		}
 
-		if (presentSupport) {
-			indices.presentFamily = i;
-		}
-
-		if (indices.isComplete()) {
+		if (indices.isComplete() && betterTransferFamilyFound) {
 			break;
 		}
 	}
@@ -928,7 +1016,7 @@ void Renderer::destroyVulkan()
 
 void Renderer::recrateSwapChainIfNeeded()
 {
-	vkDeviceWaitIdle(device);
+	vkQueueWaitIdle(graphicsQueue); // render queue
 	if (framebufferResized) {
 		framebufferResized = false;
 		destroySwapChain();
@@ -1022,24 +1110,37 @@ void Renderer::recrateSwapChainIfNeeded()
 
  VkExtent2D Renderer::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
  {
-	 if (capabilities.currentExtent.width != UINT32_MAX) {
+	 if (capabilities.currentExtent.width != UINT32_MAX)
 		 return capabilities.currentExtent;
-	 }
-	 else {
-		 int width, height;
+
+	 int width = 0, height = 0;
+	 glfwGetFramebufferSize(window, &width, &height);
+
+	 // 🔥 Kritik kısım
+	 while (width == 0 || height == 0)
+	 {
 		 glfwGetFramebufferSize(window, &width, &height);
-
-		 VkExtent2D actualExtent = {
-			 static_cast<uint32_t>(width),
-			 static_cast<uint32_t>(height)
-		 };
-
-		 actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-		 actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
-		 return actualExtent;
+		 glfwWaitEvents();   // event pump şart
 	 }
+
+	 VkExtent2D actualExtent = {
+		 static_cast<uint32_t>(width),
+		 static_cast<uint32_t>(height)
+	 };
+
+	 actualExtent.width =
+		 std::clamp(actualExtent.width,
+			 capabilities.minImageExtent.width,
+			 capabilities.maxImageExtent.width);
+
+	 actualExtent.height =
+		 std::clamp(actualExtent.height,
+			 capabilities.minImageExtent.height,
+			 capabilities.maxImageExtent.height);
+
+	 return actualExtent;
  }
+
 
  static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	 VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -1057,8 +1158,8 @@ void Renderer::recrateSwapChainIfNeeded()
 	 }
 
 	 // debug stuff
-#ifdef _DEBUG
-	 VkLayerSettingEXT layerSetting;
+#if defined(_DEBUG) and defined(VULKAN_RENDERER_ENABLE_SHADER_DEBUG_PRINTF)
+	 VkLayerSettingEXT layerSetting{};
 	 layerSetting.pLayerName = "VK_LAYER_KHRONOS_validation";
 	 layerSetting.pSettingName = "enables";
 	 layerSetting.type = VK_LAYER_SETTING_TYPE_STRING_EXT;
@@ -1066,6 +1167,12 @@ void Renderer::recrateSwapChainIfNeeded()
 
 	 static const char* layerEnables = "VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT";
 	 layerSetting.pValues = &layerEnables;
+
+	 VkLayerSettingsCreateInfoEXT layerSettingsCreateInfo{};
+	 layerSettingsCreateInfo.sType = VK_STRUCTURE_TYPE_LAYER_SETTINGS_CREATE_INFO_EXT;
+	 layerSettingsCreateInfo.pNext = nullptr;
+	 layerSettingsCreateInfo.settingCount = 1;
+	 layerSettingsCreateInfo.pSettings = &layerSetting;
 #endif
 	 // ****
 
@@ -1095,11 +1202,12 @@ void Renderer::recrateSwapChainIfNeeded()
 	 auto extensions = getRequiredExtensions();
 	 createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
 	 createInfo.ppEnabledExtensionNames = extensions.data();
-#ifdef _DEBUG
-	 createInfo.pNext = &layerSetting;
+#if defined(_DEBUG) and defined(VULKAN_RENDERER_ENABLE_SHADER_DEBUG_PRINTF)
+	 createInfo.pNext = &layerSettingsCreateInfo;
 #else
 	 createInfo.pNext = nullptr;
 #endif
+
 	 VkResult result = vkCreateInstance(&createInfo, nullptr, &instance); // create instance
 
 	 std::vector<VkExtensionProperties> aExts;
@@ -1214,47 +1322,64 @@ void Renderer::recrateSwapChainIfNeeded()
  {
 	 QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
 
-	 VkDeviceQueueCreateInfo queueCreateInfo{};
-	 queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	 queueCreateInfo.queueFamilyIndex = indices.graphicsFamily;
-	 queueCreateInfo.queueCount = 1;
+	 static float queuePriority = 1.0f;
+	 static float transferQueuePriority = 0.85f;
 
-	 float queuePriority = 1.0f;
-	 queueCreateInfo.pQueuePriorities = &queuePriority;
+	 dArray<VkDeviceQueueCreateInfo> queueCreateInfos;
+	 uint32_t transferQueueIndex = 0;
+
+	 // graphics queue
+	 VkDeviceQueueCreateInfo graphicsQueueCreateInfo{};
+	 graphicsQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	 graphicsQueueCreateInfo.queueFamilyIndex = indices.graphicsFamily;
+	 graphicsQueueCreateInfo.queueCount = 1;
+	 graphicsQueueCreateInfo.pQueuePriorities = &queuePriority;
+
+	 queueCreateInfos.push_back(graphicsQueueCreateInfo);
+
+	 if (indices.graphicsFamily != indices.presentFamily) {
+		 // has different present queue
+		 VkDeviceQueueCreateInfo presentQueueCreateInfo{};
+		 presentQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		 presentQueueCreateInfo.queueFamilyIndex = indices.presentFamily;
+		 presentQueueCreateInfo.queueCount = 1;
+		 presentQueueCreateInfo.pQueuePriorities = &queuePriority;
+		 queueCreateInfos.push_back(presentQueueCreateInfo);
+	 }
+
+	 if (indices.graphicsFamily != indices.transferFamily && indices.presentFamily != indices.transferFamily) {
+		 // has different transfer queue
+		 VkDeviceQueueCreateInfo transferQueueCreateInfo{};
+		 transferQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		 transferQueueCreateInfo.queueFamilyIndex = indices.transferFamily;
+		 transferQueueCreateInfo.queueCount = 1;
+		 transferQueueCreateInfo.pQueuePriorities = &transferQueuePriority;
+		 queueCreateInfos.push_back(transferQueueCreateInfo);
+		 transferQueueIndex = 0; // its a separate queue, so index is 0
+	 }
+	 else {
+
+	 }
 
 	 VkPhysicalDeviceFeatures deviceFeatures{};
-
-
-	 QueueFamilyIndices _indices = findQueueFamilies(physicalDevice, surface);
 
 	 VkDeviceCreateInfo createInfo{};
 	 createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	 createInfo.pEnabledFeatures = &deviceFeatures;
 	 createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 	 createInfo.enabledExtensionCount = deviceExtensions.size();
-	 createInfo.pQueueCreateInfos = &queueCreateInfo;
-	 createInfo.queueCreateInfoCount = 1;
+	 createInfo.pQueueCreateInfos = queueCreateInfos.data();
+	 createInfo.queueCreateInfoCount = queueCreateInfos.size();
 
 	 createInfo.pEnabledFeatures = &deviceFeatures;
-
-	 /*
-	 VkPhysicalDeviceNestedCommandBufferFeaturesEXT nestedFeatures = {};
-	 nestedFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_NESTED_COMMAND_BUFFER_FEATURES_EXT;
-	 nestedFeatures.pNext = nullptr;
-	 nestedFeatures.nestedCommandBuffer = VK_TRUE;
-
-	 VkPhysicalDeviceMaintenance7FeaturesKHR maintenance7Features = {};
-	 maintenance7Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_7_FEATURES_KHR;
-	 maintenance7Features.pNext = nullptr;
-	 maintenance7Features.maintenance7 = VK_TRUE;
-	 maintenance7Features.pNext = &nestedFeatures;
-
-	 createInfo.pNext = &maintenance7Features;
-	 */
 	 
 	 if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
 		 EngineConsole::log("Failed to create logical device!", UreTechEngine::EngineConsole::ERROR_FATAL);
 	 }
+
+	 vkGetDeviceQueue(device, indices.graphicsFamily, 0, &graphicsQueue);
+	 vkGetDeviceQueue(device, indices.presentFamily, 0, &presentQueue);
+	 vkGetDeviceQueue(device, indices.transferFamily, transferQueueIndex, &transferQueue);
  }
 
  void Renderer::createSurface()
@@ -1263,13 +1388,16 @@ void Renderer::recrateSwapChainIfNeeded()
 	 createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 	 createInfo.hwnd = glfwGetWin32Window(window);
 	 createInfo.hinstance = GetModuleHandle(nullptr);
-
+	 
+	 /*
 	 if (vkCreateWin32SurfaceKHR(instance, &createInfo, nullptr, &surface) != VK_SUCCESS) {
 		 EngineConsole::log("Failed to create window surface!", UreTechEngine::EngineConsole::ERROR_FATAL);
 	 }
-	 QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
-	 vkGetDeviceQueue(device, indices.graphicsFamily, 0, &graphicsQueue);
-	 vkGetDeviceQueue(device, indices.presentFamily, 0, &presentQueue);
+	 */
+
+	 if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+		 EngineConsole::log("Failed to create surface!", UreTechEngine::EngineConsole::ERROR_FATAL);
+	 }
  }
 
  void Renderer::createCommandPool()
@@ -1422,9 +1550,14 @@ void Renderer::recrateSwapChainIfNeeded()
 	 fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 	 if (vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
-		 vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
-		 vkCreateFence(device, &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS) {
+		 vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS) {
 		 EngineConsole::log("Failed to create synchronization objects!", UreTechEngine::EngineConsole::ERROR_FATAL);
+	 }
+
+	 for (int i = 0; i < RENDERER_VULKAN_FENCE_COUNT; i++) {
+		 if (vkCreateFence(device, &fenceInfo, nullptr, &fences[i]) != VK_SUCCESS) {
+			 EngineConsole::log("Failed to create fences!", UreTechEngine::EngineConsole::ERROR_FATAL);
+		 }
 	 }
  }
 
@@ -1506,7 +1639,9 @@ void Renderer::recrateSwapChainIfNeeded()
 	 surfaceFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 
 	 //VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-	 VkPresentModeKHR presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+	 VkPresentModeKHR presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR; // sends when frame is ready
+	 //VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR; // vsync
+
 	 VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
 	 uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;

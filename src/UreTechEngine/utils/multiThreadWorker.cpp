@@ -2,7 +2,7 @@
 
 void UreTechEngine::threadWorker(int id, multicoreThreading* parent) {
 	SetThreadAffinityMask(GetCurrentThread(), (1ULL << id));
-	SetPriorityClass(GetCurrentThread(), HIGH_PRIORITY_CLASS);
+	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 
 	string name = ("Thread Worker " + u64ToDecStr(id));
@@ -15,8 +15,10 @@ void UreTechEngine::threadWorker(int id, multicoreThreading* parent) {
 		// wait job
 		WaitForSingleObject(parent->semaphore, INFINITE);
 
+		/*
 		timer ttimer;
 		ttimer.start();
+		*/
 
 		parent->preJob(id);
 
@@ -30,13 +32,17 @@ void UreTechEngine::threadWorker(int id, multicoreThreading* parent) {
 		parent->postJob(id);
 
 		if (parent->workersRemaining.fetch_sub(1, std::memory_order_release) == 1) {
+			// EngineConsole::log("jobs ended " + u64ToDecStr(id) + " took " + u64ToDecStr(ttimer.get_elapsed_ms()) + "ms to end.", EngineConsole::INFO);
 			SetEvent(parent->doneEventHandle);
 		}
 
-		//EngineConsole::log("thread " + u64ToDecStr(id) + " took " + u64ToDecStr(ttimer.get_elapsed_ms()) + "ms to end.", EngineConsole::INFO);
+		/*
+		if (ttimer.get_elapsed_ms() > 1) {
+			EngineConsole::log("thread " + u64ToDecStr(id) + " took " + u64ToDecStr(ttimer.get_elapsed_ms()) + "ms to end.", EngineConsole::INFO);
 
-		//EngineConsole::log("thread " + u64ToDecStr(id) + " exit " + u64ToDecStr(--parent->workersRemaining) + " thread remaining.", EngineConsole::INFO);
-
+			EngineConsole::log("thread " + u64ToDecStr(id) + " exit " + u64ToDecStr(parent->workersRemaining) + " thread remaining.", EngineConsole::INFO);
+		}
+		*/
 	}
 }
 
@@ -104,16 +110,22 @@ void UreTechEngine::multicoreThreading::waitJobsSync() {
 	//timer ttimer;
 	//ttimer.start();
 
+	/*
+	static std::mutex mtx;
+	std::unique_lock lock(mtx);
+	workersDoneCondition.wait(lock, [this]() { return this->workersRemaining == 0; });
+	*/
 	WaitForSingleObject(doneEventHandle, INFINITE);
 
 	//	if (ttimer.get_elapsed_ms() > 100) {
 	//		EngineConsole::log("This frame took very long time " + u64ToDecStr(ttimer.get_elapsed_ms()) + "ms elapsed.", EngineConsole::WARN);
 	//	}
+	//EngineConsole::log("thread jobs took " + u64ToDecStr(ttimer.get_elapsed_ms()) + "ms to end.", EngineConsole::INFO);
 
 	postWorkers();
 	status = IDLE;
 
-	//EngineConsole::log("thread jobs took " + u64ToDecStr(ttimer.get_elapsed_ms()) + "ms to end.", EngineConsole::INFO);
+	// EngineConsole::log("thread jobs took " + u64ToDecStr(ttimer.get_elapsed_ms()) + "ms to end.", EngineConsole::DEBUG);
 }
 
 int UreTechEngine::multicoreThreading::waitJobsAsync() {

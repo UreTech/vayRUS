@@ -91,6 +91,8 @@
     <ClInclude Include="..\vayRUS3D\src\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\vayRUS3D\shaders\baseFS.frag" />
+    <None Include="..\vayRUS3D\shaders\baseVS.vert" />
     <None Include="..\vayRUS3D\testContent\shaders\baseFS.frag">
       <FileType>Document</FileType>
     </None>
@@ -218,16 +220,25 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)\vayRUS3D\include;$(SolutionDir)\vayRUS3D\imgui;$(SolutionDir)\vayRUS3D\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(ProjectDir)..\include;$(ProjectDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(SolutionDir)\vayRUS3D\lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(ProjectDir)..\lib\x64;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3dll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /D "D:\vsProjects\vayRUS\x64\vayRUS3DEngine Release\*.*" "D:\vsProjects\vayRUS\x64\Release Engine Build"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>delete this later...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

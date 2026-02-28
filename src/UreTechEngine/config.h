@@ -11,3 +11,6 @@
 #define ENGINE_CONSOLE_TITLE "VayRUS3D Engine vConsole"
 
 #define FULL_ENGINE_DESCRIPTION "\nvayRUS3D-EDITOR BETA1.3.1 Vulkan\npEngine 1.0\nPlatform Windows x64"
+
+// It requeares Vulkan 1.1 or above
+//#define VULKAN_RENDERER_ENABLE_SHADER_DEBUG_PRINTF

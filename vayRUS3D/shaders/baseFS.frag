@@ -41,4 +41,5 @@ void main()
 		vec3 lightColorRGB = diff * uLightColor.rgb;
 		vec4 brightnessLvl = vec4(lightColorRGB, uLightColor.a) * brightness;
 		fragColor = texture(textures[vertTextureLevel], texCoord) * brightnessLvl;
+		fragColor = texture(textures[vertTextureLevel], texCoord);
 }

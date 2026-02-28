@@ -52,6 +52,7 @@ namespace UreTechEngine {
 		}
 	};
 
+	ENGINE_DEFINE int initEngine();
 
 	class ENGINE_DEFINE UreTechEngineClass {
 	friend class Renderer;
@@ -101,10 +102,14 @@ namespace UreTechEngine {
 		void saveGame(std::string gamePath);
 		void loadGame(std::string gamePath);
 
-		dArray<VkCommandBuffer> threadCommandBuffers;
-		VkCommandBuffer mainCommandBuffer;
+		dArray<VkCommandBuffer> threadCommandBuffers[RENDERER_VULKAN_FENCE_COUNT];
+		VkCommandBuffer mainCommandBuffer[RENDERER_VULKAN_FENCE_COUNT];
 		VkCommandBuffer getThreadCommandBuffer();
+		GLFWwindow* window = nullptr;
+
 	private:
+		friend int initEngine();
+
 		// visual update
 		multicoreThreading* visualThreading;
 		dArray<VkCommandPool> threadCommandPools;
@@ -112,7 +117,6 @@ namespace UreTechEngine {
 		size_t systemThreadCount = std::thread::hardware_concurrency();
 		nlohmann::json mapJson;
 		Player* defPlayer = nullptr;
-		GLFWwindow* window = nullptr;
 		uint64_t lastID = 0x000a0000; // BEGIN_ENT_ID define
 		dArray<entity*> sceneEntities;
 		dArray<upk_API*> loadedPackages;

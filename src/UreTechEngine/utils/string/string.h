@@ -9,7 +9,7 @@ namespace UreTechEngine {
 	class ENGINE_DEFINE string {
 	private:
 		char* s_data = nullptr;// data
-		char* s_data_c_str_type = nullptr;// c_str type holder
+		mutable char* s_data_c_str_type = nullptr;// c_str type holder (some sort of cache)
 		size_t s_size = 0;// data size
 		bool haltWithFatalError = false;
 
@@ -18,7 +18,7 @@ namespace UreTechEngine {
 	public:
 
 		// c1
-		string();
+		string() = default;
 
 		// c2
 		string(char* _str, size_t _lenght);
@@ -42,7 +42,7 @@ namespace UreTechEngine {
 		char& operator[](size_t index);
 
 		// string cmp operator
-		bool operator==( string& other);
+		bool operator==(const string& other) const;
 
 		// copies data into it self
 		string operator=(const string other);
@@ -109,6 +109,7 @@ namespace UreTechEngine {
 
 		//converts c string type (\0)
 		const char* c_str() const;
+		char* c_str();
 
 		//converts to std::string
 		std::string std_str();

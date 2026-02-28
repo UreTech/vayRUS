@@ -249,7 +249,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Engine Build|x64'">
     <IncludePath>$(VULKAN_SDK)\Include;$(IncludePath);$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</IncludePath>
-    <LibraryPath>$(ProjectDir)lib\x64\;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <LibraryPath>$(ProjectDir)..\x64\vayRUS3DEngine Release;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
@@ -498,7 +498,7 @@ start packageContent.bat
       </AddModuleNamesToAssembly>
       <ForceSymbolReferences>
       </ForceSymbolReferences>
-      <AdditionalDependencies>openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>openGL32.Lib;glfw3dll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <ShowProgress>LinkVerbose</ShowProgress>
       <DelayLoadDLLs>
@@ -533,17 +533,19 @@ start packageContent.bat
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>GMODULE_APP;ENGINE_BUILD;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\src;$(VULKAN_SDK)\Include;$(ProjectDir)\include;$(ProjectDir)\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\\src;$(VULKAN_SDK)\Include;$(ProjectDir)..\\x64\vayRUS3DEngine Debug;$(ProjectDir)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;$(ProjectDir)\lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;$(SolutionDir)\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vayRUS3DEngine.lib;vulkan-1.lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\x64\vayRUS3DEngine Release;$(VULKAN_SDK)\Lib;$(ProjectDir)..\lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vayRUS3DEngine.lib;vulkan-1.lib;glfw3dll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <AddModuleNamesToAssembly>
@@ -553,6 +555,12 @@ start packageContent.bat
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <SuppressStartupBanner>false</SuppressStartupBanner>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /D "D:\vsProjects\vayRUS\x64\vayRUS3DEngine Release\*.*" "D:\vsProjects\vayRUS\x64\Release Engine Build"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>delete this later...</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release DedicatedServer Build|x64'">
     <ClCompile>
@@ -601,7 +609,7 @@ start packageContent.bat
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)lib\x64\;$(WindowsSDK_LibraryPath_x64);$(VCInstallDir)atlmfc\lib\amd64;$(VCInstallDir)lib\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>openGL32.Lib;glfw3.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>openGL32.Lib;glfw3dll.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <AddModuleNamesToAssembly>

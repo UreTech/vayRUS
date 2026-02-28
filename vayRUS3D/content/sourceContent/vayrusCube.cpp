@@ -12,71 +12,67 @@ void vayrusCube::async_load() {
 	// add your async load commands here like loading meshes, textures, etc.
 	Material nullmat;
 
-	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/heavyTF2.obj", nullmat);
+	this->entityMesh = MeshManager::getInstance()->imp_mesh_glb_type("/test/gordonHL2.glb");
 
 	Material suit;
 	suit.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/gordon_suit.png");
 	this->entityMesh->assignMaterial(suit, 0);
 
-	Material glass;
-	glass.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/combine_health_charger_glass.png");
-	this->entityMesh->assignMaterial(glass, 1);
+	Material glasses;
+	glasses.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/combine_health_charger_glass.png");
+	this->entityMesh->assignMaterial(glasses, 1);
 
-	Material skin;
-	skin.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/combine_health_charger_glass.png");
-	this->entityMesh->assignMaterial(skin, 2);
+	Material glass_frame;
+	glass_frame.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eli_eye_lash.png");
+	this->entityMesh->assignMaterial(glass_frame, 2);
 
 	Material eye;
-	eye.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/gordon_eye.png");
+	eye.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/Eye-Green.jpeg");
 	this->entityMesh->assignMaterial(eye, 3);
 
 	Material hair;
 	hair.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/gordon_hair.png");
 	this->entityMesh->assignMaterial(hair, 4);
 
-	Material haircap;
-	haircap.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/gordon_haircap.png");
-	this->entityMesh->assignMaterial(haircap, 5);
+	Material hair_cap;
+	hair_cap.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/gordon_haircap.png");
+	this->entityMesh->assignMaterial(hair_cap, 5);
 
 	Material head;
 	head.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/gordon_head.png");
 	this->entityMesh->assignMaterial(head, 6);
 
-	Material eyemen;
-	eyemen.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eyemeniscus.png");
-	this->entityMesh->assignMaterial(eyemen, 7);
+	Material eyes_m;
+	eyes_m.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eyemeniscus.png");
+	this->entityMesh->assignMaterial(eyes_m, 7);
 
-	Material eyelas;
-	eyelas.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eli_eye_lash.png");
-	this->entityMesh->assignMaterial(eyelas, 8);
+	Material eye_lash;
+	eye_lash.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eli_eye_lash.png");
+	this->entityMesh->assignMaterial(eye_lash, 8);
 
-	Material eyesha;
-	eyesha.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eyeshadow.png");
-	this->entityMesh->assignMaterial(eyesha, 9);
+	Material eye_shadow;
+	eye_shadow.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eyeshadow.png");
+	this->entityMesh->assignMaterial(eye_shadow, 9);
 
-	Material brow;
-	brow.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eli_brow.png");
-	this->entityMesh->assignMaterial(brow, 10);
+	Material brow_a;
+	brow_a.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eli_brow.png");
+	this->entityMesh->assignMaterial(brow_a, 10);
 
-	Material brow2;
-	brow2.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eli_brow2.png");
-	this->entityMesh->assignMaterial(brow2, 11);
+	Material brow_b;
+	brow_b.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eli_brow2.png");
+	this->entityMesh->assignMaterial(brow_b, 11);
 
 	Material beard;
-	beard.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eli_brow2.png");
+	beard.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eli_brow.png");
 	this->entityMesh->assignMaterial(beard, 12);
 
 	Material teeth;
 	teeth.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/gman_teeth.png");
 	this->entityMesh->assignMaterial(teeth, 13);
 
-	Material tong;
-	tong.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/gman_teeth.png");
-	this->entityMesh->assignMaterial(tong, 14);
-
-	Material armor;
-	armor.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/gordon_suit.png");
-	this->entityMesh->assignMaterial(armor, 15);
+	Material tongue;
+	tongue.colorText = TextureManager::getInstance()->loadTextureFromFile("/test/eli_eye_lash.png");
+	this->entityMesh->assignMaterial(tongue, 14);
 
 	if (this->entityMesh == nullptr) {
 		UreTechEngine::EngineConsole::log("vayRUS cube can not load mesh!", UreTechEngine::EngineConsole::t_error::LOG_ERROR);
@@ -84,12 +80,18 @@ void vayrusCube::async_load() {
 	entName = "vayrusCube";
 }
 
+vector3 lastPos = { -20.0f,0.0f,0.0f };
+
 void vayrusCube::begin() {
 	//add your begin commands here
 	print("vayRUS cube Spawned!");
+	//this->transform.Location = lastPos;
+	//this->transform.Rotation.roll = -90.0f;
+	//this->transform.Rotation.yaw = 180.0f;
+	//lastPos.x += 1.0f;
 }
 
 void vayrusCube::tick() {
 	//add your loop commands here
-	this->transform.Rotation.pitch += 0.5f;
+	// this->transform.Rotation.pitch += 0.5f;
 }

@@ -2,28 +2,26 @@
 
 #include<UreTechEngine/EngineCore.h>
 
-#include<GLFW/glfw3.h>
-#include<glm/mat4x4.hpp>
-#include<glm/gtc/matrix_transform.hpp>
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_RIGHT_HANDED
+#include<glm/glm.hpp>
 
 void mesh::draw(UreTechEngine::Transform3D _addTrnsfm)
 {
-	// t*r*s
-	modelMatrix = glm::mat4(1.0f);
-
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(_addTrnsfm.Rotation.roll + this->transform.Rotation.roll), glm::vec3(1, 0, 0)); // X
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(_addTrnsfm.Rotation.pitch + this->transform.Rotation.pitch), glm::vec3(0, 1, 0)); // Y
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(_addTrnsfm.Rotation.yaw + this->transform.Rotation.yaw), glm::vec3(0, 0, 1)); // Z
-
+	// r*s*t
 	modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(
 		_addTrnsfm.Location.x + this->transform.Location.x,
 		_addTrnsfm.Location.y + this->transform.Location.y,
-		_addTrnsfm.Location.z + this->transform.Location.z)) * modelMatrix;
+		_addTrnsfm.Location.z + this->transform.Location.z));
 
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(
 		_addTrnsfm.Scale.x * this->transform.Scale.x,
 		_addTrnsfm.Scale.y * this->transform.Scale.y,
 		_addTrnsfm.Scale.z * this->transform.Scale.z));
+
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(_addTrnsfm.Rotation.roll + this->transform.Rotation.roll), glm::vec3(1, 0, 0)); // X
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(_addTrnsfm.Rotation.pitch + this->transform.Rotation.pitch), glm::vec3(0, 1, 0)); // Y
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(_addTrnsfm.Rotation.yaw + this->transform.Rotation.yaw), glm::vec3(0, 0, 1)); // Z
 
 	vsUniforms.uMtxModel = modelMatrix;
 
@@ -39,8 +37,10 @@ void mesh::draw(UreTechEngine::Transform3D _addTrnsfm)
 	updateUBODescriptor();
 	shaderProg->sendUniforms(descriptorSets, 2);
 
-	// binding mesh
-	p_Vao->bindBuffer();
+	// bind & draw meshes
+	for (int i = 0; i < p_Vaos.size(); i++) {
+		p_Vaos[i]->bindAndDrawBuffer();
+	}
 
 }
 
@@ -95,14 +95,14 @@ void mesh::changeLitRender(bool val)
 mesh::mesh(vertexArrayObject* _p_Vao, Material _mat)
 {
 	modelMatrix = glm::mat4(1.0f);
-	p_Vao = _p_Vao;
+	p_Vaos.push_back(_p_Vao);
 	shaderProg = UreTechEngine::UreTechEngineClass::getEngine()->getShaderProgram();
-	indexCount = p_Vao->getIndexCount();
+	indexCount = p_Vaos[0]->getIndexCount();
 
 	for (int i = 0; i < 16; i++) {
 		images[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		images[i].imageView = shaderProg->emptyTx.imageView;
-		images[i].sampler = shaderProg->emptyTx.imageSampler;
+		images[i].imageView = shaderProg->emptyTx->imageView;
+		images[i].sampler = shaderProg->emptyTx->imageSampler;
 	}
 
 	Materials[0] = _mat;
@@ -176,11 +176,97 @@ mesh::mesh(vertexArrayObject* _p_Vao, Material _mat)
 	descriptorSets[1] = textureDescSet;
 }
 
+mesh::mesh(vertexArrayObject** _p_Vaos, size_t vao_count)
+{
+	for (int i = 0; i < vao_count; i++) {
+		p_Vaos.push_back(_p_Vaos[i]);
+	}
+
+	modelMatrix = glm::mat4(1.0f);
+	shaderProg = UreTechEngine::UreTechEngineClass::getEngine()->getShaderProgram();
+	indexCount = p_Vaos[0]->getIndexCount();
+
+	for (int i = 0; i < 16; i++) {
+		images[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		images[i].imageView = shaderProg->emptyTx->imageView;
+		images[i].sampler = shaderProg->emptyTx->imageSampler;
+	}
+
+	PlayerRef = UreTechEngine::UreTechEngineClass::getEngine()->getPlayer();
+	textManager = TextureManager::getInstance();
+	if (textManager == nullptr) {
+		UreTechEngine::EngineConsole::log("(Mesh): Failed to use texture system!", UreTechEngine::EngineConsole::ERROR_FATAL);
+	}
+
+	VkDescriptorSetAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.descriptorPool = shaderProg->descriptorPool;
+	allocInfo.descriptorSetCount = 1;
+	allocInfo.pSetLayouts = &shaderProg->UTEXdescriptorSetLayout;
+
+	VkDescriptorSetAllocateInfo UBOallocInfo{};
+	UBOallocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	UBOallocInfo.descriptorPool = shaderProg->descriptorPool;
+	UBOallocInfo.descriptorSetCount = 1;
+	UBOallocInfo.pSetLayouts = &shaderProg->UBOdescriptorSetLayout;
+
+	if (vkAllocateDescriptorSets(shaderProg->device, &UBOallocInfo, &UBOdescriptorSet) != VK_SUCCESS) {
+		EngineConsole::log("Can not allocate UBOdescriptor set for mesh!", EngineConsole::ERROR_FATAL);
+	}
+
+	if (vkAllocateDescriptorSets(shaderProg->device, &allocInfo, &textureDescSet) != VK_SUCCESS) {
+		EngineConsole::log("Failed to allocate textureDescSet descriptor sets for mesh!", EngineConsole::ERROR_FATAL);
+	}
+
+	updateTextureDescriptor();
+
+	// create uniform buffers
+	VkDeviceSize bufferSize = sizeof(baseVS_Uniforms);
+	shaderProg->createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		vtxUniformBuf, vtxUniformBufMemory);
+
+	bufferSize = sizeof(baseFS_Uniforms);
+	shaderProg->createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		frgUniformBuf, frgUniformBufMemory);
+
+	// vtx ubo info
+	vtxBufferInfo.buffer = vtxUniformBuf;
+	vtxBufferInfo.offset = 0;
+	vtxBufferInfo.range = sizeof(baseVS_Uniforms);
+
+	vtxWriteUBO.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	vtxWriteUBO.dstSet = UBOdescriptorSet;
+	vtxWriteUBO.dstBinding = 0;
+	vtxWriteUBO.dstArrayElement = 0;
+	vtxWriteUBO.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	vtxWriteUBO.descriptorCount = 1;
+	vtxWriteUBO.pBufferInfo = &vtxBufferInfo;
+
+	// frg ubo info
+	frgBufferInfo.buffer = frgUniformBuf;
+	frgBufferInfo.offset = 0;
+	frgBufferInfo.range = sizeof(baseFS_Uniforms);
+
+	frgWriteUBO.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	frgWriteUBO.dstSet = UBOdescriptorSet;
+	frgWriteUBO.dstBinding = 1;
+	frgWriteUBO.dstArrayElement = 0;
+	frgWriteUBO.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	frgWriteUBO.descriptorCount = 1;
+	frgWriteUBO.pBufferInfo = &frgBufferInfo;
+
+	descriptorSets[0] = UBOdescriptorSet;
+	descriptorSets[1] = textureDescSet;
+}
+
 void mesh::assignMaterial(Material _mat, unsigned int index)
 {
+
 	Materials[index] = _mat;
 	images[index].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-	images[index].imageView = Materials[index].colorText.imageView;
-	images[index].sampler = Materials[index].colorText.imageSampler;
+	images[index].imageView = Materials[index].colorText->imageView;
+	images[index].sampler = Materials[index].colorText->imageSampler;
 	updateTextureDescriptor();
 }

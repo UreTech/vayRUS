@@ -42,9 +42,18 @@ typedef enum {
 struct ENGINE_DEFINE QueueFamilyIndices {
 	uint32_t graphicsFamily = 0xFABCAF;
 	uint32_t presentFamily = 0xFABCAF;
+	uint32_t transferFamily = 0xFABCAF;
 
 	bool isComplete();
 };
+
+struct DeviceMemoryAllocation{
+	VkDeviceMemory block;
+	VkDeviceSize offset;
+	VkDeviceSize size;
+};
+
+#define RENDERER_VULKAN_FENCE_COUNT 2
 
 QueueFamilyIndices ENGINE_DEFINE findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
 
@@ -60,10 +69,10 @@ public:
 	VkDevice device;                                            // actual device
 	VkDebugUtilsMessengerEXT debugMessenger;                    // debug messenger
 	VkQueue graphicsQueue;                                      // graphics queue
-	VkSurfaceKHR surface = nullptr;                             // main surface
 	VkQueue presentQueue;                                       // present queue
+	VkQueue transferQueue;                                      // transfer queue
+	VkSurfaceKHR surface = nullptr;                             // main surface
 	VkCommandPool commandPool;                                  // command pool
-	// VkCommandBuffer EngineCommandBuffer;                     // command buffer for engine (depracated)
 	VkCommandBuffer multiThreadEngineCommandBuffer;             // command buffer for multi threading
 	VkSwapchainKHR swapChain;                                   // swap chain
 	// color
@@ -79,11 +88,10 @@ public:
 	VkFormat swapChainImageFormat;                              // swap chain image format
 	VkExtent2D swapChainExtent;                                 // swap chain extent
 	VkRenderPass renderPass;                                    // render pass
-	// VkRenderPass multiThreadRenderPass;                         // render pass for multi threading
 	VkSemaphore imageAvailableSemaphore;                        // image available semaphore
 	VkSemaphore renderFinishedSemaphore;                        // render finished semaphore
 	// VkSemaphore multiRenderFinishedSemaphore;                // multi threaded render finished semaphore (not used)
-	VkFence inFlightFence;                                      // fence
+	VkFence fences[RENDERER_VULKAN_FENCE_COUNT];                // fences
 	VkPipelineLayout pipelineLayout;                            // pipeline layout
 
 	VkDescriptorPool imguiPool;
@@ -101,6 +109,9 @@ public:
 	VkSubmitInfo submitInfo = {};
 	VkPresentInfoKHR presentInfo{};
 	
+	// hold the index of current frame
+	// this is used outside of Renderer class
+	uint32_t currentFrameIndex;
 
 	// for not "Kaboom!" at the next stages
 	const std::vector<const char*> validationLayers = {
@@ -108,9 +119,9 @@ public:
 	};
 
 #ifdef NDEBUG
-	const bool enableValidationLayers = false;
+	bool enableValidationLayers = true;
 #else
-	const bool enableValidationLayers = true;
+	bool enableValidationLayers = true; // change this later
 #endif
 
 	UreTechEngine::UreTechEngineClass* engine = nullptr;
@@ -119,7 +130,7 @@ public:
 	~Renderer();
 
 	//default texture:
-	texture emptyTx;
+	texture* emptyTx;
 
 	// global uniforms for shaders (private ones set in meshs)
 	baseVS_Uniforms vsUniforms;
@@ -135,9 +146,12 @@ public:
 
 	void sendUniforms(VkDescriptorSet* sets = nullptr, size_t setCount = 0);
 
-	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+	// void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+	// custom vulkan device memory allocator
+	DeviceMemoryAllocation allocateDeviceMemory(VkDeviceSize size, VkMemoryPropertyFlags properties);
 
 	void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 
@@ -165,12 +179,23 @@ public:
 
 	void waitFrame();
 
-	std::mutex immediateSubmitMutex;
-	bool immediateSubmitInfoAvailable = false;
-	bool immediateSubmitInfoSubmitted = false;
 	bool engineLoopStarted = false;
-	VkCommandBuffer immediateSubmitCommandBuffer;
+
+	std::mutex immediateSubmitMutex;
+
+	// its way more faster and optimized than immediateSubmitGQ()
 	void immediateSubmit(std::function<void(VkCommandBuffer cmd)>&& recordCommands);
+
+	// immediate submit with graphics queue
+	std::mutex immediateSubmitGQMutex;
+	std::atomic<bool> immediateSubmitGQInfoAvailable = false;
+	std::atomic<bool> immediateSubmitGQInfoSubmitted = false;
+	VkCommandBuffer immediateSubmitGQCmdBuffer;
+
+	// its way more slower and unoptimized than immediateSubmit()
+	// because its uses graphics queue instead of transfer queue
+	// Warning: Can cause frame drops because of its executed in frame flow
+	void immediateSubmitGQ(std::function<void(VkCommandBuffer cmd)>&& recordCommands);
 
 	VkCommandBuffer createTemporalCmdBuffer();
 
@@ -192,7 +217,8 @@ public:
 	void recrateSwapChainIfNeeded();
 
 private:
-	uint32_t frameBufferImageIndex;
+	// hold the index of current swap chain image
+	uint32_t currentSwapChainImageIndex;
 
 	UreTechEngine::string getShaderFromFile(const char* fileName);
 

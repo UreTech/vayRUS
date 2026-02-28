@@ -32,34 +32,53 @@ namespace UreTechEngine {
 		float x = 0;
 		float y = 0;
 		float z = 0;
+
 		vector3(float _x=0.0f, float _y = 0.0f, float _z = 0.0f) {
 			x = _x;
 			y = _y;
 			z = _z;
 		}
+
+		vector3(glm::vec3 other) {
+			x = other.x;
+			y = other.y;
+			z = other.z;
+		}
+
+		operator glm::vec3() {
+			return glm::vec3(x, y, z);
+		}
+
 		void resetAsInput(vector3 _val) {
 			x = _val.x;
 			y = _val.y;
 			z = _val.z;
 		}
+
 		void addX(float _x) {
 			x += _x;
 		}
+
 		void addY(float _y) {
 			y += _y;
 		}
+
 		void addZ(float _z) {
 			z += _z;
 		}
+
 		float fx() {
 			return float(x);
 		}
+
 		float fy() {
 			return float(y);
 		}
+
 		float fz() {
 			return float(z);
 		}
+
 	};
 	struct vector2 {
 		float x = 0;

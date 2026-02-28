@@ -229,7 +229,8 @@ std::string getCPUInfo() {
 }
 
 void executeCommand(UreTechEngine::string commandLine) {
-	conArgs args = parseWith(commandLine, ' ', true);
+	conArgs args;
+	args = parseWith(commandLine, ' ', true);
 	UreTechEngine::string command = args[0];
 	for (uint64_t i = 0; i < EngineConsole::conFuncs.size(); i++) {
 		if (command == EngineConsole::conFuncs[i].commandName) {
@@ -330,7 +331,31 @@ ENGINE_CONSOLE_COMMAND_REGISTER("console", con_command_console, UreTechEngineCom
 void con_command_screen(conArgs args) {
 	if (args.size() == 2) {
 		if (args[1] == "full") {
-			EngineConsole::log("Full screen. (not working for now)", EngineConsole::INFO);
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+			glfwSetWindowMonitor(
+				engine->window,
+				monitor,
+				0, 0,
+				mode->width,
+				mode->height,
+				mode->refreshRate
+			);
+
+			EngineConsole::log("Full screen enabled!", EngineConsole::INFO);
+		}
+		else if(args[1] == "windowed"){
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+			glfwSetWindowMonitor(
+				engine->window,
+				nullptr,
+				30, 30,
+				1400,
+				1000,
+				mode->refreshRate
+			);
 		}
 		else {
 			EngineConsole::log("Invalid argument!", EngineConsole::LOG_ERROR);
@@ -354,7 +379,7 @@ ENGINE_CONSOLE_COMMAND_REGISTER("gbuild", con_command_gbuild, UreTechEngineComma
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	// set high priority
-	SetPriorityClass(GetCurrentThread(), HIGH_PRIORITY_CLASS);
+	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 	UreTechEngine::string name = ("vayRUS3D Engine Main Thread");
 	std::wstring wname(name.data(), name.data() + name.lenght());
@@ -379,9 +404,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// open external console
 
 	// init engine
+	UreTechEngine::initEngine();
 	engine = UreTechEngine::UreTechEngineClass::getEngine();// init engine
-	glfwMakeContextCurrent(engine->mainRenderer->window);
+
 	ImGui::SetCurrentContext(engine->mainRenderer->ImGuiContext);// set ImGui context for engine
+
+	glfwGetFramebufferSize(engine->window, &display_w, &display_h);
 
 	if (engine == nullptr) {
 		EngineConsole::log("ENGINE ERROR (0x01)", EngineConsole::ERROR_FATAL);
@@ -463,6 +491,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// PRELOAD END
 #endif
 
+	glfwGetFramebufferSize(window, &display_w, &display_h);
+
 	// spawnables
 	//engine->entityConstructors.push_back(entConstructStruct("entity"      , []() { return new entity(); }));
 	//engine->entityConstructors.push_back(entConstructStruct("vayrusCube"  , []() { return dynamic_cast<entity*>(new vayrusCube()); }));
@@ -492,6 +522,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// main loop
 	engine->mainRenderer->engineLoopStarted = true;
+
 #if defined(ENGINE_BUILD) or defined(GAME_BUILD)
 	while (!glfwWindowShouldClose(window)) {
 #elif DEDICATED_SERVER_BUILD
@@ -526,18 +557,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 		lxpos = xpos;
 		lypos = ypos;
+
+		glfwPollEvents();
+
+		// get framebuffer size & isWindowMinimized
+		glfwGetFramebufferSize(window, &display_w, &display_h);
+
+		if (display_w != 0 && display_h != 0) {
+			UreTechEngine::UreTechEngineClass::displayWidth = display_w;
+			UreTechEngine::UreTechEngineClass::displayHeight = display_h;
+			UreTechEngine::UreTechEngineClass::windowMinmized = false;
+		}
+		else {
+			UreTechEngine::UreTechEngineClass::windowMinmized = true;
+		}
 #endif
-		//not useable while player pawn is null
-		//player->CameraTranform.Rotation.roll = editorCamRoll;
-		//player->CameraTranform.Rotation.yaw = editorCamYaw;
-		//player->playerPawn->transform.Rotation.yaw = -1*editorCamYaw;
-		//player->playerPawn->transform.Location.x = editorCamPos[0];
-		//player->playerPawn->transform.Location.y = editorCamPos[1];
-		//player->CameraTranform.Location.z = editorCamPos[2];
+		// engine starts ticking in other threads
+		// its not blocking main loop here
+		engine->engineTick();
 
 		//ui
 #if defined(ENGINE_BUILD) or defined(GAME_BUILD)
-		glfwPollEvents();
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -656,9 +696,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			if (engine->isValidEntity(entToModify)) {
 				ImGui::Text(("Entity --> " + engine->getEntityWithID(entToModify)->entName).c_str());
 				entity* abasd = engine->getEntityWithID(entToModify);
-				ImGui::DragScalarN("Location", ImGuiDataType_Float, &engine->getEntityWithID(entToModify)->transform.Location, 3);
-				ImGui::DragScalarN("Rotation", ImGuiDataType_Float, &engine->getEntityWithID(entToModify)->transform.Rotation, 3);
-				ImGui::DragScalarN("Scale", ImGuiDataType_Float, &engine->getEntityWithID(entToModify)->transform.Scale, 3);
+				ImGui::DragScalarN("Location", ImGuiDataType_Float, &engine->getEntityWithID(entToModify)->transform.Location, 3, 0.1f);
+				ImGui::DragScalarN("Rotation", ImGuiDataType_Float, &engine->getEntityWithID(entToModify)->transform.Rotation, 3, 0.1f);
+				ImGui::DragScalarN("Scale", ImGuiDataType_Float, &engine->getEntityWithID(entToModify)->transform.Scale, 3, 0.1f);
 				if (ImGui::Button("Rename Entity")){
 					renameEntWindow = true;
 					engInf = "Rename entity";
@@ -724,7 +764,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				}
 			}
 			else {
-				for (uint64_t i = 1000 - EngineConsole::messages.size(); i < EngineConsole::messages.size(); i++) {
+				for (uint64_t i = EngineConsole::messages.size() % 1000; i < EngineConsole::messages.size(); i++) {
 					RenderColoredText(EngineConsole::messages[i].msg.c_str());
 				}
 			}
@@ -801,41 +841,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			ImGui::End();
 		}
 
+		ImGui::EndFrame();
+
+
 		// render stuff
 
-		glfwGetFramebufferSize(window, &display_w, &display_h);
-		if (display_w != 0 && display_h != 0) {
-			UreTechEngine::UreTechEngineClass::displayWidth = display_w;
-			UreTechEngine::UreTechEngineClass::displayHeight = display_h;
-			UreTechEngine::UreTechEngineClass::windowMinmized = false;
-		}
-		else {
-			UreTechEngine::UreTechEngineClass::windowMinmized = true;
-			display_w = 1;
-			display_h = 1;
-		}
-
-		// wait frame
-		engine->mainRenderer->waitFrame();
-
-		if (!engine->windowMinmized) {
+		if (!UreTechEngineClass::windowMinmized) {
+			// wait frame
+			engine->mainRenderer->waitFrame();
 
 			engine->mainRenderer->recrateSwapChainIfNeeded();
 			engine->mainRenderer->prepareNewFrame();
 
 			//ENGINE VULKAN RENDER
-			engine->mainRenderer->BeginVulkanCommandBuffer();
-
-			ImGui::Render();
-			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), engine->mainCommandBuffer);
-
-			engine->engineTick();
 
 			player->updateCamera();
 
-			engine->waitEngineTickSync();
+			engine->mainRenderer->BeginVulkanCommandBuffer();
+
+			ImGui::Render();
+			ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), engine->mainCommandBuffer[engine->mainRenderer->currentFrameIndex]);
 
 			engine->mainRenderer->EndVulkanCommandBuffer();
+
+			// wait engine tick threads to end
+			// they have their own cmd buffers
+			engine->waitEngineTickSync();
+
 			//ENGINE VULKAN RENDER END
 
 			// processing...

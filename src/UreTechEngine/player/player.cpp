@@ -1,17 +1,30 @@
-#include<UreTechEngine/EngineCore.h>
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_RIGHT_HANDED
+#include<glm/glm.hpp>
+
+#include<UreTechEngine/player/player.h>
 
 void UreTechEngine::Player::updateCamera()
 {
 	//cam matrix
-	mtxCam =
-		glm::rotate(glm::mat4(1.0f), glm::radians(camRot.yaw), glm::vec3(0, 0, 1)) *   //z
-		glm::rotate(glm::mat4(1.0f), glm::radians(camRot.pitch), glm::vec3(0, 1, 0)) * //y
-		glm::rotate(glm::mat4(1.0f), glm::radians(camRot.roll), glm::vec3(1, 0, 0));   //x
-	mtxCam = glm::transpose(mtxCam);
-	mtxCam = glm::translate(mtxCam, -glm::vec3(camPos.x, camPos.y, camPos.z));
+	glm::vec3 forward;
+	forward.x = sin(glm::radians(camRot.yaw)) * cos(glm::radians(camRot.pitch));
+	forward.y = sin(glm::radians(camRot.pitch));
+	forward.z = -cos(glm::radians(camRot.yaw)) * cos(glm::radians(camRot.pitch));
+
+	forward = glm::normalize(forward);
+
+	glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	glm::vec3 right = glm::normalize(glm::cross(forward, worldUp));
+	glm::vec3 up = glm::normalize(glm::cross(right, forward));
+
+	mtxCam = glm::lookAt((glm::vec3)camPos, (glm::vec3)camPos + forward, up);
 
 	//projection matrix
-	mtxProj = glm::perspective(glm::radians(camFov), (float(UreTechEngine::UreTechEngineClass::displayWidth) / float(UreTechEngine::UreTechEngineClass::displayHeight)), 1.0f, 1000.0f);
+	mtxProj = glm::perspective(glm::radians(camFov), (float(UreTechEngine::UreTechEngineClass::displayWidth) / float(UreTechEngine::UreTechEngineClass::displayHeight)), 0.1f, 1000.0f);
+
+	mtxProj[1][1] *= -1;
 
 	shaderProg->vsUniforms.uMtxProj = this->mtxProj;
 	shaderProg->vsUniforms.uMtxCam = this->mtxCam;

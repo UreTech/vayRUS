@@ -21,15 +21,6 @@ void string::assign_cstr_type(const char* _cstr)
 	memcpy(this->s_data, _cstr, len);
 }
 
-// constructors
-string::string()
-{
-	// null array
-	s_size = 0;
-	s_data = nullptr;
-	haltWithFatalError = false;
-}
-
 string::string(char* _str, size_t _lenght)
 {
 	s_size = 0;
@@ -300,6 +291,15 @@ const char* string::c_str() const
 	return s_data_c_str_type;
 }
 
+char* UreTechEngine::string::c_str()
+{
+	s_data_c_str_type = (char*)realloc(s_data_c_str_type, s_size + 1);
+
+	memcpy(s_data_c_str_type, s_data, s_size);
+	s_data_c_str_type[s_size] = '\0';
+	return s_data_c_str_type;
+}
+
 std::string string::std_str()
 {
 	return std::string(this->s_data, this->s_size);
@@ -308,12 +308,6 @@ std::string string::std_str()
 void string::assign(char* data, size_t size)
 {
 	this->clear();
-	if ((data == (void*)0xcdcdcdcdcdcdcdcd)) {
-		std::cout << "null1 XD";
-	}
-	if ((this->s_data == (void*)0xcdcdcdcdcdcdcdcd)) {
-		std::cout << "null2 XD";
-	}
 	if (size) {
 		this->s_size = size;
 		this->s_data = (char*)malloc(this->s_size);

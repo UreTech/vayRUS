@@ -39,19 +39,29 @@ namespace UreTechEngine {
 			this->assign((arrType*)list.begin(), list.size());
 		}
 
+		// c5
+		dArray(const dArray& other) {
+			this->assign(other.a_data, other.a_size);
+		}
+
+		~dArray() {
+			this->clear();
+		}
+
 		// index operator
 		arrType& operator[](size_t index) {
 			return this->at(index);
 		}
 
 		// copies data into it self
-		dArray operator=(dArray other) {
+		dArray& operator=(dArray other) {
+			if (this == &other) return *this;
 			this->assign(other.a_data, other.a_size);
 			return *this;
 		}
 
 		// copies data into it self
-		dArray operator=(std::initializer_list<arrType> list) {
+		dArray& operator=(std::initializer_list<arrType> list){
 			this->assign((arrType*)list.begin(), list.size());
 			return *this;
 		}
@@ -91,7 +101,7 @@ namespace UreTechEngine {
 		void pop_back() {
 			a_size--;
 			a_data = (arrType*)realloc(a_data, a_size * sizeof(arrType));
-			if (a_data == nullptr) {
+			if (a_data == nullptr && a_size != 0) {
 				if (haltWithFatalError) {
 					strLog("Array: Invalid resize operation in 'pop_back'! (FATAL ARRAY)", true);
 				}
@@ -121,7 +131,7 @@ namespace UreTechEngine {
 			size_t originalSize = a_size;
 			a_size = size;
 			a_data = (arrType*)realloc(a_data, size * sizeof(arrType));
-			if (a_data == nullptr) {
+			if (a_data == nullptr && a_size != 0) {
 				if (haltWithFatalError) {
 					strLog("Array: Invalid resize operation in 'resize'! (FATAL ARRAY)", true);
 				}
@@ -131,7 +141,6 @@ namespace UreTechEngine {
 			}
 
 			memset(a_data + originalSize, 0, (a_size - originalSize) * sizeof(arrType));
-
 
 			for (size_t i = originalSize; i < a_size; i++) {
 				*(a_data + i) = arrType();
@@ -190,7 +199,11 @@ namespace UreTechEngine {
 			this->clear();
 			a_data = (arrType*)realloc(a_data, sizeof(arrType) * size);
 			a_size = size;
-			memcpy((void*)a_data, data, size * sizeof(arrType));
+			memset(a_data, 0, a_size * sizeof(arrType));
+
+			for (size_t i = 0; i < a_size; i++) {
+				*(a_data + i) = *(data + i);
+			}
 		}
 
 		// sets direct pointer to data

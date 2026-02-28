@@ -102,7 +102,7 @@ mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath, Material _m
 		}
 		else {
 			file = string((char*)objImpBuf.pointer, objImpBuf.size).std_str();
-			//free(objImpBuf.pointer);
+			free(objImpBuf.pointer);
 		}
 	}
 	else {
@@ -248,9 +248,281 @@ mesh* MeshManager::imp_mesh_obj_type(UreTechEngine::string filePath, Material _m
 
 	unsigned int vertCount = temp_vertices.size();
 	_vao->createObject(tmpVert[0], tmpVert.size(), finalIndices[0], finalIndices.size());
-	mesh* result = new mesh(_vao, _mat);
-	
-	UreTechEngine::EngineConsole::log("(Mesh Loader): Obj loaded! Path:" + filePath, UreTechEngine::EngineConsole::INFO);
 	loadedVaos.push_back({ filePath,_vao });
+
+	mesh* result = new mesh(loadedVaos[loadedVaos.size() - 1].vao, _mat);
+
+	UreTechEngine::EngineConsole::log("(Mesh Loader): Obj loaded! Path:" + filePath, UreTechEngine::EngineConsole::INFO);
 	return result;
+}
+
+struct GLB_HEADER {
+	char magic[4];
+	uint32_t version;
+	uint32_t totalLenght;
+
+	void* first_chunk_header() {
+		return ((char*)this) + sizeof(GLB_HEADER);
+	}
+};
+
+struct GLB_CHUNK_HEADER {
+	uint32_t chunkLenght;
+	char chunkType[4];
+
+	void* data_begin() {
+		return ((char*)this) + sizeof(GLB_CHUNK_HEADER);
+	}
+
+	void* data_offset(uint32_t _offset) {
+		return ((char*)this) + sizeof(GLB_CHUNK_HEADER) + _offset;
+	}
+
+	GLB_CHUNK_HEADER* get_next() {
+		return (GLB_CHUNK_HEADER*)(((char*)this) + sizeof(GLB_CHUNK_HEADER) + chunkLenght);
+
+	}
+};
+
+// helper macro
+#define GLB_HSTRING_TO_USTRING(buf) string(buf, 4)
+
+#define GLB_JSON_TYPE_NAME "JSON"
+#define GLB_BIN_TYPE_NAME "BIN\0"
+
+#define GLB_COMPONENT_TYPE_BYTE_ID 5120
+#define GLB_COMPONENT_TYPE_UBYTE_ID 5121
+#define GLB_COMPONENT_TYPE_SHORT_ID 5122
+#define GLB_COMPONENT_TYPE_USHORT_ID 5123
+#define GLB_COMPONENT_TYPE_UINT_ID 5125
+#define GLB_COMPONENT_TYPE_FLOAT32_ID 5126
+
+#define GLB_TYPE_SCALAR "SCALAR"
+#define GLB_TYPE_VEC2 "VEC2"
+#define GLB_TYPE_VEC3 "VEC3"
+
+mesh* MeshManager::imp_mesh_glb_type(UreTechEngine::string filePath, bool useSmooth)
+{
+
+
+	Buffer glBinary;
+	glBinary.pointer = nullptr;
+	glBinary.size = 0;
+
+	if (UPK_ENABLE_PACKAGE_SYSTEM) {
+		// read
+		glBinary = UreTechEngineClass::getEngine()->package->get(filePath);
+
+		//asign
+		if (glBinary.pointer == nullptr) {
+			UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Can not open source file! (UPK) Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+			return nullptr;
+		}
+	}
+	else {
+		UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Can not open source file! (NOT UPK) Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+		return nullptr;
+	}
+
+	GLB_HEADER* glb_header = (GLB_HEADER*)glBinary.pointer;
+
+	if (GLB_HSTRING_TO_USTRING(glb_header->magic) != "glTF") {
+		UreTechEngine::EngineConsole::log("(GLB Mesh Loader): File is corrupted or invalid! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+		free(glBinary.pointer);
+		return nullptr;
+	}
+
+	if (glb_header->version != 2) {
+		UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Only glTF 2.0 allowed! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+		free(glBinary.pointer);
+		return nullptr;
+	}
+
+	if (glb_header->totalLenght != glBinary.size) {
+		UreTechEngine::EngineConsole::log("(GLB Mesh Loader): File size is not matching with real size! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+		free(glBinary.pointer);
+		return nullptr;
+	}
+
+	dArray<GLB_CHUNK_HEADER*> chunks;
+
+	GLB_CHUNK_HEADER* jsonChunk = nullptr;
+
+	GLB_CHUNK_HEADER* last = (GLB_CHUNK_HEADER*)glb_header->first_chunk_header();
+
+	while (true) {
+
+		UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Found chunk with type: " + GLB_HSTRING_TO_USTRING(last->chunkType), UreTechEngine::EngineConsole::DEBUG);
+
+		if (GLB_HSTRING_TO_USTRING(last->chunkType) == GLB_JSON_TYPE_NAME) {
+			jsonChunk = last;
+		}
+		else {
+			// ignore json chunk
+			chunks.push_back(last);
+		}
+
+		last = last->get_next();
+
+		if ((char*)last >= (char*)(glBinary.pointer + glBinary.size)) {
+			break; // no more chunks available
+		}
+	}
+
+	if (jsonChunk == nullptr) {
+		UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Json chunk not found! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+		free(glBinary.pointer);
+		return nullptr;
+	}
+
+	nlohmann::json json = nlohmann::json::parse((char*)(jsonChunk->data_begin()), ((char*)(jsonChunk->data_begin()) + jsonChunk->chunkLenght));
+
+	if (json.contains("meshes")) {
+		if (json["meshes"].size() > 0) {
+			if (json["meshes"][0].contains("primitives")) {
+
+				// primitives (submesh)
+				// we need to hold pointer because actual vao is must not have a copy
+				// copies could cause problems because of the pointer nature of vaos
+				dArray<vertexArrayObject*> vaos;
+
+				// load primitives
+				int primitivesCount = json["meshes"][0]["primitives"].size();
+				for (int i = 0; i < primitivesCount; i++) {
+					if (json["meshes"][0]["primitives"][i].contains("attributes")) {
+						int POSITION_accessor_index = json["meshes"][0]["primitives"][i]["attributes"]["POSITION"];
+						int NORMAL_accessor_index = json["meshes"][0]["primitives"][i]["attributes"]["NORMAL"];
+						int TEXCOORD_0_accessor_index = json["meshes"][0]["primitives"][i]["attributes"]["TEXCOORD_0"];
+						int indices_accessor_index = json["meshes"][0]["primitives"][i]["indices"];
+
+						// Check Position accessor
+						if (json["accessors"][POSITION_accessor_index]["componentType"] != GLB_COMPONENT_TYPE_FLOAT32_ID) {
+							UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Only float32 position allowed! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+							free(glBinary.pointer);
+							return nullptr;
+						}
+						if (json["accessors"][POSITION_accessor_index]["type"] != GLB_TYPE_VEC3) {
+							UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Only vec3 position allowed! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+							free(glBinary.pointer);
+							return nullptr;
+						}
+
+						// Check Normal accessor
+						if (json["accessors"][NORMAL_accessor_index]["componentType"] != GLB_COMPONENT_TYPE_FLOAT32_ID) {
+							UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Only float32 normal allowed! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+							free(glBinary.pointer);
+							return nullptr;
+						}
+						if (json["accessors"][NORMAL_accessor_index]["type"] != GLB_TYPE_VEC3) {
+							UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Only vec3 normal allowed! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+							free(glBinary.pointer);
+							return nullptr;
+						}
+
+						// Check UV accessor
+						if (json["accessors"][TEXCOORD_0_accessor_index]["componentType"] != GLB_COMPONENT_TYPE_FLOAT32_ID) {
+							UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Only float32 UV allowed! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+							free(glBinary.pointer);
+							return nullptr;
+						}
+						if (json["accessors"][TEXCOORD_0_accessor_index]["type"] != GLB_TYPE_VEC2) {
+							UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Only vec2 UV allowed! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+							free(glBinary.pointer);
+							return nullptr;
+						}
+
+						// Check Index accessor
+						int indexComponentType = json["accessors"][indices_accessor_index]["componentType"];
+						if (indexComponentType != GLB_COMPONENT_TYPE_USHORT_ID && indexComponentType != GLB_COMPONENT_TYPE_UINT_ID) {
+							UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Only USHORT or UINT indices allowed! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+							free(glBinary.pointer);
+							return nullptr;
+						}
+						if (json["accessors"][indices_accessor_index]["type"] != GLB_TYPE_SCALAR) {
+							UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Only scalar indices allowed! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+							free(glBinary.pointer);
+							return nullptr;
+						}
+
+						// If we are here, all data is valid, we can load it
+						vertexArrayObject* temp_vao = new vertexArrayObject();
+
+						// meta datas
+						uint32_t vertexCount = json["accessors"][POSITION_accessor_index]["count"];
+						uint32_t indexCount = json["accessors"][indices_accessor_index]["count"];
+
+						bool isIndexUINT = (indexComponentType == GLB_COMPONENT_TYPE_UINT_ID);
+
+						uint32_t positionBufferViewIndex = json["accessors"][POSITION_accessor_index]["bufferView"];
+						uint32_t positionBufferViewOffset = json["bufferViews"][positionBufferViewIndex]["byteOffset"];
+						uint32_t positionBuffer = json["bufferViews"][positionBufferViewIndex]["buffer"];
+						float* positionData = (float*)chunks[positionBuffer]->data_offset(positionBufferViewOffset);
+
+						uint32_t normalBufferViewIndex = json["accessors"][NORMAL_accessor_index]["bufferView"];
+						uint32_t normalBufferViewOffset = json["bufferViews"][normalBufferViewIndex]["byteOffset"];
+						uint32_t normalBuffer = json["bufferViews"][normalBufferViewIndex]["buffer"];
+						float* normalData = (float*)chunks[normalBuffer]->data_offset(normalBufferViewOffset);
+
+						uint32_t uvBufferViewIndex = json["accessors"][TEXCOORD_0_accessor_index]["bufferView"];
+						uint32_t uvBufferViewOffset = json["bufferViews"][uvBufferViewIndex]["byteOffset"];
+						uint32_t uvBuffer = json["bufferViews"][uvBufferViewIndex]["buffer"];
+						float* uvData = (float*)chunks[uvBuffer]->data_offset(uvBufferViewOffset);
+
+						// temporal buffer
+						dArray<Vertex> vertices;
+
+						for (uint32_t j = 0; j < vertexCount; j++) {
+							Vertex newVertex;
+							newVertex.pos = glm::vec3(positionData[j * 3], positionData[j * 3 + 1], positionData[j * 3 + 2]);
+							newVertex.norm = glm::vec3(normalData[j * 3], normalData[j * 3 + 1], normalData[j * 3 + 2]);
+							newVertex.tex = glm::vec2(uvData[j * 2], uvData[j * 2 + 1]);
+							newVertex.textureIndex = i;
+							vertices.push_back(newVertex);
+						}
+
+						uint32_t indexBufferViewIndex = json["accessors"][indices_accessor_index]["bufferView"];
+						uint32_t indexBufferViewOffset = json["bufferViews"][indexBufferViewIndex]["byteOffset"];
+						uint32_t indexBuffer = json["bufferViews"][indexBufferViewIndex]["buffer"];
+
+						// index data is same we just  need to check if its uint or ushort
+						if (isIndexUINT) {
+							indexData_32* indexData = (indexData_32*)chunks[indexBuffer]->data_offset(indexBufferViewOffset);
+
+							temp_vao->createObject(*vertices.data(), vertexCount, *indexData, indexCount);
+						}
+						else {
+							indexData_16* indexData = (indexData_16*)chunks[indexBuffer]->data_offset(indexBufferViewOffset);
+
+							temp_vao->createObject(*vertices.data(), vertexCount, *indexData, indexCount);
+						}
+						loadMutex.lock();
+						this->loadedVaos.push_back({ filePath + "@vao" + u64ToDecStr(i), temp_vao});
+						loadMutex.unlock();
+						vaos.push_back((this->loadedVaos[this->loadedVaos.size() - 1].vao));
+					}
+				}
+
+				// all primitives loaded, we can create mesh now
+				mesh* result = new mesh(vaos.data(), vaos.size());
+				UreTechEngine::EngineConsole::log("(GLB Mesh Loader): GLB loaded! Path:" + filePath, UreTechEngine::EngineConsole::INFO);
+				free(glBinary.pointer); // free binary data after we loaded everything, we dont need it anymore
+				return result;
+			}
+			else {
+				UreTechEngine::EngineConsole::log("(GLB Mesh Loader): Mesh dont have primitives! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+				free(glBinary.pointer);
+				return nullptr;
+			}
+		}
+		else {
+			UreTechEngine::EngineConsole::log("(GLB Mesh Loader): No any mesh found in meshes! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+			free(glBinary.pointer);
+			return nullptr;
+		}
+	}
+	else {
+		UreTechEngine::EngineConsole::log("(GLB Mesh Loader): No any mesh found! Path:" + filePath, UreTechEngine::EngineConsole::LOG_ERROR);
+		free(glBinary.pointer);
+		return nullptr;
+	}
 }

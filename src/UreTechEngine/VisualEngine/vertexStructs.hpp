@@ -30,7 +30,17 @@ struct Vertex {
 	Vertex(glm::vec3 _pos, glm::vec2 _uv, glm::vec3 _norm);
 	Vertex(glm::vec3 _pos, glm::vec2 _uv, glm::vec3 _norm,int texInd=0);
 };
-typedef unsigned int indexData;
+
+struct SkeletalVertex {
+	glm::vec3 pos;
+	glm::vec2 tex;
+	glm::vec3 norm;
+	uint8_t boneIndex[4];
+	uint8_t boneWeight[4];
+};
+
+typedef unsigned int indexData_32;
+typedef unsigned short indexData_16;
 
 struct triangleFace {
 	Vertex v0;

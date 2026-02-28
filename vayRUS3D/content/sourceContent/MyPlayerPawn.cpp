@@ -14,7 +14,7 @@ MyPlayerPawn::MyPlayerPawn(mesh* _mesh, UreTechEngine::string _entName, UreTechE
 }
 
 void MyPlayerPawn::async_load() {
-	texture text = TextureManager::getInstance()->loadTextureFromFile("/test/tText1.jpg");
+	texture* text = TextureManager::getInstance()->loadTextureFromFile("/test/tText1.jpg");
 	Material myMat;
 	myMat.colorText = text;
 	this->entityMesh = MeshManager::getInstance()->imp_mesh_obj_type("/test/cube.obj", myMat);
@@ -29,4 +29,5 @@ void MyPlayerPawn::begin()
 void MyPlayerPawn::tick()
 {
 	engineRef->getPlayer()->camPos = this->transform.Location;
+	engineRef->getPlayer()->camRot = this->transform.Rotation;
 }

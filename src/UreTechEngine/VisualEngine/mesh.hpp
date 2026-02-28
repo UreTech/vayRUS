@@ -20,6 +20,7 @@ public:
 	void draw(UreTechEngine::Transform3D _addTrnsfm);
 	void changeLitRender(bool val);
 	mesh(vertexArrayObject* _p_Vao, Material _mat);
+	mesh(vertexArrayObject** _p_Vaos, size_t vao_count);
 
 	void assignMaterial(Material _mat, unsigned int index);
 private:
@@ -27,7 +28,7 @@ private:
 	Material Materials[16];
 
 	bool litRender = true;
-	vertexArrayObject* p_Vao;
+	UreTechEngine::dArray<vertexArrayObject*> p_Vaos;
 	TextureManager* textManager;
 	Renderer* shaderProg;
 	glm::mat4 modelMatrix;

@@ -29,12 +29,9 @@ TextureManager* TextureManager::getInstance()
 	return c_Instance;
 }
 
-// util func
-void transitionImageLayout(
-	VkImage image,
-	VkFormat format,
-	VkImageLayout oldLayout,
-	VkImageLayout newLayout) {
+// pipeline barrier for VkImage
+void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
+
 	VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.oldLayout = oldLayout;
@@ -79,6 +76,8 @@ void transitionImageLayout(
 		dstStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 	}
+	/*
+	not needed
 	else if (oldLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR &&
 		newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
 
@@ -97,29 +96,19 @@ void transitionImageLayout(
 		dstStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
 	}
+	*/
 	else {
 		EngineConsole::log("Unsupported layout transition!", EngineConsole::WARN_CAN_CAUSE_ERROR);
 	}
 
 	Renderer* rnd = UreTechEngineClass::getEngine()->mainRenderer;
 
-	rnd->immediateSubmit([&srcStage, &dstStage, &barrier](VkCommandBuffer cmd) {
-		vkCmdPipelineBarrier(
-			cmd,
-			srcStage, dstStage,
-			0,
-			0, nullptr,
-			0, nullptr,
-			1, &barrier
-		);
+	rnd->immediateSubmitGQ([&srcStage, &dstStage, &barrier](VkCommandBuffer cmd) {
+		vkCmdPipelineBarrier(cmd, srcStage, dstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 		});
 }
 
-void copyBufferToImage(
-	VkBuffer buffer,
-	VkImage image,
-	uint32_t width,
-	uint32_t height) {
+void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
 	VkBufferImageCopy region{};
 	region.bufferOffset = 0;
 	region.bufferRowLength = 0;
@@ -150,37 +139,85 @@ void copyBufferToImage(
 		});
 }
 
-texture TextureManager::loadTextureFromFile(UreTechEngine::string fileName, bool texAntiAlising)
+// most pasta-ish code ever wroten
+// NOTE: change the texture filtering & comparing system
+texture* TextureManager::loadTextureFromFile(UreTechEngine::string fileName, bool filteredTexture)
 {
-	texture text;
 	bool isFound = false;
+	bool isInQueue = false;
+	uint32_t inQueueIndex = 0;
 	loadedTexture foundOne;
-	for (uint64_t i = 0; i < loadedTexts.size(); i++) {
-		if (loadedTexts[i].texuteLoadName == fileName) {
-			isFound = true;
-			foundOne = loadedTexts[i];
+
+	queueMutex.lock();
+
+	// check if already in queue
+	for (uint64_t i = 0; i < queue.size(); i++) {
+		if (queue[i].toLoad.textureLoadName == fileName && queue[i].toLoad.filteredTexture == filteredTexture) {
+			isInQueue = true;
+			inQueueIndex = i;
 			break;
 		}
 	}
+
+	if (!isInQueue) {
+		// check if already loaded
+		for (uint64_t i = 0; i < loadedTexts.size(); i++) {
+			if (loadedTexts[i].textureLoadName == fileName && loadedTexts[i].filteredTexture == filteredTexture) {
+				isFound = true;
+				foundOne = loadedTexts[i];
+				break;
+			}
+		}
+
+		// if not in queue and not loaded, add to queue and process it
+		if (!isFound) {
+			loadedTexture thisText;
+			thisText.textureLoadName = fileName;
+			thisText.filteredTexture = filteredTexture;
+			inQueueTexture thisQueueItem;
+			thisQueueItem.toLoad = thisText;
+			queue.push_back(thisQueueItem);
+		}
+		else {
+			// return found texture & bruh i forgot mutex
+			queueMutex.unlock(); // unlock
+			return foundOne.texture;
+		}
+
+		queueMutex.unlock(); // unlock
+	}
+	else {
+		// wait for it to be loaded
+		bool waiting = true;
+		queue[inQueueIndex].waitingFlags.push_back(&waiting);
+
+		queueMutex.unlock(); // unlock
+
+		// wait
+		while (waiting);
+	}
+	
+
 	if (isFound) {
-		text = foundOne.texture;
+		return foundOne.texture;
 	}
 	else {
 		int t_width, t_height, nrChannels;
 
-		stbi_set_flip_vertically_on_load(1);
+		//stbi_set_flip_vertically_on_load(1);
 
 		unsigned char* textureAddr = NULL;
 		if (UPK_ENABLE_PACKAGE_SYSTEM) {
-			Buffer icoTmpBuf = engine->package->get(fileName);
-			textureAddr = stbi_load_from_memory(icoTmpBuf.pointer, icoTmpBuf.size, &t_width, &t_height, &nrChannels, 4);
-			if (icoTmpBuf.pointer != nullptr) {
-				free(icoTmpBuf.pointer);
+			Buffer texTmpBuf = engine->package->get(fileName);
+			textureAddr = stbi_load_from_memory(texTmpBuf.pointer, texTmpBuf.size, &t_width, &t_height, &nrChannels, 4);
+			if (texTmpBuf.pointer != nullptr) {
+				free(texTmpBuf.pointer);
 			}
 		}
 		else {
 			textureAddr = stbi_load(fileName.c_str(), &t_width, &t_height, &nrChannels, 4);
 		}
+
 		Renderer* rnd = UreTechEngineClass::getEngine()->mainRenderer;
 		VkDeviceSize imageSize = t_width * t_height * 4;
 
@@ -188,56 +225,67 @@ texture TextureManager::loadTextureFromFile(UreTechEngine::string fileName, bool
 		VkDeviceMemory stagingBufferMemory;
 		rnd->createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
+		// allocate new texture
+		texture* text = new texture();
+
 		void* data;
 		vkMapMemory(rnd->device, stagingBufferMemory, 0, imageSize, 0, &data);
 		memcpy(data, textureAddr, imageSize);
 		vkUnmapMemory(rnd->device, stagingBufferMemory);
 
-		rnd->createImage(t_width, t_height, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, text.image, text.imageMemory);
+		rnd->createImage(t_width, t_height, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, text->image, text->imageMemory);
 		
-		transitionImageLayout(text.image, VK_FORMAT_R8G8B8A8_SRGB,
+		transitionImageLayout(text->image, VK_FORMAT_R8G8B8A8_SRGB,
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-		copyBufferToImage(stagingBuffer, text.image, t_width, t_height);
+		copyBufferToImage(stagingBuffer, text->image, t_width, t_height);
 
-		transitionImageLayout(text.image, VK_FORMAT_R8G8B8A8_SRGB,
+		transitionImageLayout(text->image, VK_FORMAT_R8G8B8A8_SRGB,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		vkDestroyBuffer(rnd->device, stagingBuffer, nullptr);
 		vkFreeMemory(rnd->device, stagingBufferMemory, nullptr);
 
-		rnd->createImageView(text.image, VK_FORMAT_R8G8B8A8_SRGB, text.imageView);
-		text.imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
+		rnd->createImageView(text->image, VK_FORMAT_R8G8B8A8_SRGB, text->imageView);
+		text->imageFormat = VK_FORMAT_R8G8B8A8_SRGB;
 
-		if (texAntiAlising) {
-			text.imageSampler = rnd->linearFilterSampler;
+		if (filteredTexture) {
+			text->imageSampler = rnd->linearFilterSampler;
 		}
 		else {
-			text.imageSampler = rnd->nearestFilterSampler;
+			text->imageSampler = rnd->nearestFilterSampler;
 		}
 
 		stbi_image_free(textureAddr);
+
+		queueMutex.lock();
+
+		loadedTexture thisText;
+		thisText.texture = text;
+		thisText.filteredTexture = filteredTexture;
+		thisText.textureLoadName = fileName;
+
+		loadedTexts.push_back(thisText);
+
+		// find and remove from queue
+		for (uint64_t i = 0; i < queue.size(); i++) {
+			if (queue[i].toLoad.textureLoadName == fileName && queue[i].toLoad.filteredTexture == filteredTexture) {
+
+				// set waiting flags to false
+				for (uint64_t j = 0; j < queue[i].waitingFlags.size(); j++) {
+					*(queue[i].waitingFlags[j]) = false;
+				}
+
+				queue.remove(i);
+				break;
+			}
+		}
+
+		queueMutex.unlock();
+
+
+		return text;
 	}
-
-	loadedTexture thisText;
-	thisText.texture = text;
-	thisText.texuteLoadName = fileName;
-	loadedTexts.push_back(thisText);
-
-	return text;
 }
-
-void TextureManager::applyTexture(int levelInd, texture tex)
-{
-	//shaderProg->setSamplerUniform(levelInd, tex);
-}
-
-void TextureManager::applyMultipleTexture(std::vector<texture> a)
-{
-
-	//vkCmdBindDescriptorSets(shaderProg->EngineCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shaderProg->pipelineLayout, 0, 1, &descriptorSets[0], 0, nullptr); // model A için
-}
-
-
