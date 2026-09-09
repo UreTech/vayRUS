@@ -50,15 +50,15 @@ UreTechEngine::Buffer fileSys::readFile(const std::string& filePath) {
 
 size_t fileSys::getFileSize(const std::string& filePath)
 {
-    std::ifstream file(filePath, std::ios::binary | std::ios::ate); // dosyanýn sonuna git
+    std::ifstream file(filePath, std::ios::binary | std::ios::ate); // dosyanï¿½n sonuna git
     if (file.is_open()) {
-        std::streampos fileSize = file.tellg(); // tellg() ile dosyanýn boyutunu al
+        std::streampos fileSize = file.tellg(); // tellg() ile dosyanï¿½n boyutunu al
         file.close();
         //std::cout << filePath << " -[Size]-> " << fileSize << std::endl;
         return fileSize;
     }
     else {
-        EngineConsole::log(upk_PackagerFileSysHeaderTitle upk_error "An error occured while reading file size!", EngineConsole::t_error::LOG_ERROR);
+        EngineConsole::log(upk_PackagerFileSysHeaderTitle upk_error "An error occurred while reading file size!", EngineConsole::t_error::LOG_ERROR);
         return -1;
     }
 }
@@ -123,7 +123,7 @@ bool fileSys::createFile(std::string path, UreTechEngine::Buffer toWrite) {
 
 std::vector<std::string> fileSys::getAllDirectories(const std::string path) {
     std::vector<std::string> result;
-    std::vector<std::string> stack; // Dizinleri geçici olarak saklamak için bir yýðýn kullanýyoruz
+    std::vector<std::string> stack; // Dizinleri geï¿½ici olarak saklamak iï¿½in bir yï¿½ï¿½ï¿½n kullanï¿½yoruz
 
     stack.push_back(path);
 
